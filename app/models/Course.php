@@ -35,5 +35,33 @@ class Course
 
         return $result;
     }
+
+
+    // Haal cursus + detailinformatie op
+    public function getCourseDetail($courseId)
+    {
+        $sql = "SELECT 
+                    c.CursusID,
+                    c.Titel,
+                    c.CategorieID,
+                    d.KorteBeschrijving,
+                    d.Beschrijving,
+                    d.LaatstBijgewerkt,
+                    d.Rating,
+                    d.Taal,
+                    d.Prijs
+                FROM Cursus AS c
+                JOIN Cursusdetails AS d ON c.CursusID = d.CursusID
+                WHERE c.CursusID = ?";
+
+        $stmt = mysqli_prepare($this->conn, $sql);
+        mysqli_stmt_bind_param($stmt, "i", $courseId);
+        mysqli_stmt_execute($stmt);
+        $result = mysqli_stmt_get_result($stmt);
+
+        return mysqli_fetch_assoc($result);
+    }
+
+
 }
 ?>

@@ -20,5 +20,10 @@ class CategoryController
     {
         return $this->model->getAllWithCourses();
     }
+
+    public function getCoursesByCategory($categoryId)
+    {
+        return $this->model->getCoursesByCategory($categoryId);
+    }
 }
 ?>

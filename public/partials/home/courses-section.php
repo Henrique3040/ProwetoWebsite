@@ -16,9 +16,8 @@
                             <div class="rounded-top overflow-hidden">
                                 <div class="card-overlay-hover">
                                     <!-- Image -->
-                                    <img src="<?= htmlspecialchars($course['FotoURL']) ?>" 
-                                         class="card-img-top" 
-                                         alt="<?= htmlspecialchars($course['Titel']) ?>">
+                                    <img src="<?= htmlspecialchars($course['FotoURL']) ?>" class="card-img-top"
+                                        alt="<?= htmlspecialchars($course['Titel']) ?>">
                                 </div>
                                 <!-- Hover element -->
                                 <div class="card-img-overlay">
@@ -50,14 +49,12 @@
                                         </li>
                                     </ul>
                                     <div class="avatar avatar-sm">
-                                        <img class="avatar-img rounded-circle" 
-                                             src="assets/images/avatar/09.jpg" 
-                                             alt="avatar">
+                                        <img class="avatar-img rounded-circle" src="assets/images/avatar/09.jpg" alt="avatar">
                                     </div>
                                 </div>
                                 <hr>
                                 <h6 class="card-title">
-                                    <a href="<?= htmlspecialchars($course['Link']) ?>">
+                                    <a href="course-detail.php?id=<?= urlencode($course['CursusID']) ?>">
                                         <?= htmlspecialchars($course['Titel']) ?>
                                     </a>
                                 </h6>

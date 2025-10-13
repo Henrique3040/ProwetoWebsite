@@ -20,7 +20,19 @@ class Category
      // Get all courses belonging to a category
     public function getCoursesByCategory($categoryId)
     {
-        $sql = "SELECT CursusID, Titel FROM Cursus WHERE CategorieID = ?";
+        $sql = "
+        SELECT 
+            c.CursusID,
+            c.Titel,
+            c.FotoURL,
+            c.Link,
+            c.Views,
+            cat.Naam AS CategorieNaam
+        FROM Cursus c
+        LEFT JOIN Categorie cat ON c.CategorieID = cat.CategorieID
+        WHERE c.CategorieID = ?
+        ORDER BY c.Views DESC";
+        
         $stmt = mysqli_prepare($this->conn, $sql);
         mysqli_stmt_bind_param($stmt, "i", $categoryId);
         mysqli_stmt_execute($stmt);

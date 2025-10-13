@@ -15,7 +15,7 @@
                                            <div class="card card-body shadow rounded-3">
                                                <div class="d-flex align-items-center">
                                                    <div class="ms-3">
-                                                       <h5 class="mb-0"><a href="category.php?id=' . $row['CategorieID'] . '" class="stretched-link">' . $name . '</a></h5>
+                                                       <h5 class="mb-0"><a href="categorie-page.php?id=' . $row['CategorieID'] . '" class="stretched-link">' . $name . '</a></h5>
                                                        <span>' . $count . ' Courses</span>
                                                    </div>
                                                </div>

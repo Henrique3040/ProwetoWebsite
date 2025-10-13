@@ -14,5 +14,12 @@ class CourseController
     {
         return $this->model->getFeaturedCourses($limit);
     }
+
+    public function getCourseDetail($courseId)
+    {
+        return $this->model->getCourseDetail($courseId);
+    }
+
+    
 }
 ?>
