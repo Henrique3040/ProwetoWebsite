@@ -23,5 +23,9 @@ class CourseController
     public function searchCourses($query){
         return $this->model->searchCourses($query);
     }
+
+    public function getAllCourses(){
+        return $this->model->getAllCourses();
+    }
 }
 ?>

@@ -8,6 +8,7 @@ class Course
         $this->conn = $db;
     }
 
+    // Haal de meest bekeken cursussen op
     public function getFeaturedCourses($limit = 8)
     {
         $sql = "
@@ -62,6 +63,7 @@ class Course
         return mysqli_fetch_assoc($result);
     }
 
+    // Zoek cursussen op titel
     public function searchCourses($query)
     {
         $sql = "
@@ -87,8 +89,30 @@ class Course
     mysqli_stmt_execute($stmt);
     $result = mysqli_stmt_get_result($stmt);
 
-    // 👇 Belangrijk: geef het mysqli_result direct terug
+    // Belangrijk: geef het mysqli_result direct terug
     return $result;
+    }
+
+    public function getAllCourses()
+    {
+        $sql = "SELECT 
+                    c.CursusID,
+                    c.Titel,
+                    c.FotoURL,
+                    c.Link,
+                    c.Views,
+                    cat.Naam AS CategorieNaam
+                FROM Cursus c
+                LEFT JOIN Categorie cat ON c.CategorieID = cat.CategorieID
+                ORDER BY c.Titel ASC";
+
+        $result = mysqli_query($this->conn, $sql);
+
+        if (!$result) {
+            die('Query failed: ' . mysqli_error($this->conn));
+        }
+
+        return $result;
     }
 }
 ?>
