@@ -11,7 +11,7 @@
 	<!-- Includes nodige controllers voor gebruik van data -->
 	<?php
 	require_once __DIR__ . '/../app/core/init.php';
-	
+
 	$categories = $categoryController->getAllWithCourses();
 	$result = $categoryController->index();
 	$courses = $courseController->featured(8);
@@ -87,12 +87,13 @@ Main Banner START -->
 
 						<!-- Search course -->
 						<div class="col-md-8 text-center mx-auto pb-5">
-							<form class="bg-body shadow rounded p-2">
+							<form class="bg-body shadow rounded p-2" method="GET" action="search.php">
 								<div class="input-group">
-									<input class="form-control border-0 me-1" type="search"
-										placeholder="Find your course">
-									<button type="button" class="btn btn-primary mb-0 rounded z-index-1"><i
-											class="fas fa-search"></i></button>
+									<input class="form-control border-0 me-1" type="search" name="q"
+										placeholder="Find your course" required>
+									<button type="submit" class="btn btn-primary mb-0 rounded z-index-1">
+										<i class="fas fa-search"></i>
+									</button>
 								</div>
 							</form>
 						</div>

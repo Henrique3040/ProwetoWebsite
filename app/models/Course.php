@@ -62,6 +62,33 @@ class Course
         return mysqli_fetch_assoc($result);
     }
 
+    public function searchCourses($query)
+    {
+        $sql = "
+        SELECT 
+            c.CursusID,
+            c.Titel,
+            c.FotoURL,
+            c.Link,
+            c.Views,
+            cat.Naam AS CategorieNaam
+        FROM Cursus c
+        LEFT JOIN Categorie cat ON c.CategorieID = cat.CategorieID
+        WHERE c.Titel LIKE CONCAT('%', ?, '%')
+        ORDER BY c.Views DESC
+    ";
 
+    $stmt = mysqli_prepare($this->conn, $sql);
+    if (!$stmt) {
+        die('Prepare failed: ' . mysqli_error($this->conn));
+    }
+
+    mysqli_stmt_bind_param($stmt, "s", $query);
+    mysqli_stmt_execute($stmt);
+    $result = mysqli_stmt_get_result($stmt);
+
+    // 👇 Belangrijk: geef het mysqli_result direct terug
+    return $result;
+    }
 }
 ?>

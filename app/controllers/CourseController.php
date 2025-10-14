@@ -20,6 +20,8 @@ class CourseController
         return $this->model->getCourseDetail($courseId);
     }
 
-    
+    public function searchCourses($query){
+        return $this->model->searchCourses($query);
+    }
 }
 ?>
