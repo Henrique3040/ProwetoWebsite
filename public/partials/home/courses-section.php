@@ -77,7 +77,7 @@
         </div>
 
         <div class="text-center mt-5">
-            <a href="all-courses.php" class="btn btn-primary-soft">View more
+            <a href="all-courses.php" class="btn btn-primary-soft">View all courses
                 <i class="fas fa-sync ms-2"></i>
             </a>
         </div>

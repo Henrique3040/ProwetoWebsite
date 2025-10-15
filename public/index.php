@@ -12,6 +12,7 @@
 	<?php
 	require_once __DIR__ . '/../app/core/init.php';
 
+	$subWebsites = $subWebsiteController->index();
 	$categories = $categoryController->getAllWithCourses();
 	$result = $categoryController->index();
 	$courses = $courseController->featured(8);
@@ -137,7 +138,7 @@ Video END -->
 		<!-- =======================
 Category START -->
 
-		<?php include 'partials/home/categories-section.php'; ?>
+		<?php include 'partials/home/SubWebsiteSection.php'; ?>
 
 		<!-- =======================
 Category END -->
@@ -197,149 +198,7 @@ Action box END -->
 
 		<!-- =======================
 IT courses START -->
-		<section>
-			<div class="container">
-				<!-- Title -->
-				<div class="row mb-4">
-					<div class="col-lg-8 text-center mx-auto">
-						<h2 class="fs-1">Top Courses for IT</h2>
-						<p class="mb-0">Information Technology Courses to expand your skills and boost your career &
-							salary</p>
-					</div>
-				</div>
-
-				<div class="row g-4">
-
-					<!-- Course item -->
-					<div class="col-sm-6 col-lg-4 col-xl-3">
-						<!-- Image -->
-						<div class="card card-metro overflow-hidden rounded-3">
-							<img src="assets/images/courses/4by3/01.jpg" alt="">
-							<!-- Image overlay -->
-							<div class="card-img-overlay d-flex">
-								<!-- Info -->
-								<div class="mt-auto card-text">
-									<a href="#" class="text-white mt-auto h5 stretched-link">Digital Marketing</a>
-									<div class="text-white">23 Courses</div>
-								</div>
-							</div>
-						</div>
-					</div>
-
-					<!-- Course item -->
-					<div class="col-sm-6 col-lg-4 col-xl-3">
-						<!-- Image -->
-						<div class="card card-metro overflow-hidden rounded-3">
-							<img src="assets/images/courses/4by3/03.jpg" alt="">
-							<!-- Image overlay -->
-							<div class="card-img-overlay d-flex">
-								<!-- Info -->
-								<div class="mt-auto card-text">
-									<a href="#" class="text-white mt-auto h5 stretched-link">Figma</a>
-									<div class="text-white">16 Courses</div>
-								</div>
-							</div>
-						</div>
-					</div>
-
-					<!-- Course item -->
-					<div class="col-sm-6 col-lg-4 col-xl-3">
-						<!-- Image -->
-						<div class="card card-metro overflow-hidden rounded-3">
-							<img src="assets/images/courses/4by3/05.jpg" alt="">
-							<!-- Image overlay -->
-							<div class="card-img-overlay d-flex">
-								<!-- Info -->
-								<div class="mt-auto card-text">
-									<a href="#" class="text-white mt-auto h5 stretched-link">Python</a>
-									<div class="text-white">32 Courses</div>
-								</div>
-							</div>
-						</div>
-					</div>
-
-					<!-- Course item -->
-					<div class="col-sm-6 col-lg-4 col-xl-3">
-						<!-- Image -->
-						<div class="card card-metro overflow-hidden rounded-3">
-							<img src="assets/images/courses/4by3/06.jpg" alt="">
-							<!-- Image overlay -->
-							<div class="card-img-overlay d-flex">
-								<!-- Info -->
-								<div class="mt-auto card-text">
-									<a href="#" class="text-white mt-auto h5 stretched-link">Angular</a>
-									<div class="text-white">48 Courses</div>
-								</div>
-							</div>
-						</div>
-					</div>
-
-					<!-- Course item -->
-					<div class="col-sm-6 col-lg-4 col-xl-3">
-						<!-- Image -->
-						<div class="card card-metro overflow-hidden rounded-3">
-							<img src="assets/images/courses/4by3/07.jpg" alt="">
-							<!-- Image overlay -->
-							<div class="card-img-overlay d-flex">
-								<!-- Info -->
-								<div class="mt-auto card-text">
-									<a href="#" class="text-white mt-auto h5 stretched-link">React-Native</a>
-									<div class="text-white">31 Courses</div>
-								</div>
-							</div>
-						</div>
-					</div>
-
-					<!-- Course item -->
-					<div class="col-sm-6 col-lg-4 col-xl-3">
-						<!-- Image -->
-						<div class="card card-metro overflow-hidden rounded-3">
-							<img src="assets/images/courses/4by3/08.jpg" alt="">
-							<!-- Image overlay -->
-							<div class="card-img-overlay d-flex">
-								<!-- Info -->
-								<div class="mt-auto card-text">
-									<a href="#" class="text-white mt-auto h5 stretched-link">Sketch</a>
-									<div class="text-white">38 Courses</div>
-								</div>
-							</div>
-						</div>
-					</div>
-
-					<!-- Course item -->
-					<div class="col-sm-6 col-lg-4 col-xl-3">
-						<!-- Image -->
-						<div class="card card-metro overflow-hidden rounded-3">
-							<img src="assets/images/courses/4by3/09.jpg" alt="">
-							<!-- Image overlay -->
-							<div class="card-img-overlay d-flex">
-								<!-- Info -->
-								<div class="mt-auto card-text">
-									<a href="#" class="text-white mt-auto h5 stretched-link">Javascript</a>
-									<div class="text-white">33 Courses</div>
-								</div>
-							</div>
-						</div>
-					</div>
-
-					<!-- Course item -->
-					<div class="col-sm-6 col-lg-4 col-xl-3">
-						<!-- Image -->
-						<div class="card card-metro overflow-hidden rounded-3">
-							<img src="assets/images/courses/4by3/10.jpg" alt="">
-							<!-- Image overlay -->
-							<div class="card-img-overlay d-flex">
-								<!-- Info -->
-								<div class="mt-auto card-text">
-									<a href="#" class="text-white mt-auto h5 stretched-link">Bootstrap</a>
-									<div class="text-white">62 Courses</div>
-								</div>
-							</div>
-						</div>
-					</div>
-				</div> <!-- Row END -->
-			</div>
-		</section>
+		<?php include 'partials/home/category-section.php'; ?>
 		<!-- =======================
 IT courses END -->
 

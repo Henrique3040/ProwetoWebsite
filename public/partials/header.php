@@ -50,7 +50,7 @@
                         </li>
                         <li>
                             <a class="dropdown-item bg-primary text-primary bg-opacity-10 rounded-2 mb-0"
-                                href="categories.php">
+                                href="course-categories.php">
                                 View all categories
                             </a>
                         </li>

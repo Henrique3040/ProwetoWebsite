@@ -9,10 +9,12 @@ $conn = $db->getConnection();
 // Controllers
 require_once __DIR__ . '/../controllers/CategoryController.php';
 require_once __DIR__ . '/../controllers/CourseController.php';
+require_once __DIR__ . '/../controllers/SubWebsiteController.php';
 
 // Controller-objecten
 $categoryController = new CategoryController($conn);
 $courseController   = new CourseController($conn);
+$subWebsiteController = new SubWebsiteController($conn);
 
 ?>
 
