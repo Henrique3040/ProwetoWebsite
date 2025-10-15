@@ -18,13 +18,14 @@ class Course
             c.FotoURL,
             c.Link,
             c.Views,
-            cat.Naam AS CategorieNaam
+            GROUP_CONCAT(cat.Naam SEPARATOR ', ') AS CategorieNamen
         FROM Cursus c
-        LEFT JOIN Categorie cat ON c.CategorieID = cat.CategorieID
+        LEFT JOIN CursusCategorie cc ON c.CursusID = cc.CursusID
+        LEFT JOIN Categorie cat ON cc.CategorieID = cat.CategorieID
+        GROUP BY c.CursusID
         ORDER BY c.Views DESC
         LIMIT ?
         ";
-
         $stmt = mysqli_prepare($this->conn, $sql);
         mysqli_stmt_bind_param($stmt, "i", $limit);
         mysqli_stmt_execute($stmt);
@@ -41,19 +42,25 @@ class Course
     // Haal cursus + detailinformatie op
     public function getCourseDetail($courseId)
     {
-        $sql = "SELECT 
-                    c.CursusID,
-                    c.Titel,
-                    c.CategorieID,
-                    d.KorteBeschrijving,
-                    d.Beschrijving,
-                    d.LaatstBijgewerkt,
-                    d.Rating,
-                    d.Taal,
-                    d.Prijs
-                FROM Cursus AS c
-                JOIN Cursusdetails AS d ON c.CursusID = d.CursusID
-                WHERE c.CursusID = ?";
+        $sql = "
+        SELECT 
+            c.CursusID,
+            c.Titel,
+            d.KorteBeschrijving,
+            d.Beschrijving,
+            d.LaatstBijgewerkt,
+            d.Rating,
+            d.Taal,
+            d.Prijs,
+            GROUP_CONCAT(cat.Naam SEPARATOR ', ') AS CategorieNamen
+        FROM Cursus c
+        JOIN Cursusdetails d ON c.CursusID = d.CursusID
+        LEFT JOIN CursusCategorie cc ON c.CursusID = cc.CursusID
+        LEFT JOIN Categorie cat ON cc.CategorieID = cat.CategorieID
+        WHERE c.CursusID = ?
+        GROUP BY c.CursusID
+        ";
+
 
         $stmt = mysqli_prepare($this->conn, $sql);
         mysqli_stmt_bind_param($stmt, "i", $courseId);
@@ -73,38 +80,44 @@ class Course
             c.FotoURL,
             c.Link,
             c.Views,
-            cat.Naam AS CategorieNaam
+            GROUP_CONCAT(cat.Naam SEPARATOR ', ') AS CategorieNamen
         FROM Cursus c
-        LEFT JOIN Categorie cat ON c.CategorieID = cat.CategorieID
+        LEFT JOIN CursusCategorie cc ON c.CursusID = cc.CursusID
+        LEFT JOIN Categorie cat ON cc.CategorieID = cat.CategorieID
         WHERE c.Titel LIKE CONCAT('%', ?, '%')
+        GROUP BY c.CursusID
         ORDER BY c.Views DESC
-    ";
+        ";
 
-    $stmt = mysqli_prepare($this->conn, $sql);
-    if (!$stmt) {
-        die('Prepare failed: ' . mysqli_error($this->conn));
-    }
+        $stmt = mysqli_prepare($this->conn, $sql);
+        if (!$stmt) {
+            die('Prepare failed: ' . mysqli_error($this->conn));
+        }
 
-    mysqli_stmt_bind_param($stmt, "s", $query);
-    mysqli_stmt_execute($stmt);
-    $result = mysqli_stmt_get_result($stmt);
+        mysqli_stmt_bind_param($stmt, "s", $query);
+        mysqli_stmt_execute($stmt);
+        $result = mysqli_stmt_get_result($stmt);
 
-    // Belangrijk: geef het mysqli_result direct terug
-    return $result;
+        // Belangrijk: geef het mysqli_result direct terug
+        return $result;
     }
 
     public function getAllCourses()
     {
-        $sql = "SELECT 
-                    c.CursusID,
-                    c.Titel,
-                    c.FotoURL,
-                    c.Link,
-                    c.Views,
-                    cat.Naam AS CategorieNaam
-                FROM Cursus c
-                LEFT JOIN Categorie cat ON c.CategorieID = cat.CategorieID
-                ORDER BY c.Titel ASC";
+        $sql = "
+        SELECT 
+            c.CursusID,
+            c.Titel,
+            c.FotoURL,
+            c.Link,
+            c.Views,
+            GROUP_CONCAT(cat.Naam SEPARATOR ', ') AS CategorieNamen
+        FROM Cursus c
+        LEFT JOIN CursusCategorie cc ON c.CursusID = cc.CursusID
+        LEFT JOIN Categorie cat ON cc.CategorieID = cat.CategorieID
+        GROUP BY c.CursusID
+        ORDER BY c.Titel ASC
+        ";
 
         $result = mysqli_query($this->conn, $sql);
 
@@ -114,5 +127,28 @@ class Course
 
         return $result;
     }
+
+
+    public function getCategoriesByCourse($courseId)
+    {
+        $sql = "
+        SELECT cat.CategorieID, cat.Naam
+        FROM Categorie cat
+        INNER JOIN CursusCategorie cc ON cat.CategorieID = cc.CategorieID
+        WHERE cc.CursusID = ?";
+
+        $stmt = mysqli_prepare($this->conn, $sql);
+        mysqli_stmt_bind_param($stmt, "i", $courseId);
+        mysqli_stmt_execute($stmt);
+        $result = mysqli_stmt_get_result($stmt);
+
+        $categories = [];
+        while ($row = mysqli_fetch_assoc($result)) {
+            $categories[] = $row;
+        }
+        return $categories;
+    }
+
+
 }
 ?>

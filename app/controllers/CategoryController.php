@@ -30,5 +30,18 @@ class CategoryController
     {
         return $this->model->getAll();
     }
+
+    public function getAllWithCourseCount()
+    {
+        $categories = [];
+        $categoryResult = $this->model->getAll();
+
+        while ($cat = mysqli_fetch_assoc($categoryResult)) {
+            $cat['TotalCourses'] = $this->model->getCategoryCourseCount($cat['CategorieID']);
+            $categories[] = $cat;
+        }
+
+        return $categories;
+    }
 }
 ?>

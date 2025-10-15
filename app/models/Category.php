@@ -21,18 +21,12 @@ class Category
     public function getCoursesByCategory($categoryId)
     {
         $sql = "
-        SELECT 
-            c.CursusID,
-            c.Titel,
-            c.FotoURL,
-            c.Link,
-            c.Views,
-            cat.Naam AS CategorieNaam
+        SELECT c.CursusID, c.Titel, c.FotoURL, c.Link, c.Views
         FROM Cursus c
-        LEFT JOIN Categorie cat ON c.CategorieID = cat.CategorieID
-        WHERE c.CategorieID = ?
-        ORDER BY c.Views DESC";
-        
+        INNER JOIN CursusCategorie cc ON c.CursusID = cc.CursusID
+        WHERE cc.CategorieID = ?
+        ORDER BY c.Views DESC
+        ";        
         $stmt = mysqli_prepare($this->conn, $sql);
         mysqli_stmt_bind_param($stmt, "i", $categoryId);
         mysqli_stmt_execute($stmt);
@@ -48,7 +42,7 @@ class Category
         $categoryResult = mysqli_query($this->conn, $categoryQuery);
 
         while ($cat = mysqli_fetch_assoc($categoryResult)) {
-            $catId = (int) $cat['CategorieID'];
+            $catId = (int)$cat['CategorieID'];
             $courses = $this->getCoursesByCategory($catId);
 
             $cat['courses'] = [];
@@ -72,9 +66,9 @@ class Category
         SELECT 
             c.CategorieID,
             c.Naam,
-            COUNT(cur.CursusID) AS TotalCourses
+            COUNT(cc.CursusID) AS TotalCourses
         FROM Categorie c
-        LEFT JOIN Cursus cur ON c.CategorieID = cur.CategorieID
+        LEFT JOIN CursusCategorie cc ON c.CategorieID = cc.CategorieID
         GROUP BY c.CategorieID, c.Naam
         ORDER BY c.Naam ASC
         ";
