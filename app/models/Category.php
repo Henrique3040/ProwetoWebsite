@@ -13,8 +13,14 @@ class Category
     {
         $sql = "SELECT CategorieID, Naam FROM Categorie ORDER BY Naam ASC";
         $result = mysqli_query($this->conn, $sql);
-        return $result ?: [];
-
+        $categories = [];
+        if ($result) {
+            while ($row = mysqli_fetch_assoc($result)) {
+                $categories[] = $row;
+            }
+        }
+        return $categories;
+    
     }
      
      // Get all courses belonging to a category
@@ -78,7 +84,7 @@ class Category
         if (!$result) {
             die('Query failed: ' . mysqli_error($this->conn));
         }
-
+        
         return $result;
     }
 }

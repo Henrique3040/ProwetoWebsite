@@ -3,7 +3,7 @@
         <!-- Title -->
         <div class="row mb-4">
             <div class="col-lg-8 text-center mx-auto">
-                <h2 class="fs-1 mb-0">Featured Courses</h2>
+                <h2 class="fs-1 mb-0">Our Courses</h2>
                 <p class="mb-0">Explore top picks of the week</p>
             </div>
         </div>

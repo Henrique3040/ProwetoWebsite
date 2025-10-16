@@ -1,0 +1,52 @@
+$(document).ready(function() {
+    $('form').on('submit', function(e) 
+    {
+        let categorie = $('select[name="categorie_id"]').val();
+        let titel = $('input[name="titel"]').val();
+        let beschrijving = $('textarea[name="korte_beschrijving"]').val();
+        let foto = $('input[name="foto"]').val();
+
+        let errors = [];
+
+        if (!titel.trim()) {
+            errors.push('Titel is verplicht.');
+        }
+
+        if (!beschrijving.trim()) {
+            errors.push('Korte beschrijving is verplicht.');
+        }
+
+        if (!categorie || categorie.trim() === '') {
+            errors.push('Selecteer een categorie.');
+            $('.choices__inner').css('border', '2px solid red');
+        } else {
+            $('.choices__inner').css('border', '');
+        }
+
+        if (!foto.trim()) {
+            errors.push('Kies een foto.');
+        }
+
+        if (errors.length > 0) {
+            e.preventDefault();
+
+            // Verwijder vorige foutmelding (als die er is)
+            $('#errorMessage').remove();
+
+            // Voeg een melding toe boven het formulier
+            $('form').prepend(`
+                <div id="errorMessage" class="alert alert-danger mt-2" role="alert">
+                    <strong>Er zijn fouten gevonden:</strong><br>
+                    ${errors.join('<br>')}
+                </div>
+            `);
+
+            // Scroll naar boven van het formulier
+            $('html, body').animate({ scrollTop: $('form').offset().top - 50 }, 400);
+
+            return false;
+        }
+        console.log('jQuery status:', typeof jQuery);
+
+    });
+});

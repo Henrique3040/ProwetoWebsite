@@ -150,5 +150,41 @@ class Course
     }
 
 
+
+
+    public function createCourse($data)
+    {
+        // 1️⃣ Insert in Cursus
+        $sql = "INSERT INTO Cursus (Titel, FotoURL, Link, Views, Featured)
+            VALUES (?, ?, ?, 0, 0)";
+        $stmt = mysqli_prepare($this->conn, $sql);
+        mysqli_stmt_bind_param($stmt, "sss", $data['Titel'], $data['FotoURL'], $data['Link']);
+        mysqli_stmt_execute($stmt);
+        $cursusId = mysqli_insert_id($this->conn);
+
+        if (!$cursusId) {
+            return false;
+        }
+
+        // 2️⃣ Insert in Cursusdetails
+        $sql2 = "INSERT INTO Cursusdetails (CursusID, KorteBeschrijving, Beschrijving, Rating, Taal, Prijs, LaatstBijgewerkt)
+             VALUES (?, ?, ?, 0, 'Nederlands', 0, NOW())";
+        $stmt2 = mysqli_prepare($this->conn, $sql2);
+        mysqli_stmt_bind_param($stmt2, "iss", $cursusId, $data['KorteBeschrijving'], $data['Beschrijving']);
+        mysqli_stmt_execute($stmt2);
+
+        // 3️⃣ Koppel categorie
+        $sql3 = "INSERT INTO CursusCategorie (CursusID, CategorieID) VALUES (?, ?)";
+        $stmt3 = mysqli_prepare($this->conn, $sql3);
+        mysqli_stmt_bind_param($stmt3, "ii", $cursusId, $data['CategorieID']);
+        mysqli_stmt_execute($stmt3);
+
+        return $cursusId;
+    }
+
+
+
 }
+
+
 ?>

@@ -170,8 +170,7 @@ Page content START -->
 									<div class="card card-body border p-4">
 										<!-- Price and share button -->
 										<div class="d-flex justify-content-between align-items-center">
-											<!-- Price -->
-											<h3 class="fw-bold mb-0 me-2">€<?= number_format($course['Prijs'], 2) ?></h3>
+
 											<!-- Share button with dropdown -->
 											<div class="dropdown">
 												<a href="#" class="btn btn-sm btn-light rounded mb-0 small"
@@ -195,11 +194,7 @@ Page content START -->
 											</div>
 										</div>
 
-										<!-- Buttons -->
-										<div class="mt-3 d-grid">
-											<a href="#" class="btn btn-outline-primary">Add to cart</a>
-											<a href="#" class="btn btn-success">Buy now</a>
-										</div>
+										
 										<!-- Divider -->
 										<hr>
 
@@ -240,19 +235,6 @@ Page content START -->
 										<!-- Divider -->
 										<hr>
 
-										<!-- Instructor info -->
-										<div class="d-sm-flex align-items-center">
-											<!-- Avatar image -->
-											<div class="avatar avatar-xl">
-												<img class="avatar-img rounded-circle" src="assets/images/avatar/05.jpg"
-													alt="avatar">
-											</div>
-											<div class="ms-sm-3 mt-2 mt-sm-0">
-												<h5 class="mb-0"><a href="#">By Jacqueline Miller</a></h5>
-												<p class="mb-0 small">Founder Eduport company</p>
-											</div>
-										</div>
-
 										<!-- Rating and follow -->
 										<div
 											class="d-sm-flex justify-content-sm-between align-items-center mt-0 mt-sm-2">
@@ -271,8 +253,6 @@ Page content START -->
 												<li class="list-inline-item ms-2 h6 fw-light mb-0">4.5/5.0</li>
 											</ul>
 
-											<!-- button -->
-											<button class="btn btn-sm btn-primary mb-0 mt-2 mt-sm-0">Follow</button>
 										</div>
 									</div>
 									<!-- Course info END -->
