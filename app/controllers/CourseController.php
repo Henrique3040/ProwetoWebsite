@@ -33,6 +33,8 @@ class CourseController
     //Slaag cursus op de database via de model
     public function store()
     {
+        
+
         if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             $titel = $_POST['titel'];
             $korteBeschrijving = $_POST['korte_beschrijving'];

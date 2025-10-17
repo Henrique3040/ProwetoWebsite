@@ -16,6 +16,7 @@
 	<?php
 	require_once __DIR__ . '/../app/core/init.php';
 	$categorieen = $categoryController->getAllCategories(); 
+	$courseController->store();
 	?>
 
 	<?php include("partials/head-css.php"); ?>
@@ -136,6 +137,8 @@ Steps START -->
 												<textarea class="form-control" rows="2" name="korte_beschrijving"
 													placeholder="Enter keywords"></textarea>
 											</div>
+
+											<pre><?php print_r($categorieen); ?></pre>
 
 											<!-- Course category -->
 											<div class="col-md-6">
@@ -590,83 +593,7 @@ Footer START -->
 	<!-- =======================
 Footer END -->
 
-	<!-- Popup modal for add lecture START -->
-	<div class="modal fade" id="addLecture" tabindex="-1" aria-labelledby="addLectureLabel" aria-hidden="true">
-		<div class="modal-dialog">
-			<div class="modal-content">
-				<div class="modal-header bg-dark">
-					<h5 class="modal-title text-white" id="addLectureLabel">Add Lecture</h5>
-					<button type="button" class="btn btn-sm btn-light mb-0 ms-auto" data-bs-dismiss="modal"
-						aria-label="Close"><i class="bi bi-x-lg"></i></button>
-				</div>
-				<div class="modal-body">
-					<form class="row text-start g-3">
-						<!-- Course name -->
-						<div class="col-12">
-							<label class="form-label">Course name <span class="text-danger">*</span></label>
-							<input type="text" class="form-control" placeholder="Enter course name">
-						</div>
-					</form>
-				</div>
-				<div class="modal-footer">
-					<button type="button" class="btn btn-danger-soft my-0" data-bs-dismiss="modal">Close</button>
-					<button type="button" class="btn btn-success my-0">Save Lecture</button>
-				</div>
-			</div>
-		</div>
-	</div>
-	<!-- Popup modal for add lecture END -->
-
-	<!-- Popup modal for add topic START -->
-	<div class="modal fade" id="addTopic" tabindex="-1" aria-labelledby="addTopicLabel" aria-hidden="true">
-		<div class="modal-dialog">
-			<div class="modal-content">
-				<div class="modal-header bg-dark">
-					<h5 class="modal-title text-white" id="addTopicLabel">Add topic</h5>
-					<button type="button" class="btn btn-sm btn-light mb-0 ms-auto" data-bs-dismiss="modal"
-						aria-label="Close"><i class="bi bi-x-lg"></i></button>
-				</div>
-				<div class="modal-body">
-					<form class="row text-start g-3">
-						<!-- Topic name -->
-						<div class="col-md-6">
-							<label class="form-label">Topic name</label>
-							<input class="form-control" type="text" placeholder="Enter topic name">
-						</div>
-						<!-- Video link -->
-						<div class="col-md-6">
-							<label class="form-label">Video link</label>
-							<input class="form-control" type="text" placeholder="Enter Video link">
-						</div>
-						<!-- Description -->
-						<div class="col-12 mt-3">
-							<label class="form-label">Course description</label>
-							<textarea class="form-control" rows="4" placeholder="" spellcheck="false"></textarea>
-						</div>
-						<!-- Buttons -->
-						<div class="col-6 mt-3">
-							<div class="btn-group" role="group" aria-label="Basic radio toggle button group">
-								<!-- Free button -->
-								<input type="radio" class="btn-check" name="options" id="option1" checked="">
-								<label class="btn btn-sm btn-light btn-primary-soft-check border-0 m-0"
-									for="option1">Free</label>
-								<!-- Premium button -->
-								<input type="radio" class="btn-check" name="options" id="option2">
-								<label class="btn btn-sm btn-light btn-primary-soft-check border-0 m-0"
-									for="option2">Premium</label>
-							</div>
-						</div>
-					</form>
-				</div>
-				<div class="modal-footer">
-					<button type="button" class="btn btn-danger-soft my-0" data-bs-dismiss="modal">Close</button>
-					<button type="button" class="btn btn-success my-0">Save topic</button>
-				</div>
-			</div>
-		</div>
-	</div>
-	<!-- Popup modal for add topic END -->
-
+	
 	<!-- Popup modal for add faq START -->
 	<div class="modal fade" id="addQuestion" tabindex="-1" aria-labelledby="addQuestionLabel" aria-hidden="true">
 		<div class="modal-dialog">

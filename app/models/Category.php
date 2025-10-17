@@ -13,6 +13,7 @@ class Category
     {
         $sql = "SELECT CategorieID, Naam FROM Categorie ORDER BY Naam ASC";
         $result = mysqli_query($this->conn, $sql);
+        
         $categories = [];
         if ($result) {
             while ($row = mysqli_fetch_assoc($result)) {

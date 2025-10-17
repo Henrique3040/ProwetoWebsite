@@ -1,6 +1,8 @@
 $(document).ready(function() {
+    console.log('jQuery status:', typeof jQuery);
     $('form').on('submit', function(e) 
     {
+        
         let categorie = $('select[name="categorie_id"]').val();
         let titel = $('input[name="titel"]').val();
         let beschrijving = $('textarea[name="korte_beschrijving"]').val();
@@ -46,7 +48,7 @@ $(document).ready(function() {
 
             return false;
         }
-        console.log('jQuery status:', typeof jQuery);
+      
 
     });
 });
