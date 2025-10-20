@@ -20,7 +20,7 @@
 	} else {
 		$courses = $courseController->getAllCourses();
 	}
-	
+
 	?>
 
 	<!-- Plugins CSS -->
@@ -90,15 +90,12 @@ Page content START -->
 								onchange="this.form.submit()">
 								<option value="">All</option>
 
-								<?php if ($categories && mysqli_num_rows($categories) > 0): ?>
-									<?php while ($cat = mysqli_fetch_assoc($categories)): ?>
-										<option value="<?= $cat['CategorieID'] ?>" <?= ($category == $cat['CategorieID']) ? 'selected' : '' ?>>
-											<?= htmlspecialchars($cat['Naam']) ?>
+									<?php foreach ($categories as $cat): ?>
+										<option value="<?= $cat['CategorieID'] ?>"><?= htmlspecialchars($cat['Naam']) ?>
 										</option>
-									<?php endwhile; ?>
-								<?php else: ?>
-									<option disabled>No categories found</option>
-								<?php endif; ?>
+									<?php endforeach; ?>
+
+								
 							</select>
 						</form>
 					</div>
@@ -143,8 +140,7 @@ Page content START -->
 															<?= htmlspecialchars($course['Titel']) ?>
 														</a>
 													</h5>
-													<p class="small text-muted">
-														<?= htmlspecialchars($course['CategorieNaam']) ?></p>
+													
 													<p class="mb-2"><i
 															class="fas fa-eye text-success me-1"></i><?= (int) $course['Views'] ?>
 														views</p>
@@ -161,24 +157,24 @@ Page content START -->
 
 					<!-- Card item END -->
 
-				<!-- Pagination START -->
-				<div class="col-12">
-					<nav class="mt-4 d-flex justify-content-center" aria-label="navigation">
-						<ul class="pagination pagination-primary-soft d-inline-block d-md-flex rounded mb-0">
-							<li class="page-item mb-0"><a class="page-link" href="#" tabindex="-1"><i
-										class="fas fa-angle-double-left"></i></a></li>
-							<li class="page-item mb-0"><a class="page-link" href="#">1</a></li>
-							<li class="page-item mb-0 active"><a class="page-link" href="#">2</a></li>
-							<li class="page-item mb-0"><a class="page-link" href="#">..</a></li>
-							<li class="page-item mb-0"><a class="page-link" href="#">6</a></li>
-							<li class="page-item mb-0"><a class="page-link" href="#"><i
-										class="fas fa-angle-double-right"></i></a></li>
-						</ul>
-					</nav>
-				</div>
-				<!-- Pagination END -->
+					<!-- Pagination START -->
+					<div class="col-12">
+						<nav class="mt-4 d-flex justify-content-center" aria-label="navigation">
+							<ul class="pagination pagination-primary-soft d-inline-block d-md-flex rounded mb-0">
+								<li class="page-item mb-0"><a class="page-link" href="#" tabindex="-1"><i
+											class="fas fa-angle-double-left"></i></a></li>
+								<li class="page-item mb-0"><a class="page-link" href="#">1</a></li>
+								<li class="page-item mb-0 active"><a class="page-link" href="#">2</a></li>
+								<li class="page-item mb-0"><a class="page-link" href="#">..</a></li>
+								<li class="page-item mb-0"><a class="page-link" href="#">6</a></li>
+								<li class="page-item mb-0"><a class="page-link" href="#"><i
+											class="fas fa-angle-double-right"></i></a></li>
+							</ul>
+						</nav>
+					</div>
+					<!-- Pagination END -->
 
-			</div>
+				</div>
 		</section>
 		<!-- =======================
 Page content END -->

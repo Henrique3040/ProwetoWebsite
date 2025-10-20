@@ -15,7 +15,7 @@
 
 	<?php
 	require_once __DIR__ . '/../app/core/init.php';
-	$categorieen = $categoryController->getAllCategories(); 
+	$categorieen = $categoryController->getAllCategories();
 	$courseController->store();
 	?>
 
@@ -111,7 +111,7 @@ Steps START -->
 						<div class="card-body">
 							<!-- Step content START -->
 							<div class="bs-stepper-content">
-							<form action="admin-create-course.php" method="POST" enctype="multipart/form-data">
+								<form action="admin-create-course.php" method="POST" enctype="multipart/form-data">
 
 
 									<!-- Step 1 content START -->
@@ -138,7 +138,6 @@ Steps START -->
 													placeholder="Enter keywords"></textarea>
 											</div>
 
-											<pre><?php print_r($categorieen); ?></pre>
 
 											<!-- Course category -->
 											<div class="col-md-6">
@@ -147,24 +146,13 @@ Steps START -->
 													<option value="">Select category</option>
 													<?php foreach ($categorieen as $cat): ?>
 														<option value="<?= $cat['CategorieID'] ?>">
-															<?= htmlspecialchars($cat['Naam']) ?></option>
+															<?= htmlspecialchars($cat['Naam']) ?>
+														</option>
 													<?php endforeach; ?>
 												</select>
 											</div>
 
-											<!-- Course level -->
-											<div class="col-md-6">
-												<label class="form-label">Course level</label>
-												<select class="form-select js-choice border-0 z-index-9 bg-transparent"
-													aria-label=".form-select-sm" data-search-enabled="false"
-													data-remove-item-button="true">
-													<option value="">Select course level</option>
-													<option>All level</option>
-													<option>Beginner</option>
-													<option>Intermediate</option>
-													<option>Advance</option>
-												</select>
-											</div>
+
 
 											<!-- Course description -->
 											<div class="col-12">
@@ -290,6 +278,9 @@ Steps START -->
 														plate jokes to began to cause a scale. Subjects he prospect
 														elegance followed no overcame possible it on. </p>
 												</div>
+												<!-- Verborgen input voor de inhoud van de editor -->
+												<input type="hidden" name="beschrijving" id="beschrijving">
+
 											</div>
 
 											<!-- Step 1 button -->
@@ -322,7 +313,7 @@ Steps START -->
 														<label style="cursor:pointer;">
 															<span>
 																<input class="form-control stretched-link" type="file"
-																 name="foto" id="image"
+																	name="foto" id="image"
 																	accept="image/gif, image/jpeg, image/png" />
 															</span>
 														</label>
@@ -532,7 +523,8 @@ Steps START -->
 												<button class="btn btn-light me-auto ms-md-2 mb-2 mb-md-0">Preview
 													Course</button>
 												<div class="text-md-end">
-												<button type="submit" class="btn btn-success mb-2 mb-sm-0">Submit a Course</button>
+													<button type="submit" class="btn btn-success mb-2 mb-sm-0">Submit a
+														Course</button>
 
 													<p class="mb-0 small mt-1">Once you click "Submit a Course", your
 														course will be uploaded and marked as pending for review.</p>
@@ -593,7 +585,7 @@ Footer START -->
 	<!-- =======================
 Footer END -->
 
-	
+
 	<!-- Popup modal for add faq START -->
 	<div class="modal fade" id="addQuestion" tabindex="-1" aria-labelledby="addQuestionLabel" aria-hidden="true">
 		<div class="modal-dialog">

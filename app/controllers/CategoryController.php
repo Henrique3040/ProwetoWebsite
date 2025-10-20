@@ -30,7 +30,7 @@ class CategoryController
     {
         return $this->model->getAll();
     }
-
+    
     public function getAllWithCourseCount()
     {
         $categories = [];
@@ -42,6 +42,12 @@ class CategoryController
         }
 
         return $categories;
+    }
+
+
+    public function getCategoriesByCourse($courseId)
+    {
+        return $this->model->getCategoriesByCourse($courseId);
     }
 }
 ?>

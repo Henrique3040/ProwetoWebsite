@@ -51,4 +51,22 @@ $(document).ready(function() {
       
 
     });
+
+
+
+    //Quill initialiseren
+    var quill = new Quill('#quilleditor', {
+        theme: 'snow',
+        modules: {
+            toolbar: '#quilltoolbar'
+        }
+    });
+
+    //Bij formulier verzenden: inhoud van Quill in verborgen input zetten
+    $('form').on('submit', function () {
+        var html = quill.root.innerHTML;
+        $('#beschrijving').val(html); // <-- zet inhoud in hidden input
+    });
+
+
 });

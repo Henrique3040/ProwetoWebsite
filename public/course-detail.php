@@ -8,12 +8,14 @@
 	<link rel="stylesheet" type="text/css" href="assets/vendor/plyr/plyr.css" />
 
 	<?php
-	
+
 	require_once __DIR__ . '/../app/core/init.php';
 
 	// Haal course ID op uit de URL
 	$courseId = isset($_GET['id']) ? intval($_GET['id']) : 0;
 	$course = $courseController->getCourseDetail($courseId);
+	
+	$categories = $categoryController->getCategoriesByCourse($course['CursusID']);
 
 	if (!$course) {
 		echo "<h3>Course not found.</h3>";
@@ -66,17 +68,18 @@ Page content START -->
 							<!-- Image and video -->
 							<div class="col-12 position-relative">
 								<div class="video-player rounded-3">
-									<video controls crossorigin="anonymous" playsinline
-										poster="assets/images/videos/poster.jpg">
-										<source src="assets/images/videos/360p.mp4" type="video/mp4" size="360">
-										<source src="assets/images/videos/720p.mp4" type="video/mp4" size="720">
-										<source src="assets/images/videos/1080p.mp4" type="video/mp4" size="1080">
-										<!-- Caption files -->
-										<track kind="captions" label="English" srclang="en"
-											src="assets/images/videos/en.vtt" default>
-										<track kind="captions" label="French" srclang="fr"
-											src="assets/images/videos/fr.vtt">
-									</video>
+									<div class="video-player rounded-3">
+										<video controls crossorigin="anonymous" playsinline
+											poster="<?= htmlspecialchars($course['FotoURL']) ?>">
+											<source src="<?= htmlspecialchars($course['Link']) ?>" type="video/mp4"
+												size="360">
+											<source src="<?= htmlspecialchars($course['Link']) ?>" size="720">
+											<source src="<?= htmlspecialchars($course['Link']) ?>" type="video/mp4"
+												size="1080">
+
+											<source src="<?= htmlspecialchars($course['Link']) ?>" type="video/mp4">
+										</video>
+									</div>
 								</div>
 							</div>
 
@@ -91,59 +94,19 @@ Page content START -->
 
 									<!-- Card body START -->
 									<div class="card-body">
-										<p><?= nl2br(htmlspecialchars($course['Beschrijving'])) ?></p>
 
 
 										<!-- List content -->
 										<h5 class="mt-4">What you’ll learn</h5>
 										<div class="row mb-3">
-											<div class="col-md-6">
-												<ul class="list-group list-group-borderless">
-													<li class="list-group-item h6 fw-light d-flex mb-0"><i
-															class="fas fa-check-circle text-success me-2"></i>Digital
-														marketing course introduction</li>
-													<li class="list-group-item h6 fw-light d-flex mb-0"><i
-															class="fas fa-check-circle text-success me-2"></i>Customer
-														Life cycle</li>
-													<li class="list-group-item h6 fw-light d-flex mb-0"><i
-															class="fas fa-check-circle text-success me-2"></i>What is
-														Search engine optimization(SEO)</li>
-													<li class="list-group-item h6 fw-light d-flex mb-0"><i
-															class="fas fa-check-circle text-success me-2"></i>Facebook
-														ADS</li>
-													<li class="list-group-item h6 fw-light d-flex mb-0"><i
-															class="fas fa-check-circle text-success me-2"></i>Facebook
-														Messenger Chatbot</li>
-													<li class="list-group-item h6 fw-light d-flex mb-0"><i
-															class="fas fa-check-circle text-success me-2"></i>Search
-														engine optimization tools</li>
-												</ul>
+											<div class="card-body">
+												<?= !empty($course['Beschrijving'])
+													? nl2br($course['Beschrijving'])
+													: '<p><em>No description available.</em></p>' ?>
 											</div>
-											<div class="col-md-6">
-												<ul class="list-group list-group-borderless">
-													<li class="list-group-item h6 fw-light d-flex mb-0"><i
-															class="fas fa-check-circle text-success me-2"></i>Why SEO
-													</li>
-													<li class="list-group-item h6 fw-light d-flex mb-0"><i
-															class="fas fa-check-circle text-success me-2"></i>URL
-														Structure</li>
-													<li class="list-group-item h6 fw-light d-flex mb-0"><i
-															class="fas fa-check-circle text-success me-2"></i>Featured
-														Snippet</li>
-													<li class="list-group-item h6 fw-light d-flex mb-0"><i
-															class="fas fa-check-circle text-success me-2"></i>SEO tips
-														and tricks</li>
-													<li class="list-group-item h6 fw-light d-flex mb-0"><i
-															class="fas fa-check-circle text-success me-2"></i>Google tag
-														manager</li>
-												</ul>
-											</div>
+
 										</div>
-										<p class="mb-0">As it so contrasted oh estimating instrument. Size like body
-											some one had. Are conduct viewing boy minutes warrant the expense? Tolerably
-											behavior may admit daughters offending her ask own. Praise effect wishes
-											change way and any wanted. Lively use looked latter regard had. Do he it
-											part more last in. </p>
+
 									</div>
 									<!-- Card body START -->
 								</div>
@@ -151,11 +114,11 @@ Page content START -->
 							<!-- About course END -->
 
 							<!-- Curriculum START -->
-							
+
 							<!-- Curriculum END -->
 
 							<!-- FAQs START -->
-							
+
 							<!-- FAQs END -->
 						</div>
 					</div>
@@ -194,7 +157,7 @@ Page content START -->
 											</div>
 										</div>
 
-										
+
 										<!-- Divider -->
 										<hr>
 
@@ -261,28 +224,24 @@ Page content START -->
 								<!-- Tags START -->
 								<div class="col-md-6 col-xl-12">
 									<div class="card card-body border p-4">
-										<h4 class="mb-3">Popular Tags</h4>
+										<h4 class="mb-3">Cursus Categorieën</h4>
 										<ul class="list-inline mb-0">
-											<li class="list-inline-item"> <a class="btn btn-outline-light btn-sm"
-													href="#">blog</a> </li>
-											<li class="list-inline-item"> <a class="btn btn-outline-light btn-sm"
-													href="#">business</a> </li>
-											<li class="list-inline-item"> <a class="btn btn-outline-light btn-sm"
-													href="#">theme</a> </li>
-											<li class="list-inline-item"> <a class="btn btn-outline-light btn-sm"
-													href="#">bootstrap</a> </li>
-											<li class="list-inline-item"> <a class="btn btn-outline-light btn-sm"
-													href="#">data science</a> </li>
-											<li class="list-inline-item"> <a class="btn btn-outline-light btn-sm"
-													href="#">web development</a> </li>
-											<li class="list-inline-item"> <a class="btn btn-outline-light btn-sm"
-													href="#">tips</a> </li>
-											<li class="list-inline-item"> <a class="btn btn-outline-light btn-sm"
-													href="#">machine learning</a> </li>
+											<?php
+											if ($categories) {
+												foreach ($categories as $cat) {
+													echo '<li class="list-inline-item">
+                            <a class="btn btn-outline-light btn-sm" href="#">' . htmlspecialchars($cat['Naam']) . '</a>
+                          </li>';
+												}
+											} else {
+												echo '<li class="list-inline-item text-muted">Geen categorieën</li>';
+											}
+											?>
 										</ul>
 									</div>
 								</div>
 								<!-- Tags END -->
+
 							</div><!-- Row End -->
 						</div>
 					</div>

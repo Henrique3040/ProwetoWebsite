@@ -13,7 +13,7 @@ class Category
     {
         $sql = "SELECT CategorieID, Naam FROM Categorie ORDER BY Naam ASC";
         $result = mysqli_query($this->conn, $sql);
-        
+
         $categories = [];
         if ($result) {
             while ($row = mysqli_fetch_assoc($result)) {
@@ -87,6 +87,27 @@ class Category
         }
         
         return $result;
+    }
+
+
+    public function getCategoriesByCourse($courseId)
+    {
+        $sql = "
+        SELECT cat.CategorieID, cat.Naam
+        FROM Categorie cat
+        INNER JOIN CursusCategorie cc ON cat.CategorieID = cc.CategorieID
+        WHERE cc.CursusID = ?";
+        
+        $stmt = mysqli_prepare($this->conn, $sql);
+        mysqli_stmt_bind_param($stmt, "i", $courseId);
+        mysqli_stmt_execute($stmt);
+        $result = mysqli_stmt_get_result($stmt);
+        
+        $categories = [];
+        while ($row = mysqli_fetch_assoc($result)) {
+            $categories[] = $row;
+        }
+        return $categories;
     }
 }
 ?>
