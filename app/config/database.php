@@ -1,26 +1,45 @@
 <?php
-    $db_server = "localhost";
-    $db_username = "root";
-    $db_password = "";
-    $db_name = "proweto";
+class Database
+{
+   private static $instance = null;
+   private $connection;
 
-    // Create connection
-    $conn = "";
+   private $host = "localhost";
+   private $username = "root";
+   private $password = "";
+   private $database = "proweto";
+
+   // Private constructor prevents direct object creation
+   private function __construct()
+   {
+      $this->connection = new mysqli(
+         $this->host,
+         $this->username,
+         $this->password,
+         $this->database
+      );
+
+      if ($this->connection->connect_error) {
+         die("Connection failed: " . $this->connection->connect_error);
+      }
+   }
+
+   // Get the singleton instance
+   public static function getInstance()
+   {
+      if (self::$instance == null) {
+         self::$instance = new Database();
+      }
+      return self::$instance;
+   }
+
+   // Get the connection
+   public function getConnection()
+   {
+      return $this->connection;
+   }
+}
 
 
-
-       try{
-        $conn = mysqli_connect($db_server,
-        $db_username,
-         $db_password,
-          $db_name);
-       }catch(mysqli_sql_exception $e){
-          echo "Connection failed: " . $e->getMessage();
-         }
-         
-       if($conn){
-        echo "You are connected!";
-       }
-       
 
 ?>

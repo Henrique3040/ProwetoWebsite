@@ -31,34 +31,11 @@
 						<li class="nav-item"> <a class="nav-link" href="admin-course-list.php">All Courses</a></li>
 						<li class="nav-item"> <a class="nav-link" href="admin-course-category.php">Course Category</a></li>
 						<li class="nav-item"> <a class="nav-link" href="admin-course-detail.php">Course Detail</a></li>
+						<li class="nav-item"> <a class="nav-link" href="admin-create-course.php">Add New Course</a></li>
 					</ul>
 				</li>
 
-				<!-- Menu item 3 -->
-				<li class="nav-item"> <a class="nav-link" href="admin-student-list.php"><i class="fas fa-user-graduate fa-fw me-2"></i>Students</a></li>
-
-				<!-- Menu item 4 -->
-				<li class="nav-item">
-					<a class="nav-link" data-bs-toggle="collapse" href="#collapseinstructors" role="button" aria-expanded="false" aria-controls="collapseinstructors">
-						<i class="fas fa-user-tie fa-fw me-2"></i>Instructors
-					</a>
-					<!-- Submenu -->
-					<ul class="nav collapse flex-column" id="collapseinstructors" data-bs-parent="#navbar-sidebar">
-						<li class="nav-item"> <a class="nav-link" href="admin-instructor-list.php">Instructors</a></li>
-						<li class="nav-item"> <a class="nav-link" href="admin-instructor-detail.php">Instructor Detail</a></li>
-						<li class="nav-item"> 
-							<a class="nav-link" href="admin-instructor-request.php">Instructor requests
-								<span class="badge text-bg-success rounded-circle ms-2">2</span>
-							</a>
-						</li>
-					</ul>
-				</li>
 				
-				<!-- Menu item 5 -->
-				<li class="nav-item"> <a class="nav-link" href="admin-review.php"><i class="far fa-comment-dots fa-fw me-2"></i>Reviews</a></li>
-
-				<!-- Menu item 6 -->
-				<li class="nav-item"> <a class="nav-link" href="admin-earning.php"><i class="far fa-chart-bar fa-fw me-2"></i>Earnings</a></li>
 
 				<!-- Menu item 7 -->
 				<li class="nav-item"> <a class="nav-link" href="admin-setting.php"><i class="fas fa-user-cog fa-fw me-2"></i>Admin Settings</a></li>

@@ -26,129 +26,14 @@
 					<ul class="navbar-nav navbar-nav-scroll mx-auto">
 						<!-- Nav item 1 Demos -->
 						<li class="nav-item dropdown">
-							<a class="nav-link dropdown-toggle" href="#" id="demoMenu" data-bs-toggle="dropdown" aria-haspopup="true" aria-expanded="false">Demos</a>
+							<a class="nav-link dropdown-toggle" href="#" id="demoMenu" data-bs-toggle="dropdown" aria-haspopup="true" aria-expanded="false">menu</a>
 							<ul class="dropdown-menu" aria-labelledby="demoMenu">
-								<li> <a class="dropdown-item" href="index.php">Home Default</a></li>
-								<li> <a class="dropdown-item" href="index-2.php">Home Education</a></li>
-								<li> <a class="dropdown-item" href="index-3.php">Home Academy</a></li>
-								<li> <a class="dropdown-item" href="index-4.php">Home Course</a></li>
-								<li> <a class="dropdown-item" href="index-5.php">Home University</a></li>
-								<li> <a class="dropdown-item" href="index-6.php">Home Kindergarten</a></li>
-								<li> <a class="dropdown-item" href="index-7.php">Home Landing</a></li>
-								<li> <a class="dropdown-item" href="index-8.php">Home Tutor</a></li>
-								<li> <a class="dropdown-item" href="index-9.php">Home School</a></li>
-								<li> <a class="dropdown-item" href="index-10.php">Home Abroad</a></li>
-								<li> <a class="dropdown-item" href="index-11.php">Home Workshop</a></li>
+								<li> <a class="dropdown-item" href="index.php">Home</a></li>
+								<li> <a class="dropdown-item" href="about.php">About Us</a></li>
 							</ul>
 						</li>
 
-						<!-- Nav item 2 Pages -->
-						<li class="nav-item dropdown">
-							<a class="nav-link dropdown-toggle" href="#" id="pagesMenu" data-bs-toggle="dropdown" aria-haspopup="true" aria-expanded="false">Pages</a>
-							<ul class="dropdown-menu" aria-labelledby="pagesMenu">
-								<!-- Dropdown submenu -->
-								<li class="dropdown-submenu dropend">
-									<a class="dropdown-item dropdown-toggle" href="#">Course</a>
-									<ul class="dropdown-menu dropdown-menu-start" data-bs-popper="none">
-										<li> <a class="dropdown-item" href="course-categories.php">Course Categories</a></li>
-										<li>
-											<hr class="dropdown-divider">
-										</li>
-										<li> <a class="dropdown-item" href="course-grid.php">Course Grid Classic</a></li>
-										<li> <a class="dropdown-item" href="course-grid-2.php">Course Grid Minimal</a></li>
-										<li>
-											<hr class="dropdown-divider">
-										</li>
-										<li> <a class="dropdown-item" href="course-list.php">Course List Classic</a></li>
-										<li> <a class="dropdown-item" href="course-list-2.php">Course List Minimal</a></li>
-										<li>
-											<hr class="dropdown-divider">
-										</li>
-										<li> <a class="dropdown-item" href="course-detail.php">Course Detail Classic</a></li>
-										<li> <a class="dropdown-item" href="course-detail-min.php">Course Detail Minimal</a></li>
-										<li> <a class="dropdown-item" href="course-detail-adv.php">Course Detail Advance</a></li>
-										<li> <a class="dropdown-item" href="course-detail-module.php">Course Detail Module</a></li>
-										<li> <a class="dropdown-item" href="course-video-player.php">Course Full Screen Video</a></li>
-									</ul>
-								</li>
-
-								<!-- Dropdown submenu -->
-								<li class="dropdown-submenu dropend">
-									<a class="dropdown-item dropdown-toggle" href="#">About</a>
-									<ul class="dropdown-menu dropdown-menu-start" data-bs-popper="none">
-										<li> <a class="dropdown-item" href="about.php">About Us</a></li>
-										<li> <a class="dropdown-item" href="contact-us.php">Contact Us</a></li>
-										<li> <a class="dropdown-item" href="blog-grid.php">Blog Grid</a></li>
-										<li> <a class="dropdown-item" href="blog-masonry.php">Blog Masonry</a></li>
-										<li> <a class="dropdown-item" href="blog-detail.php">Blog Detail</a></li>
-										<li> <a class="dropdown-item" href="pricing.php">Pricing</a></li>
-									</ul>
-								</li>
-
-
-
-								<li> <a class="dropdown-item" href="instructor-list.php">Instructor List</a></li>
-								<li> <a class="dropdown-item" href="instructor-single.php">Instructor Single</a></li>
-								<li> <a class="dropdown-item" href="become-instructor.php">Become an Instructor</a></li>
-								<li> <a class="dropdown-item" href="abroad-single.php">Abroad Single</a></li>
-								<li> <a class="dropdown-item" href="workshop-detail.php">Workshop Detail</a></li>
-								<li> <a class="dropdown-item" href="event-detail.php">Event Detail</a></li>
-
-								<!-- Dropdown submenu -->
-								<li class="dropdown-submenu dropend">
-									<a class="dropdown-item dropdown-toggle" href="#">Shop</a>
-									<ul class="dropdown-menu dropdown-menu-start" data-bs-popper="none">
-										<li> <a class="dropdown-item" href="shop.php">Shop grid</a></li>
-										<li> <a class="dropdown-item" href="shop-product-detail.php">Product detail</a></li>
-										<li> <a class="dropdown-item" href="cart.php">Cart</a></li>
-										<li> <a class="dropdown-item" href="checkout.php">Checkout</a></li>
-										<li> <a class="dropdown-item" href="empty-cart.php">Empty Cart</a></li>
-										<li> <a class="dropdown-item" href="wishlist.php">Wishlist</a></li>
-									</ul>
-								</li>
-
-								<!-- Dropdown submenu -->
-								<li class="dropdown-submenu dropend">
-									<a class="dropdown-item dropdown-toggle" href="#">Help</a>
-									<ul class="dropdown-menu dropdown-menu-start" data-bs-popper="none">
-										<li> <a class="dropdown-item" href="help-center.php">Help Center</a></li>
-										<li> <a class="dropdown-item" href="help-center-detail.php">Help Center Single</a></li>
-										<li> <a class="dropdown-item" href="faq.php">FAQs</a></li>
-									</ul>
-								</li>
-
-								<!-- Dropdown submenu -->
-								<li class="dropdown-submenu dropend">
-									<a class="dropdown-item dropdown-toggle" href="#">Authentication</a>
-									<ul class="dropdown-menu dropdown-menu-start" data-bs-popper="none">
-										<li> <a class="dropdown-item" href="sign-in.php">Sign In</a></li>
-										<li> <a class="dropdown-item" href="sign-up.php">Sign Up</a></li>
-										<li> <a class="dropdown-item" href="forgot-password.php">Forgot Password</a></li>
-									</ul>
-								</li>
-
-								<!-- Dropdown submenu -->
-								<li class="dropdown-submenu dropend">
-									<a class="dropdown-item dropdown-toggle" href="#">Form</a>
-									<ul class="dropdown-menu dropdown-menu-start" data-bs-popper="none">
-										<li> <a class="dropdown-item" href="request-demo.php">Request a demo</a></li>
-										<li> <a class="dropdown-item" href="book-class.php">Book a Class</a></li>
-										<li> <a class="dropdown-item" href="request-access.php">Free Access</a></li>
-										<li> <a class="dropdown-item" href="university-admission-form.php">Admission Form</a></li>
-									</ul>
-								</li>
-
-								<!-- Dropdown submenu -->
-								<li class="dropdown-submenu dropend">
-									<a class="dropdown-item dropdown-toggle" href="#">Specialty</a>
-									<ul class="dropdown-menu dropdown-menu-start" data-bs-popper="none">
-										<li> <a class="dropdown-item" href="error-404.php">Error 404</a></li>
-										<li> <a class="dropdown-item" href="coming-soon.php">Coming Soon</a></li>
-									</ul>
-								</li>
-							</ul>
-						</li>
-
+					
 						<!-- Nav item 3 Account -->
 						<li class="nav-item dropdown">
 							<a class="nav-link dropdown-toggle" href="#" id="accounntMenu" data-bs-toggle="dropdown" aria-haspopup="true" aria-expanded="false">Accounts</a>
