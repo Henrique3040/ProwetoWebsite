@@ -36,11 +36,6 @@
 				</li>
 
 				
-				<!-- Menu item 5 -->
-				<li class="nav-item"> <a class="nav-link" href="admin-review.php"><i class="far fa-comment-dots fa-fw me-2"></i>Reviews</a></li>
-
-				<!-- Menu item 6 -->
-				<li class="nav-item"> <a class="nav-link" href="admin-earning.php"><i class="far fa-chart-bar fa-fw me-2"></i>Earnings</a></li>
 
 				<!-- Menu item 7 -->
 				<li class="nav-item"> <a class="nav-link" href="admin-setting.php"><i class="fas fa-user-cog fa-fw me-2"></i>Admin Settings</a></li>

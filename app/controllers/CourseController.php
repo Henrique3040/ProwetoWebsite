@@ -54,6 +54,7 @@ class CourseController
                 move_uploaded_file($_FILES['foto']['tmp_name'], $targetFile);
                 $fotoURL = $targetFile;
             }
+            $faqs = isset($_POST['faqs']) ? json_decode(($_POST['faqs']), true) : [];
 
             // Data opslaan via model
             $cursusId = $this->model->createCourse([
@@ -62,7 +63,8 @@ class CourseController
                 'Beschrijving' => $beschrijving,
                 'CategorieID' => $categorieID,
                 'FotoURL' => $fotoURL,
-                'Link' => $videoLink
+                'Link' => $videoLink,
+                'Faqs' => $faqs
             ]);
 
             if ($cursusId) {

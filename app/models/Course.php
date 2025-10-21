@@ -46,6 +46,8 @@ class Course
         SELECT 
             c.CursusID,
             c.Titel,
+            c.FotoURL,
+            c.Link,
             d.KorteBeschrijving,
             d.Beschrijving,
             d.LaatstBijgewerkt,
@@ -111,6 +113,7 @@ class Course
             c.FotoURL,
             c.Link,
             c.Views,
+            c.CreatedAt,
             GROUP_CONCAT(cat.Naam SEPARATOR ', ') AS CategorieNamen
         FROM Cursus c
         LEFT JOIN CursusCategorie cc ON c.CursusID = cc.CursusID
@@ -154,7 +157,7 @@ class Course
 
     public function createCourse($data)
     {
-        // 1️⃣ Insert in Cursus
+        // 1️ Insert in Cursus
         $sql = "INSERT INTO Cursus (Titel, FotoURL, Link, Views, Featured)
             VALUES (?, ?, ?, 0, 0)";
         $stmt = mysqli_prepare($this->conn, $sql);
@@ -166,18 +169,32 @@ class Course
             return false;
         }
 
-        // 2️⃣ Insert in Cursusdetails
+        // 2 Insert in Cursusdetails
         $sql2 = "INSERT INTO Cursusdetails (CursusID, KorteBeschrijving, Beschrijving, Rating, Taal, Prijs, LaatstBijgewerkt)
              VALUES (?, ?, ?, 0, 'Nederlands', 0, NOW())";
         $stmt2 = mysqli_prepare($this->conn, $sql2);
         mysqli_stmt_bind_param($stmt2, "iss", $cursusId, $data['KorteBeschrijving'], $data['Beschrijving']);
         mysqli_stmt_execute($stmt2);
 
-        // 3️⃣ Koppel categorie
+        // 3 Koppel categorie
         $sql3 = "INSERT INTO CursusCategorie (CursusID, CategorieID) VALUES (?, ?)";
         $stmt3 = mysqli_prepare($this->conn, $sql3);
         mysqli_stmt_bind_param($stmt3, "ii", $cursusId, $data['CategorieID']);
         mysqli_stmt_execute($stmt3);
+
+
+        // 4️ Voeg FAQ’s toe (indien aanwezig)
+        if (!empty($data['faqs']) && is_array($data['faqs'])) {
+            foreach ($data['faqs'] as $faq) {
+                $vraag = $faq['vraag'];
+                $antwoord = $faq['antwoord'];
+
+                $sqlFaq = "INSERT INTO CursusFAQ (CursusID, Vraag, Antwoord) VALUES (?, ?, ?)";
+                $stmtFaq = mysqli_prepare($this->conn, $sqlFaq);
+                mysqli_stmt_bind_param($stmtFaq, "iss", $cursusId, $vraag, $antwoord);
+                mysqli_stmt_execute($stmtFaq);
+            }
+        }
 
         return $cursusId;
     }

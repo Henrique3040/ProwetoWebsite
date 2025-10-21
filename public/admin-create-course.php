@@ -94,10 +94,10 @@ Steps START -->
 
 
 								<!-- Step 4 -->
-								<div class="step" data-target="#step-4">
+								<div class="step" data-target="#step-3">
 									<div class="d-grid text-center align-items-center">
 										<button type="button" class="btn btn-link step-trigger mb-0" role="tab"
-											id="steppertrigger4" aria-controls="step-4">
+											id="steppertrigger3" aria-controls="step-3">
 											<span class="bs-stepper-circle">3</span>
 										</button>
 										<h6 class="bs-stepper-label d-none d-md-block">Additional information</h6>
@@ -391,9 +391,9 @@ Steps START -->
 
 
 
-									<!-- Step 4 content START -->
-									<div id="step-4" role="tabpanel" class="content fade"
-										aria-labelledby="steppertrigger4">
+									<!-- Step 3 content START -->
+									<div id="step-3" role="tabpanel" class="content fade"
+										aria-labelledby="steppertrigger3">
 										<!-- Title -->
 										<h4>Additional information</h4>
 
@@ -408,113 +408,19 @@ Steps START -->
 														class="d-sm-flex justify-content-sm-between align-items-center mb-3">
 														<h5 class="mb-2 mb-sm-0">Upload FAQs</h5>
 														<a href="#" class="btn btn-sm btn-primary-soft mb-0"
-															data-bs-toggle="modal" data-bs-target="#addQuestion"><i
-																class="bi bi-plus-circle me-2"></i>Add Question</a>
+															data-bs-toggle="modal" data-bs-target="#addQuestion">
+															<i class="bi bi-plus-circle me-2"></i> Add Question
+														</a>
 													</div>
 
-													<div class="row g-4">
-														<div class="col-12">
-															<div class="bg-body p-3 p-sm-4 border rounded">
-																<!-- Item 1 -->
-																<div
-																	class="d-sm-flex justify-content-sm-between align-items-center mb-2">
-																	<!-- Question -->
-																	<h6 class="mb-0">How Digital Marketing Work?</h6>
-																	<!-- Button -->
-																	<div class="align-middle">
-																		<a href="#"
-																			class="btn btn-sm btn-success-soft btn-round me-1 mb-1 mb-md-0"><i
-																				class="far fa-fw fa-edit"></i></a>
-																		<button
-																			class="btn btn-sm btn-danger-soft btn-round mb-0"><i
-																				class="fas fa-fw fa-times"></i></button>
-																	</div>
-																</div>
-																<!-- Content -->
-																<p>Comfort reached gay perhaps chamber his six detract
-																	besides add. Moonlight newspaper up its enjoyment
-																	agreeable depending. Timed voice share led him to
-																	widen noisy young. At weddings believed laughing
-																	although the material does the exercise of. Up
-																	attempt offered ye civilly so sitting to. She new
-																	course gets living within Elinor joy. She rapturous
-																	suffering concealed.</p>
-															</div>
-														</div>
-
-														<div class="col-12">
-															<div class="bg-body p-4 border rounded">
-																<!-- Item 2 -->
-																<div
-																	class="d-sm-flex justify-content-sm-between align-items-center mb-2">
-																	<!-- Question -->
-																	<h6 class="mb-0">How Digital Marketing Work?</h6>
-																	<!-- Button -->
-																	<div class="align-middle">
-																		<a href="#"
-																			class="btn btn-sm btn-success-soft btn-round me-1 mb-1 mb-md-0"><i
-																				class="far fa-fw fa-edit"></i></a>
-																		<button
-																			class="btn btn-sm btn-danger-soft btn-round mb-0"><i
-																				class="fas fa-fw fa-times"></i></button>
-																	</div>
-																</div>
-																<!-- Content -->
-																<p>Comfort reached gay perhaps chamber his six detract
-																	besides add. Moonlight newspaper up its enjoyment
-																	agreeable depending. Timed voice share led him to
-																	widen noisy young. At weddings believed laughing
-																	although the material does the exercise of. Up
-																	attempt offered ye civilly so sitting to. She new
-																	course gets living within Elinor joy. She rapturous
-																	suffering concealed.</p>
-															</div>
-														</div>
+													<!-- FAQ lijst container -->
+													<div class="row g-4" id="faqList">
+														<p class="text-muted">Nog geen FAQ’s toegevoegd.</p>
 													</div>
 												</div>
 											</div>
+
 											<!-- Edit faq END -->
-
-											<!-- Tags START -->
-											<div class="col-12">
-												<div class="bg-light border rounded p-4">
-													<h5 class="mb-0">Tags</h5>
-													<!-- Comment -->
-													<div class="mt-3">
-														<input type="text" class="form-control js-choice mb-0"
-															data-placeholder="true" data-placeholder-Val="Enter tags"
-															data-max-item-count="14" data-remove-item-button="true">
-														<span class="small">Maximum of 14 keywords. Keywords should all
-															be in lowercase. e.g. javascript, react, marketing</span>
-													</div>
-												</div>
-											</div>
-											<!-- Tags START -->
-
-											<!-- Reviewer START -->
-											<div class="col-12">
-												<div class="bg-light border rounded p-4">
-													<h5 class="mb-0">Message to a reviewer</h5>
-
-													<!-- Comment -->
-													<div class="mt-3">
-														<textarea class="form-control" rows="4"
-															placeholder="Write a message" spellcheck="false"></textarea>
-														<div class="form-check mb-0 mt-2">
-															<input type="checkbox" class="form-check-input"
-																id="exampleCheck1">
-															<label class="form-check-label" for="exampleCheck1">
-																Any images, sounds, or other assets that are not my own
-																work, have been appropriately licensed for use in the
-																file preview or main course. Other than these items,
-																this work is entirely my own and I have full rights to
-																sell it here.
-															</label>
-														</div>
-													</div>
-												</div>
-											</div>
-											<!-- Reviewer START -->
 
 											<!-- Step 4 button -->
 											<div class="d-md-flex justify-content-between align-items-start mt-4">
@@ -525,21 +431,22 @@ Steps START -->
 												<div class="text-md-end">
 													<button type="submit" class="btn btn-success mb-2 mb-sm-0">Submit a
 														Course</button>
-
 													<p class="mb-0 small mt-1">Once you click "Submit a Course", your
 														course will be uploaded and marked as pending for review.</p>
 												</div>
 											</div>
 										</div>
-									</div>
-									<!-- Step 4 content END -->
 
-								</form>
+									</div>
 							</div>
+							<!-- Step 3 content END -->
+
+							</form>
 						</div>
-						<!-- Card body END -->
 					</div>
+					<!-- Card body END -->
 				</div>
+			</div>
 			</div>
 		</section>
 		<!-- =======================
@@ -592,32 +499,32 @@ Footer END -->
 			<div class="modal-content">
 				<div class="modal-header bg-dark">
 					<h5 class="modal-title text-white" id="addQuestionLabel">Add FAQ</h5>
-					<button type="button" class="btn btn-sm btn-light mb-0 ms-auto" data-bs-dismiss="modal"
-						aria-label="Close"><i class="bi bi-x-lg"></i></button>
+					<button type="button" class="btn btn-sm btn-light mb-0 ms-auto" data-bs-dismiss="modal">
+						<i class="bi bi-x-lg"></i>
+					</button>
 				</div>
 				<div class="modal-body">
-					<form class="row text-start g-3">
-						<!-- Question -->
+					<form id="faqForm" class="row text-start g-3">
 						<div class="col-12">
 							<label class="form-label">Question</label>
-							<input class="form-control" type="text" placeholder="Write a question">
+							<input id="faqQuestion" class="form-control" type="text" placeholder="Write a question">
 						</div>
-						<!-- Answer -->
 						<div class="col-12 mt-3">
 							<label class="form-label">Answer</label>
-							<textarea class="form-control" rows="4" placeholder="Write a answer"
-								spellcheck="false"></textarea>
+							<textarea id="faqAnswer" class="form-control" rows="4"
+								placeholder="Write an answer"></textarea>
 						</div>
 					</form>
 				</div>
 				<div class="modal-footer">
 					<button type="button" class="btn btn-danger-soft my-0" data-bs-dismiss="modal">Close</button>
-					<button type="button" class="btn btn-success my-0">Save topic</button>
+					<button type="button" id="saveFaqBtn" class="btn btn-success my-0">Save FAQ</button>
 				</div>
 			</div>
 		</div>
 	</div>
 	<!-- Popup modal for add faq END -->
+
 
 	<!-- Back to top -->
 	<div class="back-top"><i class="bi bi-arrow-up-short position-absolute top-50 start-50 translate-middle"></i></div>

@@ -14,14 +14,10 @@
 	// Haal course ID op uit de URL
 	$courseId = isset($_GET['id']) ? intval($_GET['id']) : 0;
 	$course = $courseController->getCourseDetail($courseId);
-	
+
 	$categories = $categoryController->getCategoriesByCourse($course['CursusID']);
 
-	if (!$course) {
-		echo "<h3>Course not found.</h3>";
-		exit;
-	}
-
+	$faqs = $faqController-> index($course['CursusID']);
 	?>
 
 
@@ -65,21 +61,33 @@ Page content START -->
 							</div>
 							<!-- Title END -->
 
-							<!-- Image and video -->
+							<!-- Video Player -->
 							<div class="col-12 position-relative">
 								<div class="video-player rounded-3">
-									<div class="video-player rounded-3">
-										<video controls crossorigin="anonymous" playsinline
-											poster="<?= htmlspecialchars($course['FotoURL']) ?>">
-											<source src="<?= htmlspecialchars($course['Link']) ?>" type="video/mp4"
-												size="360">
-											<source src="<?= htmlspecialchars($course['Link']) ?>" size="720">
-											<source src="<?= htmlspecialchars($course['Link']) ?>" type="video/mp4"
-												size="1080">
+									<?php
+									$videoUrl = htmlspecialchars($course['Link']);
 
-											<source src="<?= htmlspecialchars($course['Link']) ?>" type="video/mp4">
-										</video>
-									</div>
+									// Kijk of het een YouTube-link is
+									if (strpos($videoUrl, 'youtube.com') !== false || strpos($videoUrl, 'youtu.be') !== false) {
+										// YouTube embed link maken
+										$videoId = '';
+										if (preg_match('/(?:v=|youtu\.be\/)([^&]+)/', $videoUrl, $matches)) {
+											$videoId = $matches[1];
+										}
+										echo '<iframe width="100%" height="480" 
+                                                 src="https://www.youtube.com/embed/' . $videoId . '" 
+                                                      frameborder="0" 
+                                                        allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" 
+                                                    allowfullscreen>
+						                      </iframe>';
+									} else {
+										// Normale lokale video
+										echo '<video controls crossorigin="anonymous" playsinline poster="' . htmlspecialchars($course['FotoURL']) . '">
+                                                  <source src="' . $videoUrl . '" type="video/mp4">
+                                                    Je browser ondersteunt de video-tag niet.
+                                              </video>';
+									}
+									?>
 								</div>
 							</div>
 
@@ -118,6 +126,52 @@ Page content START -->
 							<!-- Curriculum END -->
 
 							<!-- FAQs START -->
+
+							<!-- FAQ Tab Content -->
+							<div   id="course-pills-5" role="tabpanel"
+								aria-labelledby="course-pills-tab-5">
+								<!-- Title -->
+								<h5 class="mb-3">Frequently Asked Questions</h5>
+
+								<!-- Accordion START -->
+								<div class="accordion accordion-flush" id="accordionExample">
+									<?php if (!empty($faqs)): ?>
+										<?php foreach ($faqs as $index => $faq): ?>
+											<div class="accordion-item">
+												<h2 class="accordion-header" id="heading<?= $index ?>">
+													<button class="accordion-button <?= $index > 0 ? 'collapsed' : '' ?>"
+														type="button" data-bs-toggle="collapse"
+														data-bs-target="#collapse<?= $index ?>"
+														aria-expanded="<?= $index === 0 ? 'true' : 'false' ?>"
+														aria-controls="collapse<?= $index ?>">
+
+														<span class="text-secondary fw-bold me-3">
+															<?= str_pad($index + 1, 2, '0', STR_PAD_LEFT) ?>
+														</span>
+														<span class="h6 mb-0">
+															<?= htmlspecialchars($faq['Vraag']) ?>
+														</span>
+													</button>
+												</h2>
+
+												<div id="collapse<?= $index ?>"
+													class="accordion-collapse collapse <?= $index === 0 ? 'show' : '' ?>"
+													aria-labelledby="heading<?= $index ?>" data-bs-parent="#accordionExample">
+
+													<div class="accordion-body pt-0">
+														<?= nl2br(htmlspecialchars($faq['Antwoord'])) ?>
+													</div>
+												</div>
+											</div>
+										<?php endforeach; ?>
+									<?php else: ?>
+										<p class="text-muted">Er zijn nog geen veelgestelde vragen voor deze cursus.</p>
+									<?php endif; ?>
+								</div>
+								<!-- Accordion END -->
+							</div>
+							<!-- Content END -->
+
 
 							<!-- FAQs END -->
 						</div>

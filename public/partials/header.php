@@ -71,26 +71,8 @@
                     </div>
                 </div> <!-- Nav Search END -->
             </div> <!-- Main navbar END --> <!-- Right header content START --> <!-- Add to cart -->
-            <div class="navbar-nav position-relative overflow-visible me-3"> <a href="#" class="nav-link"> <i
-                        class="fas fa-shopping-cart fs-5"></i></a> <span
-                    class="position-absolute top-0 start-100 translate-middle badge rounded-circle bg-success mt-xl-2 ms-n1">5
-                    <span class="visually-hidden">unread messages</span> </span> </div> <!-- Language -->
-            <ul class="navbar-nav navbar-nav-scroll me-3 d-none d-xl-block">
-                <li class="nav-item dropdown"> <a class="nav-link dropdown-toggle" href="#" id="language"
-                        data-bs-toggle="dropdown" aria-haspopup="true" aria-expanded="false"> <i
-                            class="fas fa-globe me-2"></i> <span class="d-none d-lg-inline-block">Language</span> </a>
-                    <ul class="dropdown-menu dropdown-menu-end min-w-auto" aria-labelledby="language">
-                        <li> <a class="dropdown-item" href="#"><img class="fa-fw me-2" src="assets/images/flags/uk.svg"
-                                    alt="">English</a></li>
-                        <li> <a class="dropdown-item" href="#"><img class="fa-fw me-2" src="assets/images/flags/gr.svg"
-                                    alt="">German</a></li>
-                        <li> <a class="dropdown-item" href="#"><img class="fa-fw me-2" src="assets/images/flags/sp.svg"
-                                    alt="">French</a></li>
-                    </ul>
-                </li>
-            </ul> <!-- Signout button -->
-            <div class="navbar-nav d-none d-lg-inline-block"> <button class="btn btn-danger-soft mb-0"><i
-                        class="fas fa-sign-in-alt me-2"></i>Sign Up</button> </div> <!-- Right header content END -->
+
+
         </div>
     </nav> <!-- Logo Nav END -->
 </header>
