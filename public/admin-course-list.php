@@ -13,6 +13,13 @@
 
 	// Haal alle cursussen op
 	$courses = $courseController->getAllCourses();
+
+	if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['delete_course_id'])) {
+		$courseController->delete((int) $_POST['delete_course_id']);
+		header('Location: admin-course-list.php?success=deleted');
+		exit;
+	}
+	
 	?>
 
 
@@ -127,7 +134,7 @@
 										<th scope="col" class="border-0">Categories</th>
 										<th scope="col" class="border-0">Added Date</th>
 										<th scope="col" class="border-0">Views</th>
-										<th	 scope="col" class="border-0">Status</th>
+										<th scope="col" class="border-0">Status</th>
 										<th scope="col" class="border-0 rounded-end">Action</th>
 									</tr>
 								</thead>
@@ -175,9 +182,15 @@
 												<td>
 													<a href="admin-edit-course.php?id=<?= $course['CursusID'] ?>"
 														class="btn btn-sm btn-dark me-1">Edit</a>
-													<a href="admin-delete-course.php?id=<?= $course['CursusID'] ?>"
-														class="btn btn-sm btn-danger"
-														onclick="return confirm('Weet je zeker dat je deze cursus wilt verwijderen?')">Delete</a>
+													<form action="admin-course-list.php" method="POST" style="display:inline;">
+														<input type="hidden" name="delete_course_id"
+															value="<?= $course['CursusID'] ?>">
+														<button type="submit" class="btn btn-sm btn-danger"
+															onclick="return confirm('Weet je zeker dat je deze cursus wilt verwijderen?')">
+															Delete
+														</button>
+													</form>
+
 												</td>
 											</tr>
 										<?php endwhile; ?>

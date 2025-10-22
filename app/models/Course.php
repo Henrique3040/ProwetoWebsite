@@ -48,12 +48,16 @@ class Course
             c.Titel,
             c.FotoURL,
             c.Link,
+            c.Active,
             d.KorteBeschrijving,
             d.Beschrijving,
             d.LaatstBijgewerkt,
             d.Rating,
             d.Taal,
             d.Prijs,
+            d.Materiaal,
+            d.Documenten,
+            d.LeerJaarID,
             GROUP_CONCAT(cat.Naam SEPARATOR ', ') AS CategorieNamen
         FROM Cursus c
         JOIN Cursusdetails d ON c.CursusID = d.CursusID
@@ -197,6 +201,154 @@ class Course
         }
 
         return $cursusId;
+    }
+
+
+    public function deleteCourse($courseId)
+    {
+        // Begin transactie
+        mysqli_begin_transaction($this->conn);
+
+        try {
+            // 1️ Verwijder gekoppelde FAQ's
+            $sqlFaq = "DELETE FROM CursusFAQ WHERE CursusID = ?";
+            $stmtFaq = mysqli_prepare($this->conn, $sqlFaq);
+            mysqli_stmt_bind_param($stmtFaq, "i", $courseId);
+            mysqli_stmt_execute($stmtFaq);
+
+            // 2️ Verwijder categorie-koppelingen
+            $sqlCat = "DELETE FROM CursusCategorie WHERE CursusID = ?";
+            $stmtCat = mysqli_prepare($this->conn, $sqlCat);
+            mysqli_stmt_bind_param($stmtCat, "i", $courseId);
+            mysqli_stmt_execute($stmtCat);
+
+            // 3️ Verwijder cursusdetails
+            $sqlDetails = "DELETE FROM Cursusdetails WHERE CursusID = ?";
+            $stmtDetails = mysqli_prepare($this->conn, $sqlDetails);
+            mysqli_stmt_bind_param($stmtDetails, "i", $courseId);
+            mysqli_stmt_execute($stmtDetails);
+
+            // Verwijder foto van server
+            $sqlFoto = "SELECT FotoURL FROM Cursus WHERE CursusID = ?";
+            $stmtFoto = mysqli_prepare($this->conn, $sqlFoto);
+            mysqli_stmt_bind_param($stmtFoto, "i", $courseId);
+            mysqli_stmt_execute($stmtFoto);
+            $result = mysqli_stmt_get_result($stmtFoto);
+            $foto = mysqli_fetch_assoc($result);
+
+            if ($foto && file_exists($foto['FotoURL'])) {
+                unlink($foto['FotoURL']);
+            }
+
+
+            // 4️ Verwijder hoofdrecord
+            $sqlMain = "DELETE FROM Cursus WHERE CursusID = ?";
+            $stmtMain = mysqli_prepare($this->conn, $sqlMain);
+            mysqli_stmt_bind_param($stmtMain, "i", $courseId);
+            mysqli_stmt_execute($stmtMain);
+
+            // Alles gelukt → commit
+            mysqli_commit($this->conn);
+            return true;
+
+        } catch (Exception $e) {
+            // Fout → rollback
+            mysqli_rollback($this->conn);
+            return false;
+        }
+    }
+
+
+
+    public function updateCourse($courseId, $data)
+    {
+        mysqli_begin_transaction($this->conn);
+
+        try {
+            // 1️ Update hoofdgegevens (Cursus)
+            if (!empty($data['FotoURL'])) {
+                $sql = "UPDATE Cursus 
+                    SET Titel = ?, FotoURL = ?, Link = ?, Active = ?
+                    WHERE CursusID = ?";
+                $stmt = mysqli_prepare($this->conn, $sql);
+                mysqli_stmt_bind_param(
+                    $stmt,
+                    "sssii",
+                    $data['Titel'],
+                    $data['FotoURL'],
+                    $data['Link'],
+                    $data['Active'],
+                    $courseId
+                );
+            } else {
+                $sql = "UPDATE Cursus 
+                    SET Titel = ?, Link = ?, Active = ?
+                    WHERE CursusID = ?";
+                $stmt = mysqli_prepare($this->conn, $sql);
+                mysqli_stmt_bind_param(
+                    $stmt,
+                    "ssii",
+                    $data['Titel'],
+                    $data['Link'],
+                    $data['Active'],
+                    $courseId
+                );
+            }
+            mysqli_stmt_execute($stmt);
+
+            // 2️ Update details (Cursusdetails)
+            $sql2 = "UPDATE Cursusdetails
+                SET KorteBeschrijving = ?, Beschrijving = ?, Materiaal = ?, Documenten = ?, LeerJaarID = ?
+                WHERE CursusID = ?";
+            $stmt2 = mysqli_prepare($this->conn, $sql2);
+            mysqli_stmt_bind_param(
+                $stmt2,
+                "ssiiii",
+                $data['KorteBeschrijving'],
+                $data['Beschrijving'],
+                $data['Materiaal'],
+                $data['Documenten'],
+                $data['LeerJaarID'],
+                $courseId
+            );
+            mysqli_stmt_execute($stmt2);
+
+            // 3️ Update categorie
+            if (!empty($data['CategorieID'])) {
+                $sqlDel = "DELETE FROM CursusCategorie WHERE CursusID = ?";
+                $stmtDel = mysqli_prepare($this->conn, $sqlDel);
+                mysqli_stmt_bind_param($stmtDel, "i", $courseId);
+                mysqli_stmt_execute($stmtDel);
+
+                $sqlCat = "INSERT INTO CursusCategorie (CursusID, CategorieID) VALUES (?, ?)";
+                $stmtCat = mysqli_prepare($this->conn, $sqlCat);
+                mysqli_stmt_bind_param($stmtCat, "ii", $courseId, $data['CategorieID']);
+                mysqli_stmt_execute($stmtCat);
+            }
+
+            // 4️ Update FAQ’s (eenvoudig: verwijder en voeg opnieuw toe)
+            if (!empty($data['Faqs'])) {
+                $sqlDelFaq = "DELETE FROM CursusFAQ WHERE CursusID = ?";
+                $stmtDelFaq = mysqli_prepare($this->conn, $sqlDelFaq);
+                mysqli_stmt_bind_param($stmtDelFaq, "i", $courseId);
+                mysqli_stmt_execute($stmtDelFaq);
+
+                foreach ($data['Faqs'] as $faq) {
+                    $vraag = $faq['vraag'];
+                    $antwoord = $faq['antwoord'];
+                    $sqlFaq = "INSERT INTO CursusFAQ (CursusID, Vraag, Antwoord) VALUES (?, ?, ?)";
+                    $stmtFaq = mysqli_prepare($this->conn, $sqlFaq);
+                    mysqli_stmt_bind_param($stmtFaq, "iss", $courseId, $vraag, $antwoord);
+                    mysqli_stmt_execute($stmtFaq);
+                }
+            }
+
+            mysqli_commit($this->conn);
+            return true;
+        } catch (Exception $e) {
+            mysqli_rollback($this->conn);
+            return false;
+        }
     }
 
 

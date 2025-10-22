@@ -128,6 +128,7 @@ Page content START -->
 							<!-- FAQs START -->
 
 							<!-- FAQ Tab Content -->
+							 
 							<div   id="course-pills-5" role="tabpanel"
 								aria-labelledby="course-pills-tab-5">
 								<!-- Title -->
@@ -173,7 +174,7 @@ Page content START -->
 							<!-- Content END -->
 
 
-							<!-- FAQs END -->
+						 <!-- FAQs END -->
 						</div>
 					</div>
 					<!-- Main content END -->
@@ -216,23 +217,14 @@ Page content START -->
 										<hr>
 
 										<!-- Title -->
-										<h5 class="mb-3">This course includes</h5>
+										<h5 class="mb-3">Deze cursus bevat</h5>
 										<ul class="list-group list-group-borderless border-0">
 											<li class="list-group-item px-0 d-flex justify-content-between">
 												<span class="h6 fw-light mb-0"><i
-														class="fas fa-fw fa-book-open text-primary"></i>Lectures</span>
-												<span>30</span>
+														class="fas fa-fw fa-book-open text-primary"></i>Materialen</span>
+												<span>Ja</span>
 											</li>
-											<li class="list-group-item px-0 d-flex justify-content-between">
-												<span class="h6 fw-light mb-0"><i
-														class="fas fa-fw fa-clock text-primary"></i>Duration</span>
-												<span>4h 50m</span>
-											</li>
-											<li class="list-group-item px-0 d-flex justify-content-between">
-												<span class="h6 fw-light mb-0"><i
-														class="fas fa-fw fa-signal text-primary"></i>Skills</span>
-												<span>Beginner</span>
-											</li>
+											
 											<li class="list-group-item px-0 d-flex justify-content-between">
 												<span class="h6 fw-light mb-0"><i
 														class="fas fa-fw fa-globe text-primary"></i>Language</span>
@@ -240,14 +232,10 @@ Page content START -->
 											</li>
 											<li class="list-group-item px-0 d-flex justify-content-between">
 												<span class="h6 fw-light mb-0"><i
-														class="fas fa-fw fa-user-clock text-primary"></i>Deadline</span>
-												<span>Nov 30 2021</span>
+														class="fas fa-fw fa-user-clock text-primary"></i>Document</span>
+												<span>Nee</span>
 											</li>
-											<li class="list-group-item px-0 d-flex justify-content-between">
-												<span class="h6 fw-light mb-0"><i
-														class="fas fa-fw fa-medal text-primary"></i>Certificate</span>
-												<span>Yes</span>
-											</li>
+											
 										</ul>
 										<!-- Divider -->
 										<hr>

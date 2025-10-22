@@ -1,13 +1,13 @@
 $(document).ready(function() {
-    console.log('jQuery status:', typeof jQuery);
+    console.log('Edit Course jQuery geladen');
 
     // ----------------------------
-    // 1️ Variabelen
+    // 1️ Init variabelen
     // ----------------------------
-    let faqs = [];
+    let faqs = window.existingFaqs || []; // deze kun je via PHP injecteren
 
     // ----------------------------
-    // 2️ Quill initialiseren
+    // 2️ Quill initialiseren + bestaande content
     // ----------------------------
     var quill = new Quill('#quilleditor', {
         theme: 'snow',
@@ -16,57 +16,54 @@ $(document).ready(function() {
         }
     });
 
+    // Bij opslaan: zet de HTML-inhoud in de verborgen input
+    $('#submitCourseBtn, #updateCourseBtn').on('click', function(e) {
+        $('#beschrijving').val(quill.root.innerHTML);
+    });
+
     // ----------------------------
-    // 3️ Submit-knop click event
+    // 3️ Submit-knop logica
     // ----------------------------
-    $('#submitCourseBtn').on('click', function(e) {
+    $('#updateCourseBtn').on('click', function(e) {
         e.preventDefault();
-        let form = $(this).closest('form');
 
-        // Haal data op
-        let categorie = $('select[name="categorie_id"]').val();
-        let titel = $('input[name="titel"]').val();
-        let beschrijving = $('textarea[name="korte_beschrijving"]').val();
-        let foto = $('input[name="foto"]').val();
+        let form = $('#editCourseForm');
 
-        // Zet Quill HTML in verborgen input
+        // Zet Quill HTML in hidden input
         $('#beschrijving').val(quill.root.innerHTML);
 
-        // Voeg FAQ's toe
-        form.find('input[name="faqs"]').remove(); // verwijder bestaande hidden inputs
-        let jsonFaqs = JSON.stringify(faqs);
-        form.append(`<input type="hidden" name="faqs" value='${jsonFaqs}'>`);
+        // FAQ's updaten
+        form.find('input[name="faqs"]').remove();
+        form.append(`<input type="hidden" name="faqs" value='${JSON.stringify(faqs)}'>`);
 
         // Validatie
+        let titel = $('input[name="titel"]').val();
+        let korteBeschrijving = $('textarea[name="korte_beschrijving"]').val();
+        let categorie = $('select[name="categorie_id"]').val();
+
         let errors = [];
         if (!titel.trim()) errors.push('Titel is verplicht.');
-        if (!beschrijving.trim()) errors.push('Korte beschrijving is verplicht.');
-        if (!categorie || categorie.trim() === '') {
-            errors.push('Selecteer een categorie.');
-            $('.choices__inner').css('border', '2px solid red');
-        } else {
-            $('.choices__inner').css('border', '');
-        }
-        if (!foto.trim()) errors.push('Kies een foto.');
+        if (!korteBeschrijving.trim()) errors.push('Korte beschrijving is verplicht.');
+        if (!categorie) errors.push('Selecteer een categorie.');
 
         if (errors.length > 0) {
             $('#errorMessage').remove();
             form.prepend(`
                 <div id="errorMessage" class="alert alert-danger mt-2" role="alert">
-                    <strong>Er zijn fouten gevonden:</strong><br>${errors.join('<br>')}
+                    <strong>Fouten gevonden:</strong><br>${errors.join('<br>')}
                 </div>
             `);
             $('html, body').animate({ scrollTop: form.offset().top - 50 }, 400);
             return;
         }
 
-        // Alles oké → formulier versturen
-        form.off('submit'); // verwijder eventuele oude eventlisteners
+        // Versturen
+        form.off('submit');
         form.submit();
     });
 
     // ----------------------------
-    // 4️ FAQ LOGICA
+    // 4️ FAQ logica (zelfde als create)
     // ----------------------------
     $('#saveFaqBtn').on('click', function() {
         let vraag = $('#faqQuestion').val().trim();
@@ -77,10 +74,8 @@ $(document).ready(function() {
             return;
         }
 
-        // Voeg toe aan array
         faqs.push({ vraag, antwoord });
 
-        // Maak FAQ HTML
         let faqHtml = `
             <div class="col-12">
                 <div class="bg-body p-3 p-sm-4 border rounded">
@@ -96,28 +91,16 @@ $(document).ready(function() {
                 </div>
             </div>
         `;
-
-        // Voeg visueel toe
         $('#faqList').append(faqHtml);
-
-        // Modal sluiten
-        let modal = bootstrap.Modal.getInstance(document.getElementById('addQuestion'));
-        modal.hide();
-
-        // Reset form
+        bootstrap.Modal.getInstance(document.getElementById('addQuestion')).hide();
         $('#faqQuestion').val('');
         $('#faqAnswer').val('');
     });
 
-    // Verwijder FAQ
+    // FAQ verwijderen
     $(document).on('click', '.deleteFaq', function() {
         let index = $(this).closest('.col-12').index();
         faqs.splice(index, 1);
         $(this).closest('.col-12').remove();
     });
-
-    // ----------------------------
-    // 5️ Zorg dat step-knoppen geen submit doen
-    // ----------------------------
-    $('.next-btn, .prev-btn').attr('type', 'button');
 });

@@ -93,7 +93,7 @@ Steps START -->
 
 
 
-								<!-- Step 4 -->
+								<!-- Step 3 -->
 								<div class="step" data-target="#step-3">
 									<div class="d-grid text-center align-items-center">
 										<button type="button" class="btn btn-link step-trigger mb-0" role="tab"
@@ -382,8 +382,8 @@ Steps START -->
 
 											<!-- Step 2 button -->
 											<div class="d-flex justify-content-between mt-3">
-												<button class="btn btn-secondary prev-btn mb-0">Previous</button>
-												<button class="btn btn-primary next-btn mb-0">Next</button>
+												<button type="button" class="btn btn-secondary prev-btn mb-0">Previous</button>
+												<button type="button" class="btn btn-primary next-btn mb-0">Next</button>
 											</div>
 										</div>
 									</div>
@@ -429,7 +429,7 @@ Steps START -->
 												<button class="btn btn-light me-auto ms-md-2 mb-2 mb-md-0">Preview
 													Course</button>
 												<div class="text-md-end">
-													<button type="submit" class="btn btn-success mb-2 mb-sm-0">Submit a
+													<button type="submit" id="submitCourseBtn" class="btn btn-success mb-2 mb-sm-0">Submit a
 														Course</button>
 													<p class="mb-0 small mt-1">Once you click "Submit a Course", your
 														course will be uploaded and marked as pending for review.</p>
