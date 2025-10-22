@@ -104,6 +104,11 @@ class CourseController
                 if (!is_dir($uploadDir))
                     mkdir($uploadDir, 0755, true);
 
+                $oldPhoto = $this->model->getCourseDetail($courseId)['FotoURL'] ?? null;
+                if ($oldPhoto && file_exists($oldPhoto)) {
+                    unlink($oldPhoto);
+                }
+                
                 $filename = time() . '_' . basename($_FILES['foto']['name']);
                 $targetFile = $uploadDir . $filename;
                 move_uploaded_file($_FILES['foto']['tmp_name'], $targetFile);

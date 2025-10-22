@@ -110,7 +110,8 @@
 						<div class="card-body px-1 px-sm-4">
 							<!-- Step content START -->
 							<div class="bs-stepper-content">
-								<form id="editCourseForm" method="POST" action="admin-edit-course.php?id=<?= $courseId?>" enctype="multipart/form-data">
+								<form id="editCourseForm" method="POST"
+									action="admin-edit-course.php?id=<?= $courseId ?>" enctype="multipart/form-data">
 
 									<!-- Step 1 content START -->
 									<div id="step-1" role="tabpanel" class="content fade"
@@ -138,7 +139,7 @@
 											</div>
 
 											<!-- Course category -->
-											
+
 
 											<div class="col-md-6">
 												<label class="form-label">Course category</label>
@@ -156,7 +157,7 @@
 											<!-- Leerjaar -->
 											<div class="col-md-6">
 												<label class="form-label">Leerjaar</label>
-												
+
 												<select class="form-select" name="leerjaar_id">
 													<option value="">Select leerjaar</option>
 													<?php foreach ($leerjaren as $lj): ?>
@@ -268,15 +269,21 @@
 									<div class="col-12">
 										<div
 											class="text-center justify-content-center align-items-center p-4 p-sm-5 border border-2 border-dashed position-relative rounded-3">
-											<!-- Image -->
-											<img src="assets/images/element/gallery.svg" class="h-50px" alt="">
+											<!-- Preview huidige afbeelding -->
+											<?php if (!empty($course['FotoURL']) && file_exists($course['FotoURL'])): ?>
+												<img src="<?= htmlspecialchars($course['FotoURL']) ?>"
+													class="h-50px rounded" alt="Course Image">
+											<?php else: ?>
+												<img src="assets/images/element/gallery.svg" class="h-50px" alt="">
+											<?php endif; ?>
+
 											<div>
-												<h6 class="my-2">Upload course image here, or<a href="#!"
-														class="text-primary"> Browse</a></h6>
+												<h6 class="my-2">Upload course image here, or <a href="#!"
+														class="text-primary">Browse</a></h6>
 												<label style="cursor:pointer;">
 													<span>
 														<input class="form-control stretched-link" type="file"
-															name="my-image" id="image"
+															name="foto" id="image"
 															accept="image/gif, image/jpeg, image/png" />
 													</span>
 												</label>
@@ -300,8 +307,10 @@
 										<!-- Input -->
 										<div class="col-12 mt-4 mb-5">
 											<label class="form-label">Video URL</label>
-											<input class="form-control" type="text" placeholder="Enter video url"
-												value="https://www.youtube.com/embed/tXHviS-4ygo">
+											<input class="form-control" type="text" name="video_link"
+												value="<?= htmlspecialchars($course['Link'] ?? '') ?>"
+												placeholder="Enter video url">
+
 										</div>
 										<div class="position-relative my-4">
 											<hr>
@@ -313,33 +322,37 @@
 										<div class="col-12">
 											<label class="form-label">Upload video</label>
 											<div class="input-group mb-3">
-												<input type="file" class="form-control" id="inputGroupFile01">
+												<input type="file" class="form-control" id="inputGroupFile01"
+													name="video_mp4" accept=".mp4">
 												<label class="input-group-text">.mp4</label>
 											</div>
 											<div class="input-group mb-3">
-												<input type="file" class="form-control" id="inputGroupFile02">
+												<input type="file" class="form-control" id="inputGroupFile02"
+													name="video_webm" accept=".webm">
 												<label class="input-group-text">.WebM</label>
 											</div>
 											<div class="input-group mb-3">
-												<input type="file" class="form-control" id="inputGroupFile03">
+												<input type="file" class="form-control" id="inputGroupFile03"
+													name="video_ogg" accept=".ogg">
 												<label class="input-group-text">.OGG</label>
 											</div>
 										</div>
 
 										<!-- Preview -->
 										<h5 class="mt-4">Video preview</h5>
-										<div class="position-relative">
-											<!-- Image -->
-											<img src="assets/images/about/04.jpg" class="rounded-4" alt="">
-											<div class="position-absolute top-50 start-50 translate-middle">
-												<!-- Video link -->
-												<a href="https://www.youtube.com/embed/tXHviS-4ygo"
-													class="btn btn-lg text-danger btn-round btn-white-shadow mb-0"
-													data-glightbox="" data-gallery="video-tour">
-													<i class="fas fa-play"></i>
-												</a>
+										<?php if (!empty($course['Link'])): ?>
+											<div class="position-relative">
+												<img src="assets/images/video-placeholder.jpg" class="rounded-4" alt="">
+												<div class="position-absolute top-50 start-50 translate-middle">
+													<a href="<?= htmlspecialchars($course['Link']) ?>"
+														class="btn btn-lg text-danger btn-round btn-white-shadow mb-0"
+														data-glightbox="" data-gallery="video-tour">
+														<i class="fas fa-play"></i>
+													</a>
+												</div>
 											</div>
-										</div>
+										<?php endif; ?>
+
 									</div>
 									<!-- Upload video END -->
 
@@ -387,7 +400,7 @@
 									<?php endif; ?>
 								</div>
 
-								
+
 								<!-- Knop om nieuwe FAQ toe te voegen -->
 								<div class="d-flex justify-content-end mt-4">
 									<button type="button" class="btn btn-success-soft me-2" data-bs-toggle="modal"
