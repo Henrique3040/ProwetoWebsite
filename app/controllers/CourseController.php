@@ -110,8 +110,11 @@ class CourseController
                 $fotoURL = $targetFile;
             }
 
-            // FAQ’s (optioneel, als JSON)
+            // FAQ’s (optioneel)
             $faqs = isset($_POST['faqs']) ? json_decode($_POST['faqs'], true) : [];
+
+            // Verwijderde FAQ's
+            $deletedFaqs = isset($_POST['deletedFaqs']) ? json_decode($_POST['deletedFaqs'], true) : [];
 
             // Update via model
             $updated = $this->model->updateCourse($courseId, [
@@ -125,7 +128,8 @@ class CourseController
                 'Materiaal' => $materiaal,
                 'Documenten' => $documenten,
                 'LeerJaarID' => $leerjaarId,
-                'Faqs' => $faqs
+                'Faqs' => $faqs,
+                'DeletedFaqIDs' => $deletedFaqs // belangrijk!
             ]);
 
             if ($updated) {
@@ -136,8 +140,6 @@ class CourseController
             }
         }
     }
-
-
 
 }
 ?>

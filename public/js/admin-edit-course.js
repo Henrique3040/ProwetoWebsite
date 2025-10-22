@@ -5,6 +5,7 @@ $(document).ready(function() {
     // 1️ Init variabelen
     // ----------------------------
     let faqs = window.existingFaqs || []; // deze kun je via PHP injecteren
+    let deletedFaqIds = [];
 
     // ----------------------------
     // 2️ Quill initialiseren + bestaande content
@@ -33,7 +34,11 @@ $(document).ready(function() {
         $('#beschrijving').val(quill.root.innerHTML);
 
         // FAQ's updaten
+        form.find('input[name="deletedFaqs"]').remove();
         form.find('input[name="faqs"]').remove();
+    
+        // Voeg toe aan form
+        form.append(`<input type="hidden" name="deletedFaqs" value='${JSON.stringify(deletedFaqIds)}'>`);
         form.append(`<input type="hidden" name="faqs" value='${JSON.stringify(faqs)}'>`);
 
         // Validatie
@@ -74,7 +79,12 @@ $(document).ready(function() {
             return;
         }
 
-        faqs.push({ vraag, antwoord });
+        faqs.push({
+            FAQID: null, // nieuwe FAQ
+            vraag: $('#faqQuestion').val().trim(),
+            antwoord: $('#faqAnswer').val().trim()
+        });
+        
 
         let faqHtml = `
             <div class="col-12">
@@ -98,9 +108,14 @@ $(document).ready(function() {
     });
 
     // FAQ verwijderen
-    $(document).on('click', '.deleteFaq', function() {
-        let index = $(this).closest('.col-12').index();
+    $(document).on('click', '.delete-faq', function () {
+        const faqId = $(this).data('id');
+        if (faqId) deletedFaqIds.push(faqId); // markeer voor backend
+    
+        // Verwijder visueel uit lijst en faqs-array
+        const index = $(this).closest('.col-12').index();
         faqs.splice(index, 1);
         $(this).closest('.col-12').remove();
     });
+    
 });

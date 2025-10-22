@@ -31,6 +31,8 @@
 
 	// Haal huidige cursus op
 	$course = $courseController->getCourseDetail($courseId);
+	$categories = $categoryController->getAllCategories();
+	$leerjaren = $leerjaarController->getAllLeerjaren();
 
 	// Beveiliging: redirect als cursus niet gevonden is
 	if (!$course) {
@@ -108,7 +110,7 @@
 						<div class="card-body px-1 px-sm-4">
 							<!-- Step content START -->
 							<div class="bs-stepper-content">
-								<form id="editCourseForm" method="POST" action="admin-edit-course.php" enctype="multipart/form-data">
+								<form id="editCourseForm" method="POST" action="admin-edit-course.php?id=<?= $courseId?>" enctype="multipart/form-data">
 
 									<!-- Step 1 content START -->
 									<div id="step-1" role="tabpanel" class="content fade"
@@ -136,6 +138,8 @@
 											</div>
 
 											<!-- Course category -->
+											
+
 											<div class="col-md-6">
 												<label class="form-label">Course category</label>
 												<select class="form-select" name="categorie_id">
@@ -152,11 +156,12 @@
 											<!-- Leerjaar -->
 											<div class="col-md-6">
 												<label class="form-label">Leerjaar</label>
+												
 												<select class="form-select" name="leerjaar_id">
 													<option value="">Select leerjaar</option>
 													<?php foreach ($leerjaren as $lj): ?>
-														<option value="<?= $lj['LeerjaarID'] ?>"
-															<?= ($course['LeerjaarID'] == $lj['LeerjaarID']) ? 'selected' : '' ?>>
+														<option value="<?= $lj['LeerJaarID'] ?>"
+															<?= ($course['LeerJaarID'] == $lj['LeerJaarID']) ? 'selected' : '' ?>>
 															<?= htmlspecialchars($lj['Naam']) ?>
 														</option>
 													<?php endforeach; ?>
@@ -244,7 +249,7 @@
 
 										<!-- Step 1 button -->
 										<div class="d-flex justify-content-end mt-3">
-											<button class="btn btn-primary next-btn mb-0">Next</button>
+											<button type="button" class="btn btn-primary next-btn mb-0">Next</button>
 										</div>
 									</div>
 									<!-- Basic information START -->
@@ -341,7 +346,7 @@
 									<!-- Step 2 button -->
 									<div class="d-flex justify-content-between mt-3">
 										<button class="btn btn-secondary prev-btn mb-0">Previous</button>
-										<button class="btn btn-primary next-btn mb-0">Next</button>
+										<button type="button" class="btn btn-primary next-btn mb-0">Next</button>
 									</div>
 								</div>
 							</div>
@@ -382,9 +387,10 @@
 									<?php endif; ?>
 								</div>
 
+								
 								<!-- Knop om nieuwe FAQ toe te voegen -->
 								<div class="d-flex justify-content-end mt-4">
-									<button class="btn btn-success-soft me-2" data-bs-toggle="modal"
+									<button type="button" class="btn btn-success-soft me-2" data-bs-toggle="modal"
 										data-bs-target="#addQuestion">
 										+ Add FAQ
 									</button>
