@@ -11,7 +11,7 @@ class Category
     //get all categories
     public function getAll()
     {
-        $sql = "SELECT CategorieID, Naam FROM Categorie ORDER BY Naam ASC";
+        $sql = "SELECT CategorieID, Naam, Icon, CreatedAt, UpdatedAt FROM Categorie ORDER BY Naam ASC";
         $result = mysqli_query($this->conn, $sql);
 
         $categories = [];
@@ -45,7 +45,7 @@ class Category
     public function getAllWithCourses()
     {
         $categories = [];
-        $categoryQuery = "SELECT CategorieID, Naam FROM Categorie ORDER BY Naam ASC";
+        $categoryQuery = "SELECT CategorieID, Naam, Icon, CreatedAt, UpdatedAt FROM Categorie ORDER BY Naam ASC";
         $categoryResult = mysqli_query($this->conn, $categoryQuery);
 
         while ($cat = mysqli_fetch_assoc($categoryResult)) {
@@ -109,5 +109,30 @@ class Category
         }
         return $categories;
     }
+
+    public function createCategorie($naam, $icon)
+    {
+        $sql = "INSERT INTO Categorie (Naam, Icon) VALUES (?, ?)";
+        $stmt = mysqli_prepare($this->conn, $sql);
+        mysqli_stmt_bind_param($stmt, "ss", $naam, $icon);
+        return mysqli_stmt_execute($stmt);
+    }
+
+    public function updateCategorie($id, $naam, $icon)
+    {
+        $sql = "UPDATE Categorie SET Naam = ?, Icon = ? WHERE CategorieID = ?";
+        $stmt = mysqli_prepare($this->conn, $sql);
+        mysqli_stmt_bind_param($stmt, "ssi", $naam, $icon, $id);
+        return mysqli_stmt_execute($stmt);
+    }
+
+    public function deleteCategorie($id)
+    {
+        $sql = "DELETE FROM Categorie WHERE CategorieID = ?";
+        $stmt = mysqli_prepare($this->conn, $sql);
+        mysqli_stmt_bind_param($stmt, "i", $id);
+        return mysqli_stmt_execute($stmt);
+    }
+
 }
 ?>

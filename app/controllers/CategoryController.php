@@ -49,5 +49,70 @@ class CategoryController
     {
         return $this->model->getCategoriesByCourse($courseId);
     }
+
+    public function create()
+    {
+        if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+            $naam = $_POST['naam'] ?? '';
+            $icon = $_POST['icon'] ?? '';
+
+            if (empty($naam)) {
+                echo json_encode(['success' => false, 'message' => 'Naam is verplicht']);
+                return;
+            }
+
+            $result = $this->model->createCategorie($naam, $icon);
+            if ($result) {
+                header('Location: admin-course-category.php?success=created');
+                exit;
+            } else {
+                echo "<p style='color:red;'>Er is iets misgegaan bij het aanmaken van de categorie.</p>";
+            }
+        }
+    }
+
+    public function delete()
+    {
+        if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+            $id = $_POST['categorie_id'] ?? null;
+            if (!$id) {
+                echo json_encode(['success' => false, 'message' => 'Geen ID ontvangen']);
+                return;
+            }
+
+            $result = $this->model->deleteCategorie($id);
+            if ($result) {
+                header('Location: admin-course-category.php?success=deleted');
+                exit;
+            } else {
+                echo "<p style='color:red;'>Er is iets misgegaan bij het verwijderen van de categorie.</p>";
+            }
+        }
+    }
+
+
+    public function update()
+    {
+        if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+            $id = $_POST['categorie_id'] ?? null;
+            $naam = $_POST['naam'] ?? '';
+            $icon = $_POST['icon'] ?? '';
+
+            if (!$id || empty($naam)) {
+                echo json_encode(['success' => false, 'message' => 'Ongeldige data']);
+                return;
+            }
+
+            $result = $this->model->updateCategorie($id, $naam, $icon);
+            if ($result) {
+                header('Location: admin-course-category.php?success=updated');
+                exit;
+            } else {
+                echo "<p style='color:red;'>Er is iets misgegaan bij het updaten van de categorie.</p>";
+            }
+    
+        }
+    }
+
 }
 ?>
