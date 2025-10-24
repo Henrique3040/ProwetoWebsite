@@ -30,7 +30,7 @@
 					<ul class="nav collapse flex-column" id="collapsepage" data-bs-parent="#navbar-sidebar">
 						<li class="nav-item"> <a class="nav-link" href="admin-course-list.php">All Courses</a></li>
 						<li class="nav-item"> <a class="nav-link" href="admin-course-category.php">Course Category</a></li>
-						<li class="nav-item"> <a class="nav-link" href="admin-course-detail.php">Course Detail</a></li>
+						<li class="nav-item"> <a class="nav-link" href="admin-subwebsites.php">SubWebsites</a></li>
 						<li class="nav-item"> <a class="nav-link" href="admin-create-course.php">Add New Course</a></li>
 					</ul>
 				</li>
