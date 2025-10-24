@@ -13,13 +13,15 @@
 
 	// Haal alle cursussen op
 	$courses = $courseController->getAllCourses();
+	$activatedCourses = $courseController->getActivatedCourses();
+	$inactiveCourses = $courseController->getInactiveCourses();
 
 	if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['delete_course_id'])) {
 		$courseController->delete((int) $_POST['delete_course_id']);
 		header('Location: admin-course-list.php?success=deleted');
 		exit;
 	}
-	
+
 	?>
 
 
@@ -63,20 +65,27 @@
 							<h2 class="mb-0 fs-1 text-primary"><?= $totalCourses ?></h2>
 						</div>
 					</div>
+					<?php
+					$activatedCount = mysqli_num_rows($activatedCourses);
+					?>
 
 					<!-- Course item -->
 					<div class="col-sm-6 col-lg-4">
 						<div class="text-center p-4 bg-success bg-opacity-10 border border-success rounded-3">
 							<h6>Activated Courses</h6>
-							<h2 class="mb-0 fs-1 text-success">996</h2>
+							<h2 class="mb-0 fs-1 text-success"><?= $activatedCount ?></h2>
 						</div>
 					</div>
+
+					<?php
+					$inactiveCount = mysqli_num_rows($inactiveCourses);
+					?>
 
 					<!-- Course item -->
 					<div class="col-sm-6 col-lg-4">
 						<div class="text-center p-4  bg-warning bg-opacity-15 border border-warning rounded-3">
 							<h6>Pending Courses</h6>
-							<h2 class="mb-0 fs-1 text-warning">200</h2>
+							<h2 class="mb-0 fs-1 text-warning"><?= $inactiveCount ?></h2>
 						</div>
 					</div>
 				</div>
@@ -175,13 +184,17 @@
 
 												<!-- Status -->
 												<td>
-													<span class="badge bg-success bg-opacity-10 text-success">Active</span>
+													<?php if ($course['Active'] == 1): ?>
+														<span class="badge bg-success bg-opacity-10 text-success">Active</span>
+													<?php else: ?>
+														<span class="badge bg-warning bg-opacity-10 text-warning">Pending</span>
+													<?php endif; ?>
 												</td>
 
 												<!-- Action -->
 												<td>
 													<a href="admin-edit-course.php?id=<?= $course['CursusID'] ?>"
-														class="btn btn-sm btn-dark me-1">Edit</a>
+														class="btn btn-sm btn-success me-1 editBtn">Edit</a>
 													<form action="admin-course-list.php" method="POST" style="display:inline;">
 														<input type="hidden" name="delete_course_id"
 															value="<?= $course['CursusID'] ?>">

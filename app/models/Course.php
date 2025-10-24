@@ -130,6 +130,7 @@ class Course
             c.Link,
             c.Views,
             c.CreatedAt,
+            c.Active,
             GROUP_CONCAT(cat.Naam SEPARATOR ', ') AS CategorieNamen
         FROM Cursus c
         LEFT JOIN CursusCategorie cc ON c.CursusID = cc.CursusID
@@ -168,6 +169,49 @@ class Course
         return $categories;
     }
 
+    public function getActivatedCourses()
+    {
+        $sql = "
+        SELECT 
+            c.CursusID,
+            c.Titel,
+            c.FotoURL,
+            c.Link,
+            c.Views,
+            GROUP_CONCAT(cat.Naam SEPARATOR ', ') AS CategorieNamen
+        FROM Cursus c
+        LEFT JOIN CursusCategorie cc ON c.CursusID = cc.CursusID
+        LEFT JOIN Categorie cat ON cc.CategorieID = cat.CategorieID
+        WHERE c.Active = 1
+        GROUP BY c.CursusID
+        ORDER BY c.Titel ASC
+        ";
+
+        $result = mysqli_query($this->conn, $sql);
+
+        if (!$result) {
+            die('Query failed: ' . mysqli_error($this->conn));
+        }
+
+        return $result;
+    }
+
+    public function getInactiveCourses()
+    {
+        $sql = "
+        SELECT * 
+        FROM Cursus 
+        WHERE Active = 0
+        ";
+
+        $result = mysqli_query($this->conn, $sql);
+
+        if (!$result) {
+            die('Query failed: ' . mysqli_error($this->conn));
+        }
+
+        return $result;
+    }
 
 
 

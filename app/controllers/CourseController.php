@@ -30,6 +30,14 @@ class CourseController
         return $this->model->getAllCourses();
     }
 
+    public function getActivatedCourses(){
+        return $this->model->getActivatedCourses();
+    }
+
+    public function getInactiveCourses(){
+        return $this->model->getInactiveCourses();
+    }
+
     //Slaag cursus op de database via de model
     public function store()
     {
@@ -76,12 +84,13 @@ class CourseController
         }
     }
 
+    // Verwijder cursus via model
     public function delete($courseId)
     {
         return $this->model->deleteCourse($courseId);
     }
 
-
+    // Update cursus via model
     public function update($courseId)
     {
         if ($_SERVER['REQUEST_METHOD'] === 'POST') {
