@@ -30,13 +30,22 @@ class CourseController
         return $this->model->getAllCourses();
     }
 
-    public function getActivatedCourses(){
+    public function getActivatedCourses()
+    {
         return $this->model->getActivatedCourses();
     }
 
-    public function getInactiveCourses(){
+    public function getInactiveCourses()
+    {
         return $this->model->getInactiveCourses();
     }
+
+
+    public function getFilteredCourses($filters = [], $limit = 10, $page = 1)
+    {
+        return $this->model->getFilteredCourses($filters, $limit, $page);
+    }
+
 
     //Slaag cursus op de database via de model
     public function store()
@@ -49,6 +58,12 @@ class CourseController
             $beschrijving = $_POST['beschrijving'];
             $categorieID = $_POST['categorie_id'];
             $videoLink = $_POST['video_link'];
+            $leerjaarId = $_POST['leerjaar_id'];
+            // Booleans
+            $materiaal = isset($_POST['materiaal']) ? 1 : 0;
+            $documenten = isset($_POST['documenten']) ? 1 : 0;
+            $active = isset($_POST['active']) ? 1 : 0;
+
 
             // Upload foto
             $fotoURL = null;
@@ -72,6 +87,10 @@ class CourseController
                 'CategorieID' => $categorieID,
                 'FotoURL' => $fotoURL,
                 'Link' => $videoLink,
+                'Active' => $active,
+                'Materiaal' => $materiaal,
+                'Documenten' => $documenten,
+                'LeerJaarID' => $leerjaarId,
                 'faqs' => $faqs
             ]);
 
@@ -117,7 +136,7 @@ class CourseController
                 if ($oldPhoto && file_exists($oldPhoto)) {
                     unlink($oldPhoto);
                 }
-                
+
                 $filename = time() . '_' . basename($_FILES['foto']['name']);
                 $targetFile = $uploadDir . $filename;
                 move_uploaded_file($_FILES['foto']['tmp_name'], $targetFile);

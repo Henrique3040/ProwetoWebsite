@@ -139,8 +139,6 @@
 											</div>
 
 											<!-- Course category -->
-
-
 											<div class="col-md-6">
 												<label class="form-label">Course category</label>
 												<select class="form-select" name="categorie_id">

@@ -17,6 +17,7 @@
 	require_once __DIR__ . '/../app/core/init.php';
 	$categorieen = $categoryController->getAllCategories();
 	$courseController->store();
+	$leerjaren = $leerjaarController->getAllLeerjaren();
 	?>
 
 	<?php include("partials/head-css.php"); ?>
@@ -91,8 +92,6 @@ Steps START -->
 								</div>
 								<div class="line"></div>
 
-
-
 								<!-- Step 3 -->
 								<div class="step" data-target="#step-3">
 									<div class="d-grid text-center align-items-center">
@@ -150,6 +149,47 @@ Steps START -->
 														</option>
 													<?php endforeach; ?>
 												</select>
+											</div>
+
+											<!-- Leerjaar -->
+											<div class="col-md-6">
+												<label class="form-label">Leerjaar</label>
+
+												<select class="form-select" name="leerjaar_id">
+													<option value="">Select leerjaar</option>
+													<?php foreach ($leerjaren as $lj): ?>
+														<option value="<?= $lj['LeerJaarID'] ?>">
+															<?= htmlspecialchars($lj['Naam']) ?>
+														</option>
+													<?php endforeach; ?>
+												</select>
+											</div>
+
+											<!-- Switches -->
+											<div class="col-md-4 d-flex align-items-center mt-4">
+												<div class="form-check form-switch">
+													<input class="form-check-input" type="checkbox" name="documenten"
+														id="docSwitch">
+													<label class="form-check-label" for="docSwitch">Documents
+														available</label>
+												</div>
+											</div>
+
+											<div class="col-md-4 d-flex align-items-center mt-4">
+												<div class="form-check form-switch">
+													<input class="form-check-input" type="checkbox" name="materiaal"
+														id="matSwitch">
+													<label class="form-check-label" for="matSwitch">Material
+														available</label>
+												</div>
+											</div>
+
+											<div class="col-md-4 d-flex align-items-center mt-4">
+												<div class="form-check form-switch">
+													<input class="form-check-input" type="checkbox" name="active"
+														id="actSwitch">
+													<label class="form-check-label" for="actSwitch">Active</label>
+												</div>
 											</div>
 
 
@@ -382,8 +422,10 @@ Steps START -->
 
 											<!-- Step 2 button -->
 											<div class="d-flex justify-content-between mt-3">
-												<button type="button" class="btn btn-secondary prev-btn mb-0">Previous</button>
-												<button type="button" class="btn btn-primary next-btn mb-0">Next</button>
+												<button type="button"
+													class="btn btn-secondary prev-btn mb-0">Previous</button>
+												<button type="button"
+													class="btn btn-primary next-btn mb-0">Next</button>
 											</div>
 										</div>
 									</div>
@@ -429,7 +471,8 @@ Steps START -->
 												<button class="btn btn-light me-auto ms-md-2 mb-2 mb-md-0">Preview
 													Course</button>
 												<div class="text-md-end">
-													<button type="submit" id="submitCourseBtn" class="btn btn-success mb-2 mb-sm-0">Submit a
+													<button type="submit" id="submitCourseBtn"
+														class="btn btn-success mb-2 mb-sm-0">Submit a
 														Course</button>
 													<p class="mb-0 small mt-1">Once you click "Submit a Course", your
 														course will be uploaded and marked as pending for review.</p>
