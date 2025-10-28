@@ -63,6 +63,34 @@ class Category
         return $categories;
     }
 
+    public function getWithLimit($limit)
+    {
+        $sql = "SELECT 
+            c.CategorieID,
+            c.Naam,
+            c.Icon,
+            c.CreatedAt,
+            c.UpdatedAt,
+            COUNT(cc.CursusID) AS TotalCourses
+         FROM Categorie c
+         LEFT JOIN CursusCategorie cc ON c.CategorieID = cc.CategorieID
+         GROUP BY c.CategorieID, c.Naam, c.Icon, c.CreatedAt, c.UpdatedAt
+         ORDER BY c.Naam ASC
+         LIMIT ?
+         ";
+        $stmt = mysqli_prepare($this->conn, $sql);
+        mysqli_stmt_bind_param($stmt, "i", $limit);
+        mysqli_stmt_execute($stmt);
+        $result = mysqli_stmt_get_result($stmt);
+
+        $categories = [];
+        if ($result) {
+            while ($row = mysqli_fetch_assoc($result)) {
+                $categories[] = $row;
+            }
+        }
+        return $categories;
+    }
 
     
 
@@ -73,6 +101,7 @@ class Category
         SELECT 
             c.CategorieID,
             c.Naam,
+            c.Icon,
             COUNT(cc.CursusID) AS TotalCourses
         FROM Categorie c
         LEFT JOIN CursusCategorie cc ON c.CategorieID = cc.CategorieID

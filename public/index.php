@@ -13,7 +13,7 @@
 	require_once __DIR__ . '/../app/core/init.php';
 
 	$subWebsites = $subWebsiteController->index();
-	$categories = $categoryController->getAllWithCourses();
+	$categories = $categoryController->getWithLimit();
 	$result = $categoryController->index();
 	$courses = $courseController->featured(8);
 
@@ -214,59 +214,6 @@ Footer START -->
 	<?php include("partials/footer.php"); ?>
 	<!-- =======================
 Footer END -->
-
-
-	<!-- Sticky element START -->
-	<div class="alert alert-dismissible sticky-element fade show bg-dark text-white rounded-3 shadow p-4 ms-3 mb-3 col-10 col-md-4 col-lg-3 col-xl-2 d-none d-lg-block"
-		role="alert">
-		<div class="d-sm-flex align-items-center mb-3">
-			<!-- Avatar -->
-			<div>
-				<div class="icon-lg bg-purple rounded-circle text-purple">
-					<img class="p-3" src="assets/images/client/aftereffect.svg" alt="avatar">
-				</div>
-			</div>
-			<!-- Info -->
-			<div class="ms-sm-2 mt-2 mt-sm-0">
-				<h6 class="mb-0 text-white">Adobe after effect motion</h6>
-				<span class="small mb-0 me-3"><i class="far fa-clock text-danger me-2"></i>30 mins</span>
-				<span class="small mb-0 me-1"><i class="fas fa-circle fw-bold text-success small me-2"></i>Live</span>
-			</div>
-		</div>
-		<p class="mb-0 small">Its recommended that you complete this assignment to improve your design skills for
-			graphics</p>
-
-		<!-- Avatar group -->
-		<div class="d-sm-flex justify-content-between mt-4">
-			<ul class="avatar-group mb-2 mb-sm-0">
-				<li class="avatar avatar-xs">
-					<img class="avatar-img rounded-circle" src="assets/images/avatar/01.jpg" alt="avatar">
-				</li>
-				<li class="avatar avatar-xs">
-					<img class="avatar-img rounded-circle" src="assets/images/avatar/02.jpg" alt="avatar">
-				</li>
-				<li class="avatar avatar-xs">
-					<img class="avatar-img rounded-circle" src="assets/images/avatar/03.jpg" alt="avatar">
-				</li>
-				<li class="avatar avatar-xs">
-					<img class="avatar-img rounded-circle" src="assets/images/avatar/06.jpg" alt="avatar">
-				</li>
-			</ul>
-
-			<!-- Button -->
-			<button type="button" class="btn btn-success btn-sm mb-0" data-bs-dismiss="alert" aria-label="Close">
-				<span aria-hidden="true">Join now</span>
-			</button>
-		</div>
-		<!-- Close button -->
-		<div class="position-absolute end-0 top-0 mt-n3 me-n3">
-			<button type="button" class="btn btn-danger btn-round btn-sm mb-0" data-bs-dismiss="alert"
-				aria-label="Close">
-				<span aria-hidden="true"><i class="bi bi-x-lg"></i></span>
-			</button>
-		</div>
-	</div>
-	<!-- Sticky element START -->
 
 	<!-- Back to top -->
 	<div class="back-top"><i class="bi bi-arrow-up-short position-absolute top-50 start-50 translate-middle"></i></div>

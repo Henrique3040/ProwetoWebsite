@@ -15,6 +15,11 @@ class CategoryController
         return $this->model->getAllWithCourseCount();
     }
 
+    public function getWithLimit($limit = 8)
+    {
+        return $this->model->getWithLimit($limit);
+    }
+
     // Get all categories with their courses
     public function getAllWithCourses()
     {

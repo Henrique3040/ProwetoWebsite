@@ -109,6 +109,12 @@ class CourseController
         return $this->model->deleteCourse($courseId);
     }
 
+    public function getLatestUpdatedCourses($limit = 5)
+    {
+        return $this->model->getLatestUpdatedCourses($limit);
+    }
+
+
     // Update cursus via model
     public function update($courseId)
     {

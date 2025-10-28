@@ -110,45 +110,30 @@ Categories START -->
 				<div class="row g-4">
 					<?php
 					if ($categories && mysqli_num_rows($categories) > 0):
+						// Set of Bootstrap contextual background colors (cycled)
 						$colors = ['success', 'orange', 'danger', 'purple', 'info', 'blue', 'warning', 'dark', 'primary'];
-						$icons = [
-							'data-science.svg',
-							'online.svg',
-							'engineering.svg',
-							'coding.svg',
-							'profit.svg',
-							'medical.svg',
-							'home.svg',
-							'artist.svg',
-							'marketing.svg',
-							'account.svg'
-						];
-
 						$i = 0;
+
 						while ($cat = mysqli_fetch_assoc($categories)):
 							$name = htmlspecialchars($cat['Naam']);
 							$id = (int) $cat['CategorieID'];
-
+							$iconClass = htmlspecialchars($cat['Icon'] ?? 'fa-question-circle');
 							$color = $colors[$i % count($colors)];
-							$icon = $icons[$i % count($icons)];
+							$courseCount = $cat['TotalCourses'] ?? 0;
 							$i++;
 							?>
 							<div class="col-sm-6 col-md-4 col-xl-3">
 								<div
-									class="card card-body bg-<?= $color ?> bg-opacity-10 text-center position-relative btn-transition p-4">
-									<div class="icon-xl bg-body mx-auto rounded-circle mb-3">
-										<img src="assets/images/element/<?= $icon ?>" alt="<?= $name ?>">
+									class="card card-body bg-<?= $color ?> bg-opacity-10 text-center position-relative btn-transition p-4 h-100">
+									<div class="icon-xl bg-body mx-auto rounded-circle d-flex align-items-center justify-content-center mb-3 shadow-sm"
+										style="width: 70px; height: 70px;">
+										<i class="fas <?= $iconClass ?> fa-2x text-<?= $color ?>"></i>
 									</div>
 									<h5 class="mb-2">
-										<a href="categorie-page.php?id=<?= $id ?>" class="stretched-link"><?= $name ?></a>
+										<a href="categorie-page.php?id=<?= $id ?>"
+											class="stretched-link text-decoration-none text-dark"><?= $name ?></a>
 									</h5>
-									<!-- Optional: show course count if you have it -->
-									<h6 class="mb-0">
-										<?php
-											
-										 echo $cat['TotalCourses'] ?? '0'; 
-										?>
-									</h6>
+									<h6 class="mb-0 text-muted"><?= $courseCount ?> courses</h6>
 								</div>
 							</div>
 						<?php endwhile;

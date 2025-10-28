@@ -350,6 +350,28 @@ class Course
         return $cursusId;
     }
 
+    public function getLatestUpdatedCourses($limit = 5)
+    {
+        $sql = "
+             SELECT 
+                 c.CursusID,
+                 c.Titel,
+                 c.FotoURL,
+                 c.CreatedAt,
+                 c.Active,
+                 d.LaatstBijgewerkt
+             FROM Cursus c
+             LEFT JOIN Cursusdetails d ON c.CursusID = d.CursusID
+             ORDER BY d.LaatstBijgewerkt DESC, c.CreatedAt DESC
+             LIMIT ?
+             ";
+
+        $stmt = mysqli_prepare($this->conn, $sql);
+        mysqli_stmt_bind_param($stmt, "i", $limit);
+        mysqli_stmt_execute($stmt);
+        return mysqli_stmt_get_result($stmt);
+    }
+
 
     public function deleteCourse($courseId)
     {
