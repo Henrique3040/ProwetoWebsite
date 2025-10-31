@@ -53,50 +53,54 @@ class Course
     public function getCourseDetail($courseId)
     {
         $sql = "
-        SELECT 
-            c.id,
-            c.Titel,
-            c.FotoURL,
-            c.Link,
-            c.Active,
-            d.KorteBeschrijving,
-            d.Beschrijving,
-            d.LaatstBijgewerkt,
-            d.Rating,
-            d.Taal,
-            d.Prijs,
-            d.Materiaal,
-            d.Documenten,
-            d.LeerJaarID,
-            cc.CategorieID,
-            GROUP_CONCAT(cat.Naam SEPARATOR ', ') AS CategorieNamen
-        FROM Cursus c
-        JOIN Cursusdetails d ON c.Id = d.id
-        LEFT JOIN CursusCategorie cc ON c.id = cc.cursus_id
-        LEFT JOIN Categorie cat ON cc.CategorieID = cat.id
-        WHERE c.id = ?
-        GROUP BY c.id
+            SELECT 
+                c.id,
+                c.Titel,
+                c.FotoURL,
+                c.Link,
+                c.Active,
+                d.KorteBeschrijving,
+                d.Beschrijving,
+                d.LaatstBijgewerkt,
+                d.Rating,
+                d.Taal,
+                d.Prijs,
+                d.Materiaal,
+                d.Documenten,
+                d.LeerJaarID,
+                cc.categorie_id AS CategorieID,
+                GROUP_CONCAT(cat.Naam SEPARATOR ', ') AS CategorieNamen
+            FROM Cursus c
+            JOIN Cursusdetails d ON c.id = d.cursus_id
+            LEFT JOIN CursusCategorie cc ON c.id = cc.cursus_id
+            LEFT JOIN Categorie cat ON cc.categorie_id = cat.id
+            WHERE c.id = ?
+            GROUP BY c.id
         ";
-
-
+    
         $stmt = mysqli_prepare($this->conn, $sql);
+        if (!$stmt) {
+            die("SQL ERROR (CourseDetail): " . mysqli_error($this->conn));
+        }
+    
         mysqli_stmt_bind_param($stmt, "i", $courseId);
         mysqli_stmt_execute($stmt);
         $result = mysqli_stmt_get_result($stmt);
         $course = mysqli_fetch_assoc($result);
-
-        // Haal FAQ’s apart op
-        $sqlFaq = "SELECT FAQID, Vraag, Antwoord FROM CursusFAQ WHERE id = ?";
+    
+        // ✅ Haal FAQ’s op met juiste kolomnaam (cursus_id)
+        $sqlFaq = "SELECT id AS FAQID, Vraag, Antwoord FROM CursusFAQ WHERE cursus_id = ?";
         $stmtFaq = mysqli_prepare($this->conn, $sqlFaq);
         mysqli_stmt_bind_param($stmtFaq, "i", $courseId);
         mysqli_stmt_execute($stmtFaq);
         $resultFaq = mysqli_stmt_get_result($stmtFaq);
         $faqs = mysqli_fetch_all($resultFaq, MYSQLI_ASSOC);
-
+    
         $course['Faqs'] = $faqs;
-
+    
         return $course;
     }
+    
 
     // Zoek cursussen op titel
     public function searchCourses($query)
@@ -241,7 +245,7 @@ class Course
             if (!$stmt) {
                 die('Prepare failed: ' . mysqli_error($this->conn) . "\nSQL: " . $sql);
             }
-            
+
             mysqli_stmt_bind_param($stmt, "ii", $limit, $offset);
         }
 
@@ -325,54 +329,54 @@ class Course
 
 
 
-public function createCourse($data)
-{
-    // 1️ Insert in Cursus
-    $sql = "INSERT INTO Cursus (Titel, FotoURL, Link, Views, Featured, Active)
+    public function createCourse($data)
+    {
+        // 1️ Insert in Cursus
+        $sql = "INSERT INTO Cursus (Titel, FotoURL, Link, Views, Featured, Active)
             VALUES (?, ?, ?, 0, 0, ?)";
-    $stmt = mysqli_prepare($this->conn, $sql);
-    mysqli_stmt_bind_param($stmt, "ssss", $data['Titel'], $data['FotoURL'], $data['Link'], $data['Active']);
-    mysqli_stmt_execute($stmt);
-    $Id = mysqli_insert_id($this->conn);
+        $stmt = mysqli_prepare($this->conn, $sql);
+        mysqli_stmt_bind_param($stmt, "ssss", $data['Titel'], $data['FotoURL'], $data['Link'], $data['Active']);
+        mysqli_stmt_execute($stmt);
+        $Id = mysqli_insert_id($this->conn);
 
-    if (!$Id) {
-        die("❌ Fout bij Cursus: " . mysqli_error($this->conn));
-    }
-
-    // 2️ Insert in Cursusdetails
-    $sql2 = "INSERT INTO Cursusdetails (CursusID, KorteBeschrijving, Beschrijving, Rating, Taal, Prijs, LaatstBijgewerkt, Materiaal, Documenten, LeerJaarID)
-             VALUES (?, ?, ?, 0, 'Nederlands', 0, NOW(), ?, ?, ?)";
-    $stmt2 = mysqli_prepare($this->conn, $sql2);
-    mysqli_stmt_bind_param($stmt2, "issssi", $Id, $data['KorteBeschrijving'], $data['Beschrijving'], $data['Materiaal'], $data['Documenten'], $data['LeerJaarID']);
-    mysqli_stmt_execute($stmt2);
-    if (mysqli_error($this->conn)) {
-        die("❌ Fout bij Cursusdetails: " . mysqli_error($this->conn));
-    }
-
-    // 3️ Koppel categorie
-    $sql3 = "INSERT INTO CursusCategorie (cursus_id, categorie_id) VALUES (?, ?)";
-    $stmt3 = mysqli_prepare($this->conn, $sql3);
-    mysqli_stmt_bind_param($stmt3, "ii", $Id, $data['CategorieID']);
-    mysqli_stmt_execute($stmt3);
-    if (mysqli_error($this->conn)) {
-        die("❌ Fout bij CursusCategorie: " . mysqli_error($this->conn));
-    }
-
-    // 4️ Voeg FAQ’s toe (indien aanwezig)
-    if (!empty($data['faqs']) && is_array($data['faqs'])) {
-        foreach ($data['faqs'] as $faq) {
-            $vraag = $faq['vraag'];
-            $antwoord = $faq['antwoord'];
-
-            $sqlFaq = "INSERT INTO CursusFAQ (CursusID, Vraag, Antwoord) VALUES (?, ?, ?)";
-            $stmtFaq = mysqli_prepare($this->conn, $sqlFaq);
-            mysqli_stmt_bind_param($stmtFaq, "iss", $Id, $vraag, $antwoord);
-            mysqli_stmt_execute($stmtFaq);
+        if (!$Id) {
+            die("❌ Fout bij Cursus: " . mysqli_error($this->conn));
         }
-    }
 
-    return $Id;
-}
+        // 2️ Insert in Cursusdetails
+        $sql2 = "INSERT INTO Cursusdetails (cursus_id, KorteBeschrijving, Beschrijving, Rating, Taal, Prijs, LaatstBijgewerkt, Materiaal, Documenten, LeerJaarID)
+             VALUES (?, ?, ?, 0, 'Nederlands', 0, NOW(), ?, ?, ?)";
+        $stmt2 = mysqli_prepare($this->conn, $sql2);
+        mysqli_stmt_bind_param($stmt2, "issssi", $Id, $data['KorteBeschrijving'], $data['Beschrijving'], $data['Materiaal'], $data['Documenten'], $data['LeerJaarID']);
+        mysqli_stmt_execute($stmt2);
+        if (mysqli_error($this->conn)) {
+            die("❌ Fout bij Cursusdetails: " . mysqli_error($this->conn));
+        }
+
+        // 3️ Koppel categorie
+        $sql3 = "INSERT INTO CursusCategorie (cursus_id, categorie_id) VALUES (?, ?)";
+        $stmt3 = mysqli_prepare($this->conn, $sql3);
+        mysqli_stmt_bind_param($stmt3, "ii", $Id, $data['CategorieID']);
+        mysqli_stmt_execute($stmt3);
+        if (mysqli_error($this->conn)) {
+            die("❌ Fout bij CursusCategorie: " . mysqli_error($this->conn));
+        }
+
+        // 4️ Voeg FAQ’s toe (indien aanwezig)
+        if (!empty($data['faqs']) && is_array($data['faqs'])) {
+            foreach ($data['faqs'] as $faq) {
+                $vraag = $faq['vraag'];
+                $antwoord = $faq['antwoord'];
+
+                $sqlFaq = "INSERT INTO CursusFAQ (cursus_id, Vraag, Antwoord) VALUES (?, ?, ?)";
+                $stmtFaq = mysqli_prepare($this->conn, $sqlFaq);
+                mysqli_stmt_bind_param($stmtFaq, "iss", $Id, $vraag, $antwoord);
+                mysqli_stmt_execute($stmtFaq);
+            }
+        }
+
+        return $Id;
+    }
 
 
     public function getLatestUpdatedCourses($limit = 5)
@@ -400,57 +404,63 @@ public function createCourse($data)
 
     public function deleteCourse($courseId)
     {
-        // Begin transactie
         mysqli_begin_transaction($this->conn);
 
         try {
-            // 1️ Verwijder gekoppelde FAQ's
-            $sqlFaq = "DELETE FROM CursusFAQ WHERE Id = ?";
-            $stmtFaq = mysqli_prepare($this->conn, $sqlFaq);
+            // 1️⃣ FAQ
+            $stmtFaq = mysqli_prepare(
+                $this->conn,
+                "DELETE FROM CursusFAQ WHERE cursus_id = ?"
+            );
             mysqli_stmt_bind_param($stmtFaq, "i", $courseId);
             mysqli_stmt_execute($stmtFaq);
 
-            // 2️ Verwijder categorie-koppelingen
-            $sqlCat = "DELETE FROM CursusCategorie WHERE Id = ?";
-            $stmtCat = mysqli_prepare($this->conn, $sqlCat);
+            // 2️⃣ Categorie
+            $stmtCat = mysqli_prepare(
+                $this->conn,
+                "DELETE FROM CursusCategorie WHERE cursus_id = ?"
+            );
             mysqli_stmt_bind_param($stmtCat, "i", $courseId);
             mysqli_stmt_execute($stmtCat);
 
-            // 3️ Verwijder cursusdetails
-            $sqlDetails = "DELETE FROM Cursusdetails WHERE Id = ?";
-            $stmtDetails = mysqli_prepare($this->conn, $sqlDetails);
+            // 3️⃣ Details
+            $stmtDetails = mysqli_prepare(
+                $this->conn,
+                "DELETE FROM Cursusdetails WHERE cursus_id = ?"
+            );
             mysqli_stmt_bind_param($stmtDetails, "i", $courseId);
             mysqli_stmt_execute($stmtDetails);
 
-            // Verwijder foto van server
-            $sqlFoto = "SELECT FotoURL FROM Cursus WHERE Id = ?";
-            $stmtFoto = mysqli_prepare($this->conn, $sqlFoto);
+            // 4️⃣ Foto ophalen + verwijderen
+            $stmtFoto = mysqli_prepare(
+                $this->conn,
+                "SELECT FotoURL FROM Cursus WHERE id = ?"
+            );
             mysqli_stmt_bind_param($stmtFoto, "i", $courseId);
             mysqli_stmt_execute($stmtFoto);
-            $result = mysqli_stmt_get_result($stmtFoto);
-            $foto = mysqli_fetch_assoc($result);
 
+            $foto = mysqli_fetch_assoc(mysqli_stmt_get_result($stmtFoto));
             if ($foto && file_exists($foto['FotoURL'])) {
                 unlink($foto['FotoURL']);
             }
 
-
-            // 4️ Verwijder hoofdrecord
-            $sqlMain = "DELETE FROM Cursus WHERE Id = ?";
-            $stmtMain = mysqli_prepare($this->conn, $sqlMain);
+            // 5️⃣ Hoofdcursus verwijderen
+            $stmtMain = mysqli_prepare(
+                $this->conn,
+                "DELETE FROM Cursus WHERE id = ?"
+            );
             mysqli_stmt_bind_param($stmtMain, "i", $courseId);
             mysqli_stmt_execute($stmtMain);
 
-            // Alles gelukt → commit
             mysqli_commit($this->conn);
             return true;
 
         } catch (Exception $e) {
-            // Fout → rollback
             mysqli_rollback($this->conn);
             return false;
         }
     }
+
 
 
 
@@ -459,11 +469,11 @@ public function createCourse($data)
         mysqli_begin_transaction($this->conn);
 
         try {
-            // 1️ Update hoofdtabel (Cursus)
+            // 1️⃣ Update Cursus
             if (!empty($data['FotoURL'])) {
                 $sql = "UPDATE Cursus 
-                    SET Titel = ?, FotoURL = ?, Link = ?, Active = ?
-                    WHERE Id = ?";
+                    SET Titel=?, FotoURL=?, Link=?, Active=?
+                    WHERE id=?";
                 $stmt = mysqli_prepare($this->conn, $sql);
                 mysqli_stmt_bind_param(
                     $stmt,
@@ -476,8 +486,8 @@ public function createCourse($data)
                 );
             } else {
                 $sql = "UPDATE Cursus 
-                    SET Titel = ?, Link = ?, Active = ?
-                    WHERE Id = ?";
+                    SET Titel=?, Link=?, Active=?
+                    WHERE id=?";
                 $stmt = mysqli_prepare($this->conn, $sql);
                 mysqli_stmt_bind_param(
                     $stmt,
@@ -490,12 +500,10 @@ public function createCourse($data)
             }
             mysqli_stmt_execute($stmt);
 
-            // 2️ Update detailtabel
-            $leerjaarId = !empty($data['LeerJaarID']) ? $data['LeerJaarID'] : NULL;
-
+            // 2️⃣ Update details
             $sql2 = "UPDATE Cursusdetails
-                 SET KorteBeschrijving = ?, Beschrijving = ?, Materiaal = ?, Documenten = ?, LeerJaarID = ?
-                 WHERE Id = ?";
+                 SET KorteBeschrijving=?, Beschrijving=?, Materiaal=?, Documenten=?, LeerJaarID=?
+                 WHERE cursus_id=?";
             $stmt2 = mysqli_prepare($this->conn, $sql2);
             mysqli_stmt_bind_param(
                 $stmt2,
@@ -504,68 +512,79 @@ public function createCourse($data)
                 $data['Beschrijving'],
                 $data['Materiaal'],
                 $data['Documenten'],
-                $leerjaarId,
+                $data['LeerJaarID'],
                 $courseId
             );
             mysqli_stmt_execute($stmt2);
 
-            // 3️ Categorie bijwerken (simpel: oude verwijderen → nieuwe toevoegen)
-            $sqlDel = "DELETE FROM CursusCategorie WHERE Id = ?";
-            $stmtDel = mysqli_prepare($this->conn, $sqlDel);
-            mysqli_stmt_bind_param($stmtDel, "i", $courseId);
-            mysqli_stmt_execute($stmtDel);
+            // 3️⃣ Categorie opnieuw koppelen
+            mysqli_query(
+                $this->conn,
+                "DELETE FROM CursusCategorie WHERE cursus_id = $courseId"
+            );
 
             if (!empty($data['CategorieID'])) {
-                $sqlCat = "INSERT INTO CursusCategorie (Id, CategorieID) VALUES (?, ?)";
-                $stmtCat = mysqli_prepare($this->conn, $sqlCat);
+                $stmtCat = mysqli_prepare(
+                    $this->conn,
+                    "INSERT INTO CursusCategorie (cursus_id, categorie_id) VALUES (?, ?)"
+                );
                 mysqli_stmt_bind_param($stmtCat, "ii", $courseId, $data['CategorieID']);
                 mysqli_stmt_execute($stmtCat);
             }
 
-            // 4️ FAQ's logica — veilig bijwerken
-            if (!empty($data['Faqs']) && is_array($data['Faqs'])) {
+            // 4️⃣ Update FAQ’s
+            if (!empty($data['Faqs'])) {
                 foreach ($data['Faqs'] as $faq) {
-                    $vraag = trim($faq['vraag'] ?? '');
-                    $antwoord = trim($faq['antwoord'] ?? '');
-                    $faqId = $faq['FAQID'] ?? null;
 
-                    if ($vraag === '' || $antwoord === '')
-                        continue;
+                    if (!empty($faq['FAQID'])) {
+                        // UPDATE bestaand
+                        $sqlU = "UPDATE CursusFAQ 
+                             SET Vraag=?, Antwoord=?
+                             WHERE id=? AND cursus_id=?";
+                        $stmtU = mysqli_prepare($this->conn, $sqlU);
+                        mysqli_stmt_bind_param(
+                            $stmtU,
+                            "ssii",
+                            $faq['vraag'],
+                            $faq['antwoord'],
+                            $faq['FAQID'],
+                            $courseId
+                        );
+                        mysqli_stmt_execute($stmtU);
 
-                    // UPDATE bestaande FAQ
-                    if (!empty($faqId)) {
-                        $sqlFaqUpdate = "UPDATE CursusFAQ SET Vraag = ?, Antwoord = ? WHERE FAQID = ? AND Id = ?";
-                        $stmtFaqUpdate = mysqli_prepare($this->conn, $sqlFaqUpdate);
-                        mysqli_stmt_bind_param($stmtFaqUpdate, "ssii", $vraag, $antwoord, $faqId, $courseId);
-                        mysqli_stmt_execute($stmtFaqUpdate);
                     } else {
-                        // INSERT nieuwe FAQ
-                        $sqlFaqInsert = "INSERT INTO CursusFAQ (Id, Vraag, Antwoord) VALUES (?, ?, ?)";
-                        $stmtFaqInsert = mysqli_prepare($this->conn, $sqlFaqInsert);
-                        mysqli_stmt_bind_param($stmtFaqInsert, "iss", $courseId, $vraag, $antwoord);
-                        mysqli_stmt_execute($stmtFaqInsert);
+                        // INSERT nieuw
+                        $sqlI = "INSERT INTO CursusFAQ (cursus_id, Vraag, Antwoord) VALUES (?, ?, ?)";
+                        $stmtI = mysqli_prepare($this->conn, $sqlI);
+                        mysqli_stmt_bind_param(
+                            $stmtI,
+                            "iss",
+                            $courseId,
+                            $faq['vraag'],
+                            $faq['antwoord']
+                        );
+                        mysqli_stmt_execute($stmtI);
                     }
                 }
             }
 
-            // 5️ FAQ’s verwijderen (alleen die door frontend gevraagd worden)
-            if (!empty($data['DeletedFaqIDs']) && is_array($data['DeletedFaqIDs'])) {
+            // 5️⃣ Verwijder FAQ’s
+            if (!empty($data['DeletedFaqIDs'])) {
                 $ids = implode(',', array_map('intval', $data['DeletedFaqIDs']));
-                $sqlDelFaqs = "DELETE FROM CursusFAQ WHERE FAQID IN ($ids) AND Id = $courseId";
-                mysqli_query($this->conn, $sqlDelFaqs);
+                mysqli_query(
+                    $this->conn,
+                    "DELETE FROM CursusFAQ WHERE id IN ($ids) AND cursus_id = $courseId"
+                );
             }
 
             mysqli_commit($this->conn);
             return true;
-        } catch (Throwable $e) {
+
+        } catch (Exception $e) {
             mysqli_rollback($this->conn);
-            error_log("UpdateCourse error: " . $e->getMessage());
             return false;
         }
     }
-
-
-
 
 
 }

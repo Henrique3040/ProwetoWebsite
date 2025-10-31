@@ -91,7 +91,7 @@ Page content START -->
 								<option value="">All</option>
 
 								<?php foreach ($categories as $cat): ?>
-									<option value="<?= htmlspecialchars($cat['ID'], ENT_QUOTES) ?>">
+									<option value="<?= htmlspecialchars($cat['Id'], ENT_QUOTES) ?>">
 										<?= htmlspecialchars($cat['Naam'], ENT_QUOTES) ?>
 									</option>
 								<?php endforeach; ?>

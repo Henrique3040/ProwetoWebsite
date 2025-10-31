@@ -149,9 +149,9 @@ class Category
     public function getCategoriesByCourse($courseId)
     {
         $sql = "
-        SELECT cat.ID, cat.Naam
+        SELECT cat.Id, cat.Naam
         FROM Categorie cat
-        INNER JOIN CursusCategorie cc ON cat.ID = cc.categorie_id
+        INNER JOIN CursusCategorie cc ON cat.Id = cc.categorie_id
         WHERE cc.cursus_id = ?";
 
         $stmt = mysqli_prepare($this->conn, $sql);
@@ -176,7 +176,7 @@ class Category
 
     public function updateCategorie($id, $naam, $icon)
     {
-        $sql = "UPDATE Categorie SET Naam = ?, Icon = ? WHERE ID = ?";
+        $sql = "UPDATE Categorie SET Naam = ?, Icon = ? WHERE Id = ?";
         $stmt = mysqli_prepare($this->conn, $sql);
         mysqli_stmt_bind_param($stmt, "ssi", $naam, $icon, $id);
         return mysqli_stmt_execute($stmt);
@@ -184,7 +184,7 @@ class Category
 
     public function deleteCategorie($id)
     {
-        $sql = "DELETE FROM Categorie WHERE ID = ?";
+        $sql = "DELETE FROM Categorie WHERE Id = ?";
         $stmt = mysqli_prepare($this->conn, $sql);
         mysqli_stmt_bind_param($stmt, "i", $id);
         return mysqli_stmt_execute($stmt);

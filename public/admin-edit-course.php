@@ -144,8 +144,8 @@
 												<select class="form-select" name="categorie_id">
 													<option value="">Select category</option>
 													<?php foreach ($categories as $cat): ?>
-														<option value="<?= $cat['CategorieID'] ?>"
-															<?= ($course['CategorieID'] == $cat['CategorieID']) ? 'selected' : '' ?>>
+														<option value="<?= $cat['Id'] ?>"
+															<?= ($course['CategorieID'] == $cat['Id']) ? 'selected' : '' ?>>
 															<?= htmlspecialchars($cat['Naam']) ?>
 														</option>
 													<?php endforeach; ?>
@@ -159,8 +159,8 @@
 												<select class="form-select" name="leerjaar_id">
 													<option value="">Select leerjaar</option>
 													<?php foreach ($leerjaren as $lj): ?>
-														<option value="<?= $lj['LeerJaarID'] ?>"
-															<?= ($course['LeerJaarID'] == $lj['LeerJaarID']) ? 'selected' : '' ?>>
+														<option value="<?= $lj['id'] ?>"
+															<?= ($course['LeerJaarID'] == $lj['id']) ? 'selected' : '' ?>>
 															<?= htmlspecialchars($lj['Naam']) ?>
 														</option>
 													<?php endforeach; ?>

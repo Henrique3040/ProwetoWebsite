@@ -180,9 +180,9 @@
 					</button>
 				</div>
 				<div class="modal-body">
-					<form action="" method="POST" id="editCategorieForm" action="admin-course-category.php" method="POST">
+					<form method="POST" id="editCategorieForm" action="admin-course-category.php">
 						<input type="hidden" name="action" value="updateCategorie">
-						<input type="hidden" name="categorie_id" id="editCategorieID">
+						<input type="hidden" name="id" id="editCategorieID">
 
 						<div class="col-12">
 							<label class="form-label">Category Name</label>
@@ -221,7 +221,7 @@
 	<!--- delete categorie -->
 	<form id="deleteCategorieForm" action="admin-course-category.php" method="POST" style="display:none;">
 		<input type="hidden" name="action" value="deleteCategorie">
-		<input type="hidden" name="categorie_id" id="deleteCategorieID">
+		<input type="hidden" name="id" id="deleteCategorieID">
 	</form>
 
 </body>
