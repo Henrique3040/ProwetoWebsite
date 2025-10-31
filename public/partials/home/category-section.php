@@ -18,7 +18,7 @@
                 <?php foreach ($categories as $cat): ?>
                     <?php
                     $catName = htmlspecialchars($cat['Naam']);
-                    $catId = (int) $cat['CategorieID'];
+                    $catId = (int) $cat['id'];
                     $total = isset($cat['TotalCourses']) ? (int) $cat['TotalCourses'] : count($cat['courses'] ?? []);
                     $iconClass = htmlspecialchars($cat['Icon'] ?? 'fa-question-circle');
                     $color = $colors[$i % count($colors)];

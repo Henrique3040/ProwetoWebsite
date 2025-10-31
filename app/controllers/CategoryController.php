@@ -36,25 +36,13 @@ class CategoryController
         return $this->model->getAll();
     }
     
-    public function getAllWithCourseCount()
-    {
-        $categories = [];
-        $categoryResult = $this->model->getAll();
-
-        while ($cat = mysqli_fetch_assoc($categoryResult)) {
-            $cat['TotalCourses'] = $this->model->getCategoryCourseCount($cat['CategorieID']);
-            $categories[] = $cat;
-        }
-
-        return $categories;
-    }
-
-
+  
     public function getCategoriesByCourse($courseId)
     {
         return $this->model->getCategoriesByCourse($courseId);
     }
 
+    // CRUD methods: create, update, delete
     public function create()
     {
         if ($_SERVER['REQUEST_METHOD'] === 'POST') {
@@ -79,7 +67,7 @@ class CategoryController
     public function delete()
     {
         if ($_SERVER['REQUEST_METHOD'] === 'POST') {
-            $id = $_POST['categorie_id'] ?? null;
+            $id = $_POST['id'] ?? null;
             if (!$id) {
                 echo json_encode(['success' => false, 'message' => 'Geen ID ontvangen']);
                 return;
@@ -99,7 +87,7 @@ class CategoryController
     public function update()
     {
         if ($_SERVER['REQUEST_METHOD'] === 'POST') {
-            $id = $_POST['categorie_id'] ?? null;
+            $id = $_POST['id'] ?? null;
             $naam = $_POST['naam'] ?? '';
             $icon = $_POST['icon'] ?? '';
 

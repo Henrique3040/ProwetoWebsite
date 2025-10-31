@@ -25,11 +25,12 @@
 
 <body>
 
-	<?php include("partials/sidebar.php"); ?>
+	
 
 	<!-- **************** MAIN CONTENT START **************** -->
 	<main>
 
+	<?php include("partials/sidebar.php"); ?>
 		<!-- =======================
 Page Banner START -->
 		<section class="py-0 bg-blue h-100px align-items-center d-flex h-200px rounded-0"
@@ -110,7 +111,7 @@ Steps START -->
 						<div class="card-body">
 							<!-- Step content START -->
 							<div class="bs-stepper-content">
-								<form action="admin-create-course.php" method="POST" enctype="multipart/form-data">
+								<form id="courseForm" action="admin-create-course.php" method="POST" enctype="multipart/form-data">
 
 
 									<!-- Step 1 content START -->
@@ -144,7 +145,7 @@ Steps START -->
 												<select class="form-select js-choice" name="categorie_id" required>
 													<option value="">Select category</option>
 													<?php foreach ($categorieen as $cat): ?>
-														<option value="<?= $cat['CategorieID'] ?>">
+														<option value="<?= $cat['Id'] ?>">
 															<?= htmlspecialchars($cat['Naam']) ?>
 														</option>
 													<?php endforeach; ?>
@@ -158,7 +159,7 @@ Steps START -->
 												<select class="form-select" name="leerjaar_id">
 													<option value="">Select leerjaar</option>
 													<?php foreach ($leerjaren as $lj): ?>
-														<option value="<?= $lj['LeerJaarID'] ?>">
+														<option value="<?= $lj['id'] ?>">
 															<?= htmlspecialchars($lj['Naam']) ?>
 														</option>
 													<?php endforeach; ?>

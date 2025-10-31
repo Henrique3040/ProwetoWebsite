@@ -173,7 +173,7 @@
 																class="rounded" alt="Course image">
 														</div>
 														<h6 class="table-responsive-title mb-0 ms-2">
-															<a href="course-detail.php?id=<?= $course['CursusID'] ?>"
+															<a href="course-detail.php?id=<?= $course['Id'] ?>"
 																class="stretched-link">
 																<?= htmlspecialchars($course['Titel']) ?>
 															</a>
@@ -205,11 +205,11 @@
 
 												<!-- Action -->
 												<td>
-													<a href="admin-edit-course.php?id=<?= $course['CursusID'] ?>"
+													<a href="admin-edit-course.php?id=<?= $course['Id'] ?>"
 														class="btn btn-sm btn-success me-1 editBtn">Edit</a>
 													<form action="admin-course-list.php" method="POST" style="display:inline;">
 														<input type="hidden" name="delete_course_id"
-															value="<?= $course['CursusID'] ?>">
+															value="<?= $course['Id'] ?>">
 														<button type="submit" class="btn btn-sm btn-danger"
 															onclick="return confirm('Weet je zeker dat je deze cursus wilt verwijderen?')">
 															Delete

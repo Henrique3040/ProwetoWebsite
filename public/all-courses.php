@@ -39,7 +39,7 @@
 	<main>
 
 		<!-- =======================
-Page Banner START -->
+		 Page Banner START -->
 		<section class="bg-dark align-items-center d-flex"
 			style="background:url(assets/images/pattern/04.png) no-repeat center center; background-size:cover;">
 			<!-- Main banner background image -->
@@ -90,12 +90,13 @@ Page content START -->
 								onchange="this.form.submit()">
 								<option value="">All</option>
 
-									<?php foreach ($categories as $cat): ?>
-										<option value="<?= $cat['CategorieID'] ?>"><?= htmlspecialchars($cat['Naam']) ?>
-										</option>
-									<?php endforeach; ?>
+								<?php foreach ($categories as $cat): ?>
+									<option value="<?= htmlspecialchars($cat['ID'], ENT_QUOTES) ?>">
+										<?= htmlspecialchars($cat['Naam'], ENT_QUOTES) ?>
+									</option>
+								<?php endforeach; ?>
 
-								
+
 							</select>
 						</form>
 					</div>
@@ -122,10 +123,11 @@ Page content START -->
 				<!-- Course list START -->
 				<div class="row g-4 justify-content-center">
 
+
 					<!-- Card item START -->
 					<div class="row g-4 justify-content-center">
-						<?php if (mysqli_num_rows($courses) > 0): ?>
-							<?php while ($course = mysqli_fetch_assoc($courses)): ?>
+						<?php if (!empty($courses)): ?>
+							<?php foreach ($courses as $course): ?>
 								<div class="col-lg-10 col-xxl-6">
 									<div class="card rounded overflow-hidden shadow">
 										<div class="row g-0">
@@ -136,11 +138,11 @@ Page content START -->
 											<div class="col-md-8">
 												<div class="card-body">
 													<h5 class="card-title mb-0">
-														<a href="course-detail.php?id=<?= $course['CursusID'] ?>">
-															<?= htmlspecialchars($course['Titel']) ?>
+														<a href="course-detail.php?id=<?= htmlspecialchars($course['Id'], ENT_QUOTES) ?>">
+															<?= htmlspecialchars($course['Titel'], ENT_QUOTES) ?>
 														</a>
 													</h5>
-													
+
 													<p class="mb-2"><i
 															class="fas fa-eye text-success me-1"></i><?= (int) $course['Views'] ?>
 														views</p>
@@ -149,7 +151,7 @@ Page content START -->
 										</div>
 									</div>
 								</div>
-							<?php endwhile; ?>
+							<?php endforeach; ?>
 						<?php else: ?>
 							<p class="text-center text-muted">Geen resultaten gevonden.</p>
 						<?php endif; ?>

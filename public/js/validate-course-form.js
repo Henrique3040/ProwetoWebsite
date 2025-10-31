@@ -34,8 +34,10 @@ $(document).ready(function() {
 
         // Voeg FAQ's toe
         form.find('input[name="faqs"]').remove(); // verwijder bestaande hidden inputs
-        let jsonFaqs = JSON.stringify(faqs);
-        form.append(`<input type="hidden" name="faqs" value='${jsonFaqs}'>`);
+        let jsonFaqs = JSON.stringify(faqs)
+        .replace(/'/g, "&apos;")
+        .replace(/"/g, "&quot;");
+        form.append(`<input type="hidden" name="faqs" value="${jsonFaqs}">`);
 
         // Validatie
         let errors = [];
@@ -60,9 +62,8 @@ $(document).ready(function() {
             return;
         }
 
-        // Alles oké → formulier versturen
-        form.off('submit'); // verwijder eventuele oude eventlisteners
-        form.submit();
+        form[0].submit();
+
     });
 
     // ----------------------------

@@ -11,7 +11,7 @@ class SubWebsite
     // Get all sub-websites
     public function getAll()
     {
-        $sql = "SELECT SubWebsiteID, Title, Link, Icon, CreatedAt FROM SubWebsite ORDER BY Title ASC";
+        $sql = "SELECT Id, Title, Link, Icon, CreatedAt FROM SubWebsite ORDER BY Title ASC";
         $result = mysqli_query($this->conn, $sql);
         return $result ?: [];
     }
@@ -19,7 +19,7 @@ class SubWebsite
     // Update a sub-website
     public function update($id, $title, $link, $icon)
     {
-        $sql = "UPDATE SubWebsite SET Title = ?, Link = ?, Icon = ? WHERE SubWebsiteID = ?";
+        $sql = "UPDATE SubWebsite SET Title = ?, Link = ?, Icon = ? WHERE ID = ?";
         $stmt = mysqli_prepare($this->conn, $sql);
         mysqli_stmt_bind_param($stmt, "sssi", $title, $link, $icon, $id);
         return mysqli_stmt_execute($stmt);
@@ -36,7 +36,7 @@ class SubWebsite
     // Delete a sub-website
     public function delete($id)
     {
-        $sql = "DELETE FROM SubWebsite WHERE SubWebsiteID = ?";
+        $sql = "DELETE FROM SubWebsite WHERE ID = ?";
         $stmt = mysqli_prepare($this->conn, $sql);
         mysqli_stmt_bind_param($stmt, "i", $id);
         return mysqli_stmt_execute($stmt);

@@ -181,7 +181,7 @@
 											</div>
 											<div class="ms-2 mt-1">
 												<h6 class="mb-0">
-													<a href="admin-edit-course.php?id=<?= $course['CursusID'] ?>"
+													<a href="admin-edit-course.php?id=<?= $course['Id'] ?>"
 														class="stretched-link">
 														<?= htmlspecialchars($course['Titel']) ?>
 													</a>

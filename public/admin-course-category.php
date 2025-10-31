@@ -96,12 +96,12 @@
 											<td><?= htmlspecialchars($categorie['UpdatedAt']) ?></td>
 											<td>
 												<button class="btn btn-sm btn-success me-1 editBtn"
-													data-id="<?= $categorie['CategorieID'] ?>"
+													data-id="<?= $categorie['Id'] ?>"
 													data-naam="<?= htmlspecialchars($categorie['Naam']) ?>"
 													data-icon="<?= htmlspecialchars($categorie['Icon']) ?>">Edit</button>
 
 												<button class="btn btn-sm btn-danger deleteBtn"
-													data-id="<?= $categorie['CategorieID'] ?>">Delete</button>
+													data-id="<?= $categorie['Id'] ?>">Delete</button>
 											</td>
 										</tr>
 									<?php endforeach; ?>

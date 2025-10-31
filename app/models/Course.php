@@ -13,20 +13,25 @@ class Course
     {
         $sql = "
         SELECT 
-            c.CursusID,
+            c.Id,
             c.Titel,
             c.FotoURL,
             c.Link,
             c.Views,
             GROUP_CONCAT(cat.Naam SEPARATOR ', ') AS CategorieNamen
         FROM Cursus c
-        LEFT JOIN CursusCategorie cc ON c.CursusID = cc.CursusID
-        LEFT JOIN Categorie cat ON cc.CategorieID = cat.CategorieID
-        GROUP BY c.CursusID
+        LEFT JOIN CursusCategorie cc ON c.Id = cc.cursus_id
+        LEFT JOIN Categorie cat ON cc.categorie_id = cat.id
+        GROUP BY c.Id
         ORDER BY c.Views DESC
         LIMIT ?
         ";
+
         $stmt = mysqli_prepare($this->conn, $sql);
+        if (!$stmt) {
+            die('Prepare failed: ' . mysqli_error($this->conn));
+        }
+
         mysqli_stmt_bind_param($stmt, "i", $limit);
         mysqli_stmt_execute($stmt);
         $result = mysqli_stmt_get_result($stmt);
@@ -35,7 +40,12 @@ class Course
             die('Query failed: ' . mysqli_error($this->conn));
         }
 
-        return $result;
+        $courses = [];
+        while ($row = mysqli_fetch_assoc($result)) {
+            $courses[] = $row;
+        }
+
+        return $courses;
     }
 
 
@@ -44,7 +54,7 @@ class Course
     {
         $sql = "
         SELECT 
-            c.CursusID,
+            c.id,
             c.Titel,
             c.FotoURL,
             c.Link,
@@ -61,11 +71,11 @@ class Course
             cc.CategorieID,
             GROUP_CONCAT(cat.Naam SEPARATOR ', ') AS CategorieNamen
         FROM Cursus c
-        JOIN Cursusdetails d ON c.CursusID = d.CursusID
-        LEFT JOIN CursusCategorie cc ON c.CursusID = cc.CursusID
-        LEFT JOIN Categorie cat ON cc.CategorieID = cat.CategorieID
-        WHERE c.CursusID = ?
-        GROUP BY c.CursusID
+        JOIN Cursusdetails d ON c.Id = d.id
+        LEFT JOIN CursusCategorie cc ON c.id = cc.cursus_id
+        LEFT JOIN Categorie cat ON cc.CategorieID = cat.id
+        WHERE c.id = ?
+        GROUP BY c.id
         ";
 
 
@@ -76,7 +86,7 @@ class Course
         $course = mysqli_fetch_assoc($result);
 
         // Haal FAQ’s apart op
-        $sqlFaq = "SELECT FAQID, Vraag, Antwoord FROM CursusFAQ WHERE CursusID = ?";
+        $sqlFaq = "SELECT FAQID, Vraag, Antwoord FROM CursusFAQ WHERE id = ?";
         $stmtFaq = mysqli_prepare($this->conn, $sqlFaq);
         mysqli_stmt_bind_param($stmtFaq, "i", $courseId);
         mysqli_stmt_execute($stmtFaq);
@@ -93,17 +103,17 @@ class Course
     {
         $sql = "
         SELECT 
-            c.CursusID,
+            c.Id,
             c.Titel,
             c.FotoURL,
             c.Link,
             c.Views,
             GROUP_CONCAT(cat.Naam SEPARATOR ', ') AS CategorieNamen
         FROM Cursus c
-        LEFT JOIN CursusCategorie cc ON c.CursusID = cc.CursusID
-        LEFT JOIN Categorie cat ON cc.CategorieID = cat.CategorieID
+        LEFT JOIN CursusCategorie cc ON c.id = cc.cursus_id
+        LEFT JOIN Categorie cat ON cc.categorie_id = cat.id
         WHERE c.Titel LIKE CONCAT('%', ?, '%')
-        GROUP BY c.CursusID
+        GROUP BY c.Id
         ORDER BY c.Views DESC
         ";
 
@@ -124,7 +134,7 @@ class Course
     {
         $sql = "
         SELECT 
-            c.CursusID,
+            c.Id,
             c.Titel,
             c.FotoURL,
             c.Link,
@@ -133,13 +143,18 @@ class Course
             c.Active,
             GROUP_CONCAT(cat.Naam SEPARATOR ', ') AS CategorieNamen
         FROM Cursus c
-        LEFT JOIN CursusCategorie cc ON c.CursusID = cc.CursusID
-        LEFT JOIN Categorie cat ON cc.CategorieID = cat.CategorieID
-        GROUP BY c.CursusID
-        ORDER BY c.Titel ASC
-        ";
+        LEFT JOIN CursusCategorie cc ON c.id = cc.cursus_id
+        LEFT JOIN Categorie cat ON cc.categorie_id = cat.id
+        GROUP BY c.id
+        ORDER BY c.Titel ASC";
 
-        $result = mysqli_query($this->conn, $sql);
+        $stmt = mysqli_prepare($this->conn, $sql);
+        if (!$stmt) {
+            die('Prepare failed: ' . mysqli_error($this->conn));
+        }
+
+        mysqli_stmt_execute($stmt);
+        $result = mysqli_stmt_get_result($stmt);
 
         if (!$result) {
             die('Query failed: ' . mysqli_error($this->conn));
@@ -203,13 +218,13 @@ class Course
         // Hoofdquery
         $sql = "
         SELECT 
-            c.CursusID, c.Titel, c.FotoURL, c.Link, c.Views, c.CreatedAt, c.Active,
+            c.Id, c.Titel, c.FotoURL, c.Link, c.Views, c.CreatedAt, c.Active,
             GROUP_CONCAT(cat.Naam SEPARATOR ', ') AS CategorieNamen
         FROM Cursus c
-        LEFT JOIN CursusCategorie cc ON c.CursusID = cc.CursusID
-        LEFT JOIN Categorie cat ON cc.CategorieID = cat.CategorieID
+        LEFT JOIN CursusCategorie cc ON c.id = cc.cursus_id
+        LEFT JOIN Categorie cat ON cc.categorie_id = cat.id
         $whereSql
-        GROUP BY c.CursusID
+        GROUP BY c.Id
         $orderBy
         LIMIT ? OFFSET ?
     ";
@@ -223,6 +238,10 @@ class Course
             $params[] = $offset;
             mysqli_stmt_bind_param($stmt, $types, ...$params);
         } else {
+            if (!$stmt) {
+                die('Prepare failed: ' . mysqli_error($this->conn) . "\nSQL: " . $sql);
+            }
+            
             mysqli_stmt_bind_param($stmt, "ii", $limit, $offset);
         }
 
@@ -243,10 +262,10 @@ class Course
     public function getCategoriesByCourse($courseId)
     {
         $sql = "
-        SELECT cat.CategorieID, cat.Naam
+        SELECT cat.id AS CategorieID, cat.Naam
         FROM Categorie cat
-        INNER JOIN CursusCategorie cc ON cat.CategorieID = cc.CategorieID
-        WHERE cc.CursusID = ?";
+        INNER JOIN CursusCategorie cc ON cat.id = cc.categorie_id
+        WHERE cc.cursus_id = ?";
 
         $stmt = mysqli_prepare($this->conn, $sql);
         mysqli_stmt_bind_param($stmt, "i", $courseId);
@@ -264,17 +283,17 @@ class Course
     {
         $sql = "
         SELECT 
-            c.CursusID,
+            c.Id,
             c.Titel,
             c.FotoURL,
             c.Link,
             c.Views,
             GROUP_CONCAT(cat.Naam SEPARATOR ', ') AS CategorieNamen
         FROM Cursus c
-        LEFT JOIN CursusCategorie cc ON c.CursusID = cc.CursusID
-        LEFT JOIN Categorie cat ON cc.CategorieID = cat.CategorieID
+        LEFT JOIN CursusCategorie cc ON c.Id = cc.cursus_id
+        LEFT JOIN Categorie cat ON cc.categorie_id  = cat.id
         WHERE c.Active = 1
-        GROUP BY c.CursusID
+        GROUP BY c.Id
         ORDER BY c.Titel ASC
         ";
 
@@ -306,62 +325,68 @@ class Course
 
 
 
-    public function createCourse($data)
-    {
-        // 1️ Insert in Cursus
-        $sql = "INSERT INTO Cursus (Titel, FotoURL, Link, Views, Featured, Active)
+public function createCourse($data)
+{
+    // 1️ Insert in Cursus
+    $sql = "INSERT INTO Cursus (Titel, FotoURL, Link, Views, Featured, Active)
             VALUES (?, ?, ?, 0, 0, ?)";
-        $stmt = mysqli_prepare($this->conn, $sql);
-        mysqli_stmt_bind_param($stmt, "ssss", $data['Titel'], $data['FotoURL'], $data['Link'], $data['Active']);
-        mysqli_stmt_execute($stmt);
-        $cursusId = mysqli_insert_id($this->conn);
+    $stmt = mysqli_prepare($this->conn, $sql);
+    mysqli_stmt_bind_param($stmt, "ssss", $data['Titel'], $data['FotoURL'], $data['Link'], $data['Active']);
+    mysqli_stmt_execute($stmt);
+    $Id = mysqli_insert_id($this->conn);
 
-        if (!$cursusId) {
-            return false;
-        }
-
-        // 2 Insert in Cursusdetails
-        $sql2 = "INSERT INTO Cursusdetails (CursusID, KorteBeschrijving, Beschrijving, Rating, Taal, Prijs, LaatstBijgewerkt, Materiaal, Documenten, LeerJaarID)
-             VALUES (?, ?, ?, 0, 'Nederlands', 0, NOW(), ?, ?, ?)";
-        $stmt2 = mysqli_prepare($this->conn, $sql2);
-        mysqli_stmt_bind_param($stmt2, "isssss", $cursusId, $data['KorteBeschrijving'], $data['Beschrijving'], $data['Materiaal'], $data['Documenten'], $data['LeerJaarID']);
-        mysqli_stmt_execute($stmt2);
-
-        // 3 Koppel categorie
-        $sql3 = "INSERT INTO CursusCategorie (CursusID, CategorieID) VALUES (?, ?)";
-        $stmt3 = mysqli_prepare($this->conn, $sql3);
-        mysqli_stmt_bind_param($stmt3, "ii", $cursusId, $data['CategorieID']);
-        mysqli_stmt_execute($stmt3);
-
-
-        // 4️ Voeg FAQ’s toe (indien aanwezig)
-        if (!empty($data['faqs']) && is_array($data['faqs'])) {
-            foreach ($data['faqs'] as $faq) {
-                $vraag = $faq['vraag'];
-                $antwoord = $faq['antwoord'];
-
-                $sqlFaq = "INSERT INTO CursusFAQ (CursusID, Vraag, Antwoord) VALUES (?, ?, ?)";
-                $stmtFaq = mysqli_prepare($this->conn, $sqlFaq);
-                mysqli_stmt_bind_param($stmtFaq, "iss", $cursusId, $vraag, $antwoord);
-                mysqli_stmt_execute($stmtFaq);
-            }
-        }
-
-        return $cursusId;
+    if (!$Id) {
+        die("❌ Fout bij Cursus: " . mysqli_error($this->conn));
     }
+
+    // 2️ Insert in Cursusdetails
+    $sql2 = "INSERT INTO Cursusdetails (CursusID, KorteBeschrijving, Beschrijving, Rating, Taal, Prijs, LaatstBijgewerkt, Materiaal, Documenten, LeerJaarID)
+             VALUES (?, ?, ?, 0, 'Nederlands', 0, NOW(), ?, ?, ?)";
+    $stmt2 = mysqli_prepare($this->conn, $sql2);
+    mysqli_stmt_bind_param($stmt2, "issssi", $Id, $data['KorteBeschrijving'], $data['Beschrijving'], $data['Materiaal'], $data['Documenten'], $data['LeerJaarID']);
+    mysqli_stmt_execute($stmt2);
+    if (mysqli_error($this->conn)) {
+        die("❌ Fout bij Cursusdetails: " . mysqli_error($this->conn));
+    }
+
+    // 3️ Koppel categorie
+    $sql3 = "INSERT INTO CursusCategorie (cursus_id, categorie_id) VALUES (?, ?)";
+    $stmt3 = mysqli_prepare($this->conn, $sql3);
+    mysqli_stmt_bind_param($stmt3, "ii", $Id, $data['CategorieID']);
+    mysqli_stmt_execute($stmt3);
+    if (mysqli_error($this->conn)) {
+        die("❌ Fout bij CursusCategorie: " . mysqli_error($this->conn));
+    }
+
+    // 4️ Voeg FAQ’s toe (indien aanwezig)
+    if (!empty($data['faqs']) && is_array($data['faqs'])) {
+        foreach ($data['faqs'] as $faq) {
+            $vraag = $faq['vraag'];
+            $antwoord = $faq['antwoord'];
+
+            $sqlFaq = "INSERT INTO CursusFAQ (CursusID, Vraag, Antwoord) VALUES (?, ?, ?)";
+            $stmtFaq = mysqli_prepare($this->conn, $sqlFaq);
+            mysqli_stmt_bind_param($stmtFaq, "iss", $Id, $vraag, $antwoord);
+            mysqli_stmt_execute($stmtFaq);
+        }
+    }
+
+    return $Id;
+}
+
 
     public function getLatestUpdatedCourses($limit = 5)
     {
         $sql = "
              SELECT 
-                 c.CursusID,
+                 c.Id,
                  c.Titel,
                  c.FotoURL,
                  c.CreatedAt,
                  c.Active,
                  d.LaatstBijgewerkt
              FROM Cursus c
-             LEFT JOIN Cursusdetails d ON c.CursusID = d.CursusID
+             LEFT JOIN Cursusdetails d ON c.Id = d.Id
              ORDER BY d.LaatstBijgewerkt DESC, c.CreatedAt DESC
              LIMIT ?
              ";
@@ -380,25 +405,25 @@ class Course
 
         try {
             // 1️ Verwijder gekoppelde FAQ's
-            $sqlFaq = "DELETE FROM CursusFAQ WHERE CursusID = ?";
+            $sqlFaq = "DELETE FROM CursusFAQ WHERE Id = ?";
             $stmtFaq = mysqli_prepare($this->conn, $sqlFaq);
             mysqli_stmt_bind_param($stmtFaq, "i", $courseId);
             mysqli_stmt_execute($stmtFaq);
 
             // 2️ Verwijder categorie-koppelingen
-            $sqlCat = "DELETE FROM CursusCategorie WHERE CursusID = ?";
+            $sqlCat = "DELETE FROM CursusCategorie WHERE Id = ?";
             $stmtCat = mysqli_prepare($this->conn, $sqlCat);
             mysqli_stmt_bind_param($stmtCat, "i", $courseId);
             mysqli_stmt_execute($stmtCat);
 
             // 3️ Verwijder cursusdetails
-            $sqlDetails = "DELETE FROM Cursusdetails WHERE CursusID = ?";
+            $sqlDetails = "DELETE FROM Cursusdetails WHERE Id = ?";
             $stmtDetails = mysqli_prepare($this->conn, $sqlDetails);
             mysqli_stmt_bind_param($stmtDetails, "i", $courseId);
             mysqli_stmt_execute($stmtDetails);
 
             // Verwijder foto van server
-            $sqlFoto = "SELECT FotoURL FROM Cursus WHERE CursusID = ?";
+            $sqlFoto = "SELECT FotoURL FROM Cursus WHERE Id = ?";
             $stmtFoto = mysqli_prepare($this->conn, $sqlFoto);
             mysqli_stmt_bind_param($stmtFoto, "i", $courseId);
             mysqli_stmt_execute($stmtFoto);
@@ -411,7 +436,7 @@ class Course
 
 
             // 4️ Verwijder hoofdrecord
-            $sqlMain = "DELETE FROM Cursus WHERE CursusID = ?";
+            $sqlMain = "DELETE FROM Cursus WHERE Id = ?";
             $stmtMain = mysqli_prepare($this->conn, $sqlMain);
             mysqli_stmt_bind_param($stmtMain, "i", $courseId);
             mysqli_stmt_execute($stmtMain);
@@ -438,7 +463,7 @@ class Course
             if (!empty($data['FotoURL'])) {
                 $sql = "UPDATE Cursus 
                     SET Titel = ?, FotoURL = ?, Link = ?, Active = ?
-                    WHERE CursusID = ?";
+                    WHERE Id = ?";
                 $stmt = mysqli_prepare($this->conn, $sql);
                 mysqli_stmt_bind_param(
                     $stmt,
@@ -452,7 +477,7 @@ class Course
             } else {
                 $sql = "UPDATE Cursus 
                     SET Titel = ?, Link = ?, Active = ?
-                    WHERE CursusID = ?";
+                    WHERE Id = ?";
                 $stmt = mysqli_prepare($this->conn, $sql);
                 mysqli_stmt_bind_param(
                     $stmt,
@@ -470,7 +495,7 @@ class Course
 
             $sql2 = "UPDATE Cursusdetails
                  SET KorteBeschrijving = ?, Beschrijving = ?, Materiaal = ?, Documenten = ?, LeerJaarID = ?
-                 WHERE CursusID = ?";
+                 WHERE Id = ?";
             $stmt2 = mysqli_prepare($this->conn, $sql2);
             mysqli_stmt_bind_param(
                 $stmt2,
@@ -485,13 +510,13 @@ class Course
             mysqli_stmt_execute($stmt2);
 
             // 3️ Categorie bijwerken (simpel: oude verwijderen → nieuwe toevoegen)
-            $sqlDel = "DELETE FROM CursusCategorie WHERE CursusID = ?";
+            $sqlDel = "DELETE FROM CursusCategorie WHERE Id = ?";
             $stmtDel = mysqli_prepare($this->conn, $sqlDel);
             mysqli_stmt_bind_param($stmtDel, "i", $courseId);
             mysqli_stmt_execute($stmtDel);
 
             if (!empty($data['CategorieID'])) {
-                $sqlCat = "INSERT INTO CursusCategorie (CursusID, CategorieID) VALUES (?, ?)";
+                $sqlCat = "INSERT INTO CursusCategorie (Id, CategorieID) VALUES (?, ?)";
                 $stmtCat = mysqli_prepare($this->conn, $sqlCat);
                 mysqli_stmt_bind_param($stmtCat, "ii", $courseId, $data['CategorieID']);
                 mysqli_stmt_execute($stmtCat);
@@ -509,13 +534,13 @@ class Course
 
                     // UPDATE bestaande FAQ
                     if (!empty($faqId)) {
-                        $sqlFaqUpdate = "UPDATE CursusFAQ SET Vraag = ?, Antwoord = ? WHERE FAQID = ? AND CursusID = ?";
+                        $sqlFaqUpdate = "UPDATE CursusFAQ SET Vraag = ?, Antwoord = ? WHERE FAQID = ? AND Id = ?";
                         $stmtFaqUpdate = mysqli_prepare($this->conn, $sqlFaqUpdate);
                         mysqli_stmt_bind_param($stmtFaqUpdate, "ssii", $vraag, $antwoord, $faqId, $courseId);
                         mysqli_stmt_execute($stmtFaqUpdate);
                     } else {
                         // INSERT nieuwe FAQ
-                        $sqlFaqInsert = "INSERT INTO CursusFAQ (CursusID, Vraag, Antwoord) VALUES (?, ?, ?)";
+                        $sqlFaqInsert = "INSERT INTO CursusFAQ (Id, Vraag, Antwoord) VALUES (?, ?, ?)";
                         $stmtFaqInsert = mysqli_prepare($this->conn, $sqlFaqInsert);
                         mysqli_stmt_bind_param($stmtFaqInsert, "iss", $courseId, $vraag, $antwoord);
                         mysqli_stmt_execute($stmtFaqInsert);
@@ -526,7 +551,7 @@ class Course
             // 5️ FAQ’s verwijderen (alleen die door frontend gevraagd worden)
             if (!empty($data['DeletedFaqIDs']) && is_array($data['DeletedFaqIDs'])) {
                 $ids = implode(',', array_map('intval', $data['DeletedFaqIDs']));
-                $sqlDelFaqs = "DELETE FROM CursusFAQ WHERE FAQID IN ($ids) AND CursusID = $courseId";
+                $sqlDelFaqs = "DELETE FROM CursusFAQ WHERE FAQID IN ($ids) AND Id = $courseId";
                 mysqli_query($this->conn, $sqlDelFaqs);
             }
 

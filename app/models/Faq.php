@@ -36,7 +36,7 @@ class Faq
     // FAQ verwijderen
     public function deleteFaq($faqId)
     {
-        $sql = "DELETE FROM CursusFAQ WHERE FAQID = ?";
+        $sql = "DELETE FROM CursusFAQ WHERE ID = ?";
         $stmt = mysqli_prepare($this->conn, $sql);
         mysqli_stmt_bind_param($stmt, "i", $faqId);
         return mysqli_stmt_execute($stmt);

@@ -116,7 +116,7 @@ Categories START -->
 
 						while ($cat = mysqli_fetch_assoc($categories)):
 							$name = htmlspecialchars($cat['Naam']);
-							$id = (int) $cat['CategorieID'];
+							$id = (int) $cat['ID'];
 							$iconClass = htmlspecialchars($cat['Icon'] ?? 'fa-question-circle');
 							$color = $colors[$i % count($colors)];
 							$courseCount = $cat['TotalCourses'] ?? 0;

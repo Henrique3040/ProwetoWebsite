@@ -92,13 +92,13 @@ $totalSubwebsites = mysqli_num_rows($subwebsites);
                                     <td><?= htmlspecialchars($site['CreatedAt']) ?></td>
                                     <td>
                                         <button class="btn btn-sm btn-success me-1 editBtn"
-                                                data-id="<?= $site['SubWebsiteID'] ?>"
+                                                data-id="<?= $site['Id'] ?>"
                                                 data-title="<?= htmlspecialchars($site['Title']) ?>"
                                                 data-link="<?= htmlspecialchars($site['Link']) ?>"
                                                 data-icon="<?= htmlspecialchars($site['Icon']) ?>">Edit</button>
 
                                         <button class="btn btn-sm btn-danger deleteBtn"
-                                                data-id="<?= $site['SubWebsiteID'] ?>">Delete</button>
+                                                data-id="<?= $site['Id'] ?>">Delete</button>
                                     </td>
                                 </tr>
                             <?php endforeach; ?>
