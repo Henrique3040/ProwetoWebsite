@@ -19,7 +19,7 @@
 
 
 	if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['delete_course_id'])) {
-		$courseController->delete((int) $_POST['delete_course_id']);
+		$courseController->delete($_POST['delete_course_id']);
 		header('Location: admin-course-list.php?success=deleted');
 		exit;
 	}

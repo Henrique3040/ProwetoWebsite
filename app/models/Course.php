@@ -84,7 +84,7 @@ class Course
             die("SQL ERROR (CourseDetail): " . mysqli_error($this->conn));
         }
     
-        mysqli_stmt_bind_param($stmt, "i", $courseId);
+        mysqli_stmt_bind_param($stmt, "s", $courseId);
         mysqli_stmt_execute($stmt);
         $result = mysqli_stmt_get_result($stmt);
         $course = mysqli_fetch_assoc($result);
@@ -92,7 +92,7 @@ class Course
         // ✅ Haal FAQ’s op met juiste kolomnaam (cursus_id)
         $sqlFaq = "SELECT id AS FAQID, Vraag, Antwoord FROM CursusFAQ WHERE cursus_id = ?";
         $stmtFaq = mysqli_prepare($this->conn, $sqlFaq);
-        mysqli_stmt_bind_param($stmtFaq, "i", $courseId);
+        mysqli_stmt_bind_param($stmtFaq, "s", $courseId);
         mysqli_stmt_execute($stmtFaq);
         $resultFaq = mysqli_stmt_get_result($stmtFaq);
         $faqs = mysqli_fetch_all($resultFaq, MYSQLI_ASSOC);
@@ -273,7 +273,7 @@ class Course
         WHERE cc.cursus_id = ?";
 
         $stmt = mysqli_prepare($this->conn, $sql);
-        mysqli_stmt_bind_param($stmt, "i", $courseId);
+        mysqli_stmt_bind_param($stmt, "s", $courseId);
         mysqli_stmt_execute($stmt);
         $result = mysqli_stmt_get_result($stmt);
 
@@ -413,7 +413,7 @@ class Course
                 $this->conn,
                 "DELETE FROM CursusFAQ WHERE cursus_id = ?"
             );
-            mysqli_stmt_bind_param($stmtFaq, "i", $courseId);
+            mysqli_stmt_bind_param($stmtFaq, "s", $courseId);
             mysqli_stmt_execute($stmtFaq);
 
             // 2️⃣ Categorie
@@ -421,7 +421,7 @@ class Course
                 $this->conn,
                 "DELETE FROM CursusCategorie WHERE cursus_id = ?"
             );
-            mysqli_stmt_bind_param($stmtCat, "i", $courseId);
+            mysqli_stmt_bind_param($stmtCat, "s", $courseId);
             mysqli_stmt_execute($stmtCat);
 
             // 3️⃣ Details
@@ -429,7 +429,7 @@ class Course
                 $this->conn,
                 "DELETE FROM Cursusdetails WHERE cursus_id = ?"
             );
-            mysqli_stmt_bind_param($stmtDetails, "i", $courseId);
+            mysqli_stmt_bind_param($stmtDetails, "s", $courseId);
             mysqli_stmt_execute($stmtDetails);
 
             // 4️⃣ Foto ophalen + verwijderen
@@ -437,7 +437,7 @@ class Course
                 $this->conn,
                 "SELECT FotoURL FROM Cursus WHERE id = ?"
             );
-            mysqli_stmt_bind_param($stmtFoto, "i", $courseId);
+            mysqli_stmt_bind_param($stmtFoto, "s", $courseId);
             mysqli_stmt_execute($stmtFoto);
 
             $foto = mysqli_fetch_assoc(mysqli_stmt_get_result($stmtFoto));
@@ -450,7 +450,7 @@ class Course
                 $this->conn,
                 "DELETE FROM Cursus WHERE id = ?"
             );
-            mysqli_stmt_bind_param($stmtMain, "i", $courseId);
+            mysqli_stmt_bind_param($stmtMain, "s", $courseId);
             mysqli_stmt_execute($stmtMain);
 
             mysqli_commit($this->conn);
@@ -478,7 +478,7 @@ class Course
                 $stmt = mysqli_prepare($this->conn, $sql);
                 mysqli_stmt_bind_param(
                     $stmt,
-                    "sssii",
+                    "sssis",
                     $data['Titel'],
                     $data['FotoURL'],
                     $data['Link'],
@@ -492,7 +492,7 @@ class Course
                 $stmt = mysqli_prepare($this->conn, $sql);
                 mysqli_stmt_bind_param(
                     $stmt,
-                    "ssii",
+                    "ssis",
                     $data['Titel'],
                     $data['Link'],
                     $data['Active'],
@@ -508,7 +508,7 @@ class Course
             $stmt2 = mysqli_prepare($this->conn, $sql2);
             mysqli_stmt_bind_param(
                 $stmt2,
-                "ssiiii",
+                "ssiiss",
                 $data['KorteBeschrijving'],
                 $data['Beschrijving'],
                 $data['Materiaal'],
@@ -521,7 +521,7 @@ class Course
             // 3️⃣ Categorie opnieuw koppelen
             mysqli_query(
                 $this->conn,
-                "DELETE FROM CursusCategorie WHERE cursus_id = $courseId"
+                "DELETE FROM CursusCategorie WHERE cursus_id = ?"
             );
 
             if (!empty($data['CategorieID'])) {
@@ -529,7 +529,7 @@ class Course
                     $this->conn,
                     "INSERT INTO CursusCategorie (cursus_id, categorie_id) VALUES (?, ?)"
                 );
-                mysqli_stmt_bind_param($stmtCat, "ii", $courseId, $data['CategorieID']);
+                mysqli_stmt_bind_param($stmtCat, "ss", $courseId, $data['CategorieID']);
                 mysqli_stmt_execute($stmtCat);
             }
 
@@ -545,7 +545,7 @@ class Course
                         $stmtU = mysqli_prepare($this->conn, $sqlU);
                         mysqli_stmt_bind_param(
                             $stmtU,
-                            "ssii",
+                            "ssss",
                             $faq['vraag'],
                             $faq['antwoord'],
                             $faq['FAQID'],
@@ -555,11 +555,13 @@ class Course
 
                     } else {
                         // INSERT nieuw
-                        $sqlI = "INSERT INTO CursusFAQ (cursus_id, Vraag, Antwoord) VALUES (?, ?, ?)";
+                        $faqId = generateUUID();
+                        $sqlI = "INSERT INTO CursusFAQ (Id, cursus_id, Vraag, Antwoord) VALUES (?, ?, ?, ?)";
                         $stmtI = mysqli_prepare($this->conn, $sqlI);
                         mysqli_stmt_bind_param(
                             $stmtI,
-                            "iss",
+                            "ssss",
+                            $faqId,
                             $courseId,
                             $faq['vraag'],
                             $faq['antwoord']
@@ -571,11 +573,15 @@ class Course
 
             // 5️⃣ Verwijder FAQ’s
             if (!empty($data['DeletedFaqIDs'])) {
-                $ids = implode(',', array_map('intval', $data['DeletedFaqIDs']));
-                mysqli_query(
-                    $this->conn,
-                    "DELETE FROM CursusFAQ WHERE id IN ($ids) AND cursus_id = $courseId"
-                );
+                $ids = array_map(function($id) {
+                    return "'" . mysqli_real_escape_string($this->conn, $id) . "'";
+                }, $data['DeletedFaqIDs']);
+                
+                $idList = implode(',', $ids);
+                
+                mysqli_query($this->conn,
+                   "DELETE FROM CursusFAQ WHERE id IN ($idList) AND cursus_id='$courseId'"
+                );                
             }
 
             mysqli_commit($this->conn);

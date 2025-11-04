@@ -150,10 +150,16 @@ class CourseController
             }
 
             // FAQ’s (optioneel)
-            $faqs = isset($_POST['faqs']) ? json_decode($_POST['faqs'], true) : [];
+            $faqs = [];
+            if (isset($_POST['faqs']) && !empty($_POST['faqs'])) {
+                $faqs = json_decode($_POST['faqs'], true);
+            }
 
             // Verwijderde FAQ's
-            $deletedFaqs = isset($_POST['deletedFaqs']) ? json_decode($_POST['deletedFaqs'], true) : [];
+            $deletedFaqIDs = [];
+            if (isset($_POST['deletedFaqs']) && !empty($_POST['deletedFaqs'])) {
+                $deletedFaqIDs = json_decode($_POST['deletedFaqs'], true);
+            }
 
             // Update via model
             $updated = $this->model->updateCourse($courseId, [
@@ -168,7 +174,7 @@ class CourseController
                 'Documenten' => $documenten,
                 'LeerJaarID' => $leerjaarId,
                 'Faqs' => $faqs,
-                'DeletedFaqIDs' => $deletedFaqs // belangrijk!
+                'DeletedFaqIDs' =>  $deletedFaqIDs // belangrijk!
             ]);
 
             if ($updated) {

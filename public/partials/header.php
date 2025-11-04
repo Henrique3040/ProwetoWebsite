@@ -26,7 +26,7 @@
                                         <ul class="dropdown-menu dropdown-menu-start" data-bs-popper="none">
                                             <?php foreach ($category['courses'] as $course): ?>
                                                 <li>
-                                                    <a class="dropdown-item" href="course-detail.php?id=<?= $course['CursusID'] ?>">
+                                                    <a class="dropdown-item" href="course-detail.php?id=<?= $course['id'] ?>">
                                                         <?= htmlspecialchars($course['Titel']) ?>
                                                     </a>
                                                 </li>
@@ -35,7 +35,7 @@
                                     </li>
                                 <?php else: ?>
                                     <li>
-                                        <a class="dropdown-item" href="categorie-page.php?id=<?= $category['CategorieID'] ?>">
+                                        <a class="dropdown-item" href="categorie-page.php?id=<?= $category['id'] ?>">
                                             <?= htmlspecialchars($category['Naam']) ?>
                                         </a>
                                     </li>
