@@ -1,4 +1,5 @@
 <?php
+include_once __DIR__ . '/../helpers/generateUUID.php';
 class Category
 {
     private $conn;
@@ -155,7 +156,7 @@ class Category
         WHERE cc.cursus_id = ?";
 
         $stmt = mysqli_prepare($this->conn, $sql);
-        mysqli_stmt_bind_param($stmt, "i", $courseId);
+        mysqli_stmt_bind_param($stmt, "s", $courseId);
         mysqli_stmt_execute($stmt);
         $result = mysqli_stmt_get_result($stmt);
 
@@ -168,9 +169,10 @@ class Category
 
     public function createCategorie($naam, $icon)
     {
-        $sql = "INSERT INTO Categorie (Naam, Icon) VALUES (?, ?)";
+        $uuid = generateUUID();
+        $sql = "INSERT INTO Categorie (Id, Naam, Icon) VALUES (?, ?, ?)";
         $stmt = mysqli_prepare($this->conn, $sql);
-        mysqli_stmt_bind_param($stmt, "ss", $naam, $icon);
+        mysqli_stmt_bind_param($stmt, "sss", $uuid , $naam, $icon);
         return mysqli_stmt_execute($stmt);
     }
 

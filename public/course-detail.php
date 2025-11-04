@@ -12,12 +12,12 @@
 	require_once __DIR__ . '/../app/core/init.php';
 
 	// Haal course ID op uit de URL
-	$courseId = isset($_GET['id']) ? intval($_GET['id']) : 0;
+	$courseId = isset($_GET['id']) ? intval($_GET['id']) : null;
 	$course = $courseController->getCourseDetail($courseId);
 
-	$categories = $categoryController->getCategoriesByCourse($course['CursusID']);
+	$categories = $categoryController->getCategoriesByCourse($course['id']);
 
-	$faqs = $faqController-> index($course['CursusID']);
+	$faqs = $faqController-> index($course['id']);
 	?>
 
 

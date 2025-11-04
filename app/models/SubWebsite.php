@@ -1,4 +1,5 @@
 <?php
+include_once __DIR__ . '/../helpers/generateUUID.php';
 class SubWebsite
 {
     private $conn;
@@ -27,15 +28,17 @@ class SubWebsite
     // Create a new sub-website
     public function create($title, $link, $icon)
     {
-        $sql = "INSERT INTO SubWebsite (Title, Link, Icon) VALUES (?, ?, ?)";
+        $uuid = generateUUID();
+        $sql = "INSERT INTO SubWebsite (Id , Title, Link, Icon) VALUES (?, ?, ?, ?)";
         $stmt = mysqli_prepare($this->conn, $sql);
-        mysqli_stmt_bind_param($stmt, "sss", $title, $link, $icon);
+        mysqli_stmt_bind_param($stmt, "ssss", $uuid , $title, $link, $icon);
         return mysqli_stmt_execute($stmt);
     }
 
     // Delete a sub-website
     public function delete($id)
     {
+        
         $sql = "DELETE FROM SubWebsite WHERE ID = ?";
         $stmt = mysqli_prepare($this->conn, $sql);
         mysqli_stmt_bind_param($stmt, "i", $id);

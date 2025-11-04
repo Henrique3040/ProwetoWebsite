@@ -58,7 +58,7 @@ class CourseController
             $beschrijving = $_POST['beschrijving'];
             $categorieID = $_POST['categorie_id'];
             $videoLink = $_POST['video_link'];
-            $leerjaarId = $_POST['leerjaar_id'];
+            $leerjaarId = $_POST['leerjaar_id'] ?? null;
             // Booleans
             $materiaal = isset($_POST['materiaal']) ? 1 : 0;
             $documenten = isset($_POST['documenten']) ? 1 : 0;

@@ -1,4 +1,5 @@
 <?php
+include_once __DIR__ . '/../helpers/generateUUID.php';
 class Course
 {
     private $conn;
@@ -331,23 +332,21 @@ class Course
 
     public function createCourse($data)
     {
+        $Id = generateUUID();
         // 1️ Insert in Cursus
-        $sql = "INSERT INTO Cursus (Titel, FotoURL, Link, Views, Featured, Active)
-            VALUES (?, ?, ?, 0, 0, ?)";
+        $sql = "INSERT INTO Cursus (Id , Titel, FotoURL, Link, Views, Featured, Active)
+            VALUES (?, ?, ?, ?, 0, 0, ?)";
         $stmt = mysqli_prepare($this->conn, $sql);
-        mysqli_stmt_bind_param($stmt, "ssss", $data['Titel'], $data['FotoURL'], $data['Link'], $data['Active']);
+        mysqli_stmt_bind_param($stmt, "sssss", $Id , $data['Titel'], $data['FotoURL'], $data['Link'], $data['Active']);
         mysqli_stmt_execute($stmt);
-        $Id = mysqli_insert_id($this->conn);
+      
 
-        if (!$Id) {
-            die("❌ Fout bij Cursus: " . mysqli_error($this->conn));
-        }
-
+        $CursusDetailId = $Id;
         // 2️ Insert in Cursusdetails
-        $sql2 = "INSERT INTO Cursusdetails (cursus_id, KorteBeschrijving, Beschrijving, Rating, Taal, Prijs, LaatstBijgewerkt, Materiaal, Documenten, LeerJaarID)
-             VALUES (?, ?, ?, 0, 'Nederlands', 0, NOW(), ?, ?, ?)";
+        $sql2 = "INSERT INTO Cursusdetails (Id, cursus_id, KorteBeschrijving, Beschrijving, Rating, Taal, Prijs, LaatstBijgewerkt, Materiaal, Documenten, LeerJaarID)
+             VALUES (?, ?, ?, ?, 0, 'Nederlands', 0, NOW(), ?, ?, ?)";
         $stmt2 = mysqli_prepare($this->conn, $sql2);
-        mysqli_stmt_bind_param($stmt2, "issssi", $Id, $data['KorteBeschrijving'], $data['Beschrijving'], $data['Materiaal'], $data['Documenten'], $data['LeerJaarID']);
+        mysqli_stmt_bind_param($stmt2, "sssssss",$CursusDetailId , $Id, $data['KorteBeschrijving'], $data['Beschrijving'], $data['Materiaal'], $data['Documenten'], $data['LeerJaarID']);
         mysqli_stmt_execute($stmt2);
         if (mysqli_error($this->conn)) {
             die("❌ Fout bij Cursusdetails: " . mysqli_error($this->conn));
@@ -356,21 +355,23 @@ class Course
         // 3️ Koppel categorie
         $sql3 = "INSERT INTO CursusCategorie (cursus_id, categorie_id) VALUES (?, ?)";
         $stmt3 = mysqli_prepare($this->conn, $sql3);
-        mysqli_stmt_bind_param($stmt3, "ii", $Id, $data['CategorieID']);
+        mysqli_stmt_bind_param($stmt3, "ss",  $Id, $data['CategorieID']);
         mysqli_stmt_execute($stmt3);
         if (mysqli_error($this->conn)) {
             die("❌ Fout bij CursusCategorie: " . mysqli_error($this->conn));
         }
 
+        
         // 4️ Voeg FAQ’s toe (indien aanwezig)
         if (!empty($data['faqs']) && is_array($data['faqs'])) {
             foreach ($data['faqs'] as $faq) {
                 $vraag = $faq['vraag'];
                 $antwoord = $faq['antwoord'];
+                $faqId = generateUUID();
 
-                $sqlFaq = "INSERT INTO CursusFAQ (cursus_id, Vraag, Antwoord) VALUES (?, ?, ?)";
+                $sqlFaq = "INSERT INTO CursusFAQ (Id, cursus_id, Vraag, Antwoord) VALUES (?, ?, ?, ?)";
                 $stmtFaq = mysqli_prepare($this->conn, $sqlFaq);
-                mysqli_stmt_bind_param($stmtFaq, "iss", $Id, $vraag, $antwoord);
+                mysqli_stmt_bind_param($stmtFaq, "ssss", $faqId, $Id, $vraag, $antwoord);
                 mysqli_stmt_execute($stmtFaq);
             }
         }
