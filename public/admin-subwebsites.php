@@ -1,5 +1,7 @@
 <?php
 include_once __DIR__ . '/../app/core/init.php';
+require_once __DIR__ . '/../app/helpers/auth.php'; 
+requireAdmin();
 
 // Verwerk POST-acties
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {

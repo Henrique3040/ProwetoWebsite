@@ -15,6 +15,8 @@
 
 	<?php
 	require_once __DIR__ . '/../app/core/init.php';
+	require_once __DIR__ . '/../app/helpers/auth.php'; 
+    requireAdmin();
 	$categorieen = $categoryController->getAllCategories();
 	$courseController->store();
 	$leerjaren = $leerjaarController->getAllLeerjaren();

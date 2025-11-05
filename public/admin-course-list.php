@@ -11,6 +11,8 @@
 
 	<?php
 	require_once __DIR__ . '/../app/core/init.php';
+	require_once __DIR__ . '/../app/helpers/auth.php'; 
+    requireAdmin();
 
 	// Haal alle cursussen op
 	$coursesTotaal = $courseController->getAllCourses();

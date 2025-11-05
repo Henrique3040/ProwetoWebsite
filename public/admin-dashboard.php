@@ -1,6 +1,5 @@
 <!DOCTYPE html>
 <html lang="en">
-
 <head>
 	<?php include("partials/title-meta.php"); ?>
 
@@ -11,6 +10,9 @@
 	<?php include("partials/head-css.php"); ?>
 	<?php
 	require_once __DIR__ . '/../app/core/init.php';
+	require_once __DIR__ . '/../app/helpers/auth.php'; 
+    requireAdmin();
+
 	$coursesTotaal = $courseController->getAllCourses();
 	$activatedCourses = $courseController->getActivatedCourses();
 	$inactiveCourses = $courseController->getInactiveCourses();

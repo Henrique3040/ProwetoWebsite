@@ -13,6 +13,8 @@
 
 	<?php
 	include_once __DIR__ . '/../app/core/init.php';
+	require_once __DIR__ . '/../app/helpers/auth.php'; 
+    requireAdmin();
 
 	if ($_SERVER['REQUEST_METHOD'] === 'POST' && $_POST['action'] === 'deleteCategorie') {
 		$categoryController->delete();
