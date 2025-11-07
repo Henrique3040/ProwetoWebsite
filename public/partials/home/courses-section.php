@@ -9,8 +9,8 @@
         </div>
 
         <div class="row g-4">
-            <?php if (mysqli_num_rows($courses) > 0): ?>
-                <?php while ($course = mysqli_fetch_assoc($courses)): ?>
+            <?php if (!empty($courses)): ?>
+                <?php foreach ($courses as $course): ?>
                     <div class="col-md-6 col-lg-4 col-xxl-3">
                         <div class="card p-2 shadow h-100">
                             <div class="rounded-top overflow-hidden">
@@ -35,7 +35,7 @@
                                     <ul class="list-inline hstack gap-2 mb-0">
                                         <li class="list-inline-item d-flex justify-content-center align-items-center">
                                             <div class="icon-md bg-orange bg-opacity-10 text-orange rounded-circle">
-                                                <i class="fas fa-user-graduate"></i>
+                                             <i class="fa fa-eye"></i>
                                             </div>
                                             <span class="h6 fw-light mb-0 ms-2">
                                                 <?= number_format($course['Views']) ?>
@@ -48,13 +48,10 @@
                                             <span class="h6 fw-light mb-0 ms-2">4.5</span>
                                         </li>
                                     </ul>
-                                    <div class="avatar avatar-sm">
-                                        <img class="avatar-img rounded-circle" src="assets/images/avatar/09.jpg" alt="avatar">
-                                    </div>
                                 </div>
                                 <hr>
                                 <h6 class="card-title">
-                                    <a href="course-detail.php?id=<?= urlencode($course['CursusID']) ?>">
+                                    <a href="course-detail.php?id=<?= urlencode($course['Id']) ?>">
                                         <?= htmlspecialchars($course['Titel']) ?>
                                     </a>
                                 </h6>
@@ -62,19 +59,20 @@
                                     <div>
                                         <a href="#" class="badge bg-info bg-opacity-10 text-info me-2">
                                             <i class="fas fa-circle small fw-bold"></i>
-                                            <?= htmlspecialchars($course['CategorieNaam'] ?? 'General') ?>
+                                            <?= htmlspecialchars($course['CategorieNamen'] ?? 'General') ?>
                                         </a>
                                     </div>
-                                    <h5 class="text-success mb-0">$<?= rand(100, 300) ?></h5>
+                                    
                                 </div>
                             </div>
                         </div>
                     </div>
-                <?php endwhile; ?>
+                <?php endforeach; ?>
             <?php else: ?>
                 <p>No courses found.</p>
             <?php endif; ?>
         </div>
+
 
         <div class="text-center mt-5">
             <a href="all-courses.php" class="btn btn-primary-soft">View all courses

@@ -15,8 +15,11 @@
 
 	<?php
 	require_once __DIR__ . '/../app/core/init.php';
+	require_once __DIR__ . '/../app/helpers/auth.php'; 
+    requireAdmin();
 	$categorieen = $categoryController->getAllCategories();
 	$courseController->store();
+	$leerjaren = $leerjaarController->getAllLeerjaren();
 	?>
 
 	<?php include("partials/head-css.php"); ?>
@@ -24,11 +27,12 @@
 
 <body>
 
-	<?php include("partials/sidebar.php"); ?>
+	
 
 	<!-- **************** MAIN CONTENT START **************** -->
 	<main>
 
+	<?php include("partials/sidebar.php"); ?>
 		<!-- =======================
 Page Banner START -->
 		<section class="py-0 bg-blue h-100px align-items-center d-flex h-200px rounded-0"
@@ -91,9 +95,7 @@ Steps START -->
 								</div>
 								<div class="line"></div>
 
-
-
-								<!-- Step 4 -->
+								<!-- Step 3 -->
 								<div class="step" data-target="#step-3">
 									<div class="d-grid text-center align-items-center">
 										<button type="button" class="btn btn-link step-trigger mb-0" role="tab"
@@ -111,7 +113,7 @@ Steps START -->
 						<div class="card-body">
 							<!-- Step content START -->
 							<div class="bs-stepper-content">
-								<form action="admin-create-course.php" method="POST" enctype="multipart/form-data">
+								<form id="courseForm" action="admin-create-course.php" method="POST" enctype="multipart/form-data">
 
 
 									<!-- Step 1 content START -->
@@ -145,11 +147,52 @@ Steps START -->
 												<select class="form-select js-choice" name="categorie_id" required>
 													<option value="">Select category</option>
 													<?php foreach ($categorieen as $cat): ?>
-														<option value="<?= $cat['CategorieID'] ?>">
+														<option value="<?= $cat['Id'] ?>">
 															<?= htmlspecialchars($cat['Naam']) ?>
 														</option>
 													<?php endforeach; ?>
 												</select>
+											</div>
+
+											<!-- Leerjaar -->
+											<div class="col-md-6">
+												<label class="form-label">Leerjaar</label>
+
+												<select class="form-select" name="leerjaar_id">
+													<option value="">Select leerjaar</option>
+													<?php foreach ($leerjaren as $lj): ?>
+														<option value="<?= $lj['id'] ?>">
+															<?= htmlspecialchars($lj['Naam']) ?>
+														</option>
+													<?php endforeach; ?>
+												</select>
+											</div>
+
+											<!-- Switches -->
+											<div class="col-md-4 d-flex align-items-center mt-4">
+												<div class="form-check form-switch">
+													<input class="form-check-input" type="checkbox" name="documenten"
+														id="docSwitch">
+													<label class="form-check-label" for="docSwitch">Documents
+														available</label>
+												</div>
+											</div>
+
+											<div class="col-md-4 d-flex align-items-center mt-4">
+												<div class="form-check form-switch">
+													<input class="form-check-input" type="checkbox" name="materiaal"
+														id="matSwitch">
+													<label class="form-check-label" for="matSwitch">Material
+														available</label>
+												</div>
+											</div>
+
+											<div class="col-md-4 d-flex align-items-center mt-4">
+												<div class="form-check form-switch">
+													<input class="form-check-input" type="checkbox" name="active"
+														id="actSwitch">
+													<label class="form-check-label" for="actSwitch">Active</label>
+												</div>
 											</div>
 
 
@@ -382,8 +425,10 @@ Steps START -->
 
 											<!-- Step 2 button -->
 											<div class="d-flex justify-content-between mt-3">
-												<button class="btn btn-secondary prev-btn mb-0">Previous</button>
-												<button class="btn btn-primary next-btn mb-0">Next</button>
+												<button type="button"
+													class="btn btn-secondary prev-btn mb-0">Previous</button>
+												<button type="button"
+													class="btn btn-primary next-btn mb-0">Next</button>
 											</div>
 										</div>
 									</div>
@@ -429,7 +474,8 @@ Steps START -->
 												<button class="btn btn-light me-auto ms-md-2 mb-2 mb-md-0">Preview
 													Course</button>
 												<div class="text-md-end">
-													<button type="submit" class="btn btn-success mb-2 mb-sm-0">Submit a
+													<button type="submit" id="submitCourseBtn"
+														class="btn btn-success mb-2 mb-sm-0">Submit a
 														Course</button>
 													<p class="mb-0 small mt-1">Once you click "Submit a Course", your
 														course will be uploaded and marked as pending for review.</p>
