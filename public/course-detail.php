@@ -17,9 +17,10 @@
 
 	$categories = $categoryController->getCategoriesByCourse($course['id']);
 
-	$faqs = $faqController-> index($course['id']);
+	$faqs = $faqController->index($course['id']);
 	?>
 
+	<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
 
 	<?php include("partials/head-css.php"); ?>
 </head>
@@ -48,7 +49,9 @@ Page content START -->
 								<!-- Content -->
 								<ul class="list-inline mb-0">
 									<li class="list-inline-item fw-light h6 me-3"><i
-											class="fas fa-star me-2"></i><?= htmlspecialchars($course['Rating']) ?>/5.0
+											class="fas fa-star text-warning"></i>
+										<?= number_format($course['Rating'], 1) ?>/5
+
 									</li>
 									<li class="list-inline-item fw-light h6 me-3"><i
 											class="fas fa-globe me-2"></i><?= htmlspecialchars($course['Taal']) ?></li>
@@ -128,9 +131,8 @@ Page content START -->
 							<!-- FAQs START -->
 
 							<!-- FAQ Tab Content -->
-							 
-							<div   id="course-pills-5" role="tabpanel"
-								aria-labelledby="course-pills-tab-5">
+
+							<div id="course-pills-5" role="tabpanel" aria-labelledby="course-pills-tab-5">
 								<!-- Title -->
 								<h5 class="mb-3">Frequently Asked Questions</h5>
 
@@ -174,7 +176,7 @@ Page content START -->
 							<!-- Content END -->
 
 
-						 <!-- FAQs END -->
+							<!-- FAQs END -->
 						</div>
 					</div>
 					<!-- Main content END -->
@@ -224,7 +226,7 @@ Page content START -->
 														class="fas fa-fw fa-book-open text-primary"></i>Materialen</span>
 												<span>Ja</span>
 											</li>
-											
+
 											<li class="list-group-item px-0 d-flex justify-content-between">
 												<span class="h6 fw-light mb-0"><i
 														class="fas fa-fw fa-globe text-primary"></i>Language</span>
@@ -235,28 +237,31 @@ Page content START -->
 														class="fas fa-fw fa-user-clock text-primary"></i>Document</span>
 												<span>Nee</span>
 											</li>
-											
+
 										</ul>
 										<!-- Divider -->
 										<hr>
+										<p>Beoordeel deze cursus</p>
 
 										<!-- Rating and follow -->
 										<div
 											class="d-sm-flex justify-content-sm-between align-items-center mt-0 mt-sm-2">
+											
 											<!-- Rating star -->
-											<ul class="list-inline mb-0">
-												<li class="list-inline-item me-0 small"><i
-														class="fas fa-star text-warning"></i></li>
-												<li class="list-inline-item me-0 small"><i
-														class="fas fa-star text-warning"></i></li>
-												<li class="list-inline-item me-0 small"><i
-														class="fas fa-star text-warning"></i></li>
-												<li class="list-inline-item me-0 small"><i
-														class="fas fa-star text-warning"></i></li>
-												<li class="list-inline-item me-0 small"><i
-														class="fas fa-star-half-alt text-warning"></i></li>
-												<li class="list-inline-item ms-2 h6 fw-light mb-0">4.5/5.0</li>
-											</ul>
+											<?php if (!isset($_COOKIE["rated_" . $course['id']])): ?>
+												<div id="rating" data-course="<?= $course['id'] ?>" class="star-rating">
+													<i class="bi bi-star" data-value="1"></i>
+													<i class="bi bi-star" data-value="2"></i>
+													<i class="bi bi-star" data-value="3"></i>
+													<i class="bi bi-star" data-value="4"></i>
+													<i class="bi bi-star" data-value="5"></i>
+													<p>/5</p>
+												</div>
+
+											<?php else: ?>
+												<p class="text-success">Bedankt voor je rating!</p>
+											<?php endif; ?>
+
 
 										</div>
 									</div>
@@ -310,6 +315,7 @@ Footer END -->
 	<!-- Vendors -->
 	<script src="assets/vendor/sticky-js/sticky.min.js"></script>
 	<script src="assets/vendor/plyr/plyr.min.js"></script>
+	<script src="js/rating.js"></script>
 
 	<?php include("partials/footer-scripts.php"); ?>
 

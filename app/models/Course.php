@@ -78,17 +78,17 @@ class Course
             WHERE c.id = ?
             GROUP BY c.id
         ";
-    
+
         $stmt = mysqli_prepare($this->conn, $sql);
         if (!$stmt) {
             die("SQL ERROR (CourseDetail): " . mysqli_error($this->conn));
         }
-    
+
         mysqli_stmt_bind_param($stmt, "s", $courseId);
         mysqli_stmt_execute($stmt);
         $result = mysqli_stmt_get_result($stmt);
         $course = mysqli_fetch_assoc($result);
-    
+
         // ✅ Haal FAQ’s op met juiste kolomnaam (cursus_id)
         $sqlFaq = "SELECT id AS FAQID, Vraag, Antwoord FROM CursusFAQ WHERE cursus_id = ?";
         $stmtFaq = mysqli_prepare($this->conn, $sqlFaq);
@@ -96,12 +96,49 @@ class Course
         mysqli_stmt_execute($stmtFaq);
         $resultFaq = mysqli_stmt_get_result($stmtFaq);
         $faqs = mysqli_fetch_all($resultFaq, MYSQLI_ASSOC);
-    
+
         $course['Faqs'] = $faqs;
-    
+
         return $course;
     }
-    
+
+    public function addRating($courseId, $rating)
+    {
+        $id = generateUUID();
+
+        // 1) Nieuwe rating opslaan
+        $sql = "INSERT INTO CursusRating (id, cursus_id, rating) VALUES (?, ?, ?)";
+        $stmt = mysqli_prepare($this->conn, $sql);
+        mysqli_stmt_bind_param($stmt, "ssi", $id, $courseId, $rating);
+        mysqli_stmt_execute($stmt);
+
+        // 2) Nieuw gemiddelde berekenen
+        $sql2 = "SELECT AVG(rating) AS avgRating FROM CursusRating WHERE cursus_id = ?";
+        $stmt2 = mysqli_prepare($this->conn, $sql2);
+        mysqli_stmt_bind_param($stmt2, "s", $courseId);
+        mysqli_stmt_execute($stmt2);
+        $result = mysqli_stmt_get_result($stmt2);
+        $avg = mysqli_fetch_assoc($result)['avgRating'];
+
+        // 3) Gemiddelde opslaan in Cursusdetails tabel
+        $sql3 = "UPDATE Cursusdetails SET Rating = ? WHERE cursus_id = ?";
+        $stmt3 = mysqli_prepare($this->conn, $sql3);
+        mysqli_stmt_bind_param($stmt3, "ds", $avg, $courseId);
+        mysqli_stmt_execute($stmt3);
+
+        return true;
+    }
+
+
+    public function addView($courseId)
+    {
+        $sql = "UPDATE Cursus SET Views = Views + 1 WHERE Id = ?";
+        $stmt = mysqli_prepare($this->conn, $sql);
+        mysqli_stmt_bind_param($stmt, "s", $courseId);
+        mysqli_stmt_execute($stmt);
+    }
+
+
 
     // Zoek cursussen op titel
     public function searchCourses($query)
@@ -171,47 +208,67 @@ class Course
 
     public function getFilteredCourses($filters = [], $limit = 10, $page = 1)
     {
-        $search = $filters['search'] ?? '';
-        $status = $filters['status'] ?? '';
-        $sort = $filters['sort'] ?? '';
-
+        $search   = $filters['search']   ?? '';
+        $category = $filters['category'] ?? '';
+        $sort     = $filters['sort']     ?? '';
+    
         $offset = ($page - 1) * $limit;
-
+    
         $where = [];
         $params = [];
-        $types = '';
-
-        // Zoekfilter
+        $types  = '';
+    
+        // ✅ SEARCH
         if (!empty($search)) {
             $where[] = "c.Titel LIKE ?";
             $params[] = "%$search%";
-            $types .= 's';
+            $types .= "s";
         }
-
-        // Statusfilter
-        if ($status === 'active') {
-            $where[] = "c.Active = 1";
-        } elseif ($status === 'pending') {
-            $where[] = "c.Active = 0";
+    
+        // ✅ CATEGORY
+        if (!empty($category)) {
+            $where[] = "cc.categorie_id = ?";
+            $params[] = $category;
+            $types .= "s";
         }
-
-        $whereSql = '';
+    
+        // ✅ WHERE SQL
+        $whereSql = "";
         if (count($where) > 0) {
             $whereSql = "WHERE " . implode(" AND ", $where);
         }
-
-        // Sorteren
-        $orderBy = "ORDER BY c.CreatedAt DESC";
-        if ($sort === 'oldest') {
-            $orderBy = "ORDER BY c.CreatedAt ASC";
-        } elseif ($sort === 'active') {
-            $orderBy = "ORDER BY c.Active DESC";
-        } elseif ($sort === 'pending') {
-            $orderBy = "ORDER BY c.Active ASC";
+    
+        // ✅ SORTERING
+        switch ($sort) {
+            case "views":
+                $orderBy = "ORDER BY c.Views DESC";
+                break;
+    
+            case "rating":
+                $orderBy = "ORDER BY d.Rating DESC";
+                break;
+    
+            case "recent":
+                $orderBy = "ORDER BY c.CreatedAt DESC";
+                break;
+    
+            case "oldest":
+                $orderBy = "ORDER BY c.CreatedAt ASC";
+                break;
+    
+            default:
+                $orderBy = "ORDER BY c.CreatedAt DESC";
         }
-
-        // Totaal aantal records (voor paginatie)
-        $countSql = "SELECT COUNT(*) as total FROM Cursus c $whereSql";
+    
+        // ✅ COUNT (totaal voor paginatie)
+        $countSql = "
+            SELECT COUNT(*) AS total
+            FROM Cursus c
+            LEFT JOIN CursusCategorie cc ON c.id = cc.cursus_id
+            LEFT JOIN Cursusdetails d ON c.id = d.cursus_id
+            $whereSql
+        ";
+    
         $countStmt = mysqli_prepare($this->conn, $countSql);
         if (!empty($params)) {
             mysqli_stmt_bind_param($countStmt, $types, ...$params);
@@ -219,48 +276,47 @@ class Course
         mysqli_stmt_execute($countStmt);
         $countResult = mysqli_stmt_get_result($countStmt);
         $total = mysqli_fetch_assoc($countResult)['total'] ?? 0;
-
-        // Hoofdquery
+    
+        // ✅ MAIN QUERY
         $sql = "
-        SELECT 
-            c.Id, c.Titel, c.FotoURL, c.Link, c.Views, c.CreatedAt, c.Active,
-            GROUP_CONCAT(cat.Naam SEPARATOR ', ') AS CategorieNamen
-        FROM Cursus c
-        LEFT JOIN CursusCategorie cc ON c.id = cc.cursus_id
-        LEFT JOIN Categorie cat ON cc.categorie_id = cat.id
-        $whereSql
-        GROUP BY c.Id
-        $orderBy
-        LIMIT ? OFFSET ?
-    ";
-
+            SELECT 
+                c.Id, c.Titel, c.FotoURL, c.Link, c.Views, c.CreatedAt, c.Active,
+                d.Rating,
+                GROUP_CONCAT(cat.Naam SEPARATOR ', ') AS CategorieNamen
+            FROM Cursus c
+            LEFT JOIN Cursusdetails d ON c.id = d.cursus_id
+            LEFT JOIN CursusCategorie cc ON c.id = cc.cursus_id
+            LEFT JOIN Categorie cat ON cc.categorie_id = cat.id
+            $whereSql
+            GROUP BY c.Id
+            $orderBy
+            LIMIT ? OFFSET ?
+        ";
+    
         $stmt = mysqli_prepare($this->conn, $sql);
-
-        // Bind params
+    
+        // ✅ Bind filters + limit + offset
         if (!empty($params)) {
             $types .= "ii";
             $params[] = $limit;
             $params[] = $offset;
             mysqli_stmt_bind_param($stmt, $types, ...$params);
         } else {
-            if (!$stmt) {
-                die('Prepare failed: ' . mysqli_error($this->conn) . "\nSQL: " . $sql);
-            }
-
             mysqli_stmt_bind_param($stmt, "ii", $limit, $offset);
         }
-
+    
         mysqli_stmt_execute($stmt);
         $result = mysqli_stmt_get_result($stmt);
-
+    
         return [
             'result' => $result,
-            'total' => $total,
-            'limit' => $limit,
-            'page' => $page,
-            'pages' => ceil($total / $limit)
+            'total'  => $total,
+            'limit'  => $limit,
+            'page'   => $page,
+            'pages'  => ceil($total / $limit)
         ];
     }
+    
 
 
 
@@ -311,6 +367,8 @@ class Course
         return $result;
     }
 
+
+
     public function getInactiveCourses()
     {
         $sql = "
@@ -337,16 +395,16 @@ class Course
         $sql = "INSERT INTO Cursus (Id , Titel, FotoURL, Link, Views, Featured, Active)
             VALUES (?, ?, ?, ?, 0, 0, ?)";
         $stmt = mysqli_prepare($this->conn, $sql);
-        mysqli_stmt_bind_param($stmt, "sssss", $Id , $data['Titel'], $data['FotoURL'], $data['Link'], $data['Active']);
+        mysqli_stmt_bind_param($stmt, "sssss", $Id, $data['Titel'], $data['FotoURL'], $data['Link'], $data['Active']);
         mysqli_stmt_execute($stmt);
-      
+
 
         $CursusDetailId = $Id;
         // 2️ Insert in Cursusdetails
         $sql2 = "INSERT INTO Cursusdetails (Id, cursus_id, KorteBeschrijving, Beschrijving, Rating, Taal, Prijs, LaatstBijgewerkt, Materiaal, Documenten, LeerJaarID)
              VALUES (?, ?, ?, ?, 0, 'Nederlands', 0, NOW(), ?, ?, ?)";
         $stmt2 = mysqli_prepare($this->conn, $sql2);
-        mysqli_stmt_bind_param($stmt2, "sssssss",$CursusDetailId , $Id, $data['KorteBeschrijving'], $data['Beschrijving'], $data['Materiaal'], $data['Documenten'], $data['LeerJaarID']);
+        mysqli_stmt_bind_param($stmt2, "sssssss", $CursusDetailId, $Id, $data['KorteBeschrijving'], $data['Beschrijving'], $data['Materiaal'], $data['Documenten'], $data['LeerJaarID']);
         mysqli_stmt_execute($stmt2);
         if (mysqli_error($this->conn)) {
             die("❌ Fout bij Cursusdetails: " . mysqli_error($this->conn));
@@ -355,13 +413,13 @@ class Course
         // 3️ Koppel categorie
         $sql3 = "INSERT INTO CursusCategorie (cursus_id, categorie_id) VALUES (?, ?)";
         $stmt3 = mysqli_prepare($this->conn, $sql3);
-        mysqli_stmt_bind_param($stmt3, "ss",  $Id, $data['CategorieID']);
+        mysqli_stmt_bind_param($stmt3, "ss", $Id, $data['CategorieID']);
         mysqli_stmt_execute($stmt3);
         if (mysqli_error($this->conn)) {
             die("❌ Fout bij CursusCategorie: " . mysqli_error($this->conn));
         }
 
-        
+
         // 4️ Voeg FAQ’s toe (indien aanwezig)
         if (!empty($data['faqs']) && is_array($data['faqs'])) {
             foreach ($data['faqs'] as $faq) {
@@ -573,15 +631,16 @@ class Course
 
             // 5️⃣ Verwijder FAQ’s
             if (!empty($data['DeletedFaqIDs'])) {
-                $ids = array_map(function($id) {
+                $ids = array_map(function ($id) {
                     return "'" . mysqli_real_escape_string($this->conn, $id) . "'";
                 }, $data['DeletedFaqIDs']);
-                
+
                 $idList = implode(',', $ids);
-                
-                mysqli_query($this->conn,
-                   "DELETE FROM CursusFAQ WHERE id IN ($idList) AND cursus_id='$courseId'"
-                );                
+
+                mysqli_query(
+                    $this->conn,
+                    "DELETE FROM CursusFAQ WHERE id IN ($idList) AND cursus_id='$courseId'"
+                );
             }
 
             mysqli_commit($this->conn);

@@ -17,8 +17,17 @@ class CourseController
 
     public function getCourseDetail($courseId)
     {
+        // eerst view toevoegen
+        $this->model->addView($courseId);
+
         return $this->model->getCourseDetail($courseId);
     }
+
+    public function rateCourse($courseId, $rating)
+    {
+        return $this->model->addRating($courseId, $rating);
+    }
+
 
     public function searchCourses($query)
     {
@@ -103,6 +112,7 @@ class CourseController
         }
     }
 
+
     // Verwijder cursus via model
     public function delete($courseId)
     {
@@ -174,7 +184,7 @@ class CourseController
                 'Documenten' => $documenten,
                 'LeerJaarID' => $leerjaarId,
                 'Faqs' => $faqs,
-                'DeletedFaqIDs' =>  $deletedFaqIDs // belangrijk!
+                'DeletedFaqIDs' => $deletedFaqIDs // belangrijk!
             ]);
 
             if ($updated) {

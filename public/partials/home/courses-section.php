@@ -35,7 +35,7 @@
                                     <ul class="list-inline hstack gap-2 mb-0">
                                         <li class="list-inline-item d-flex justify-content-center align-items-center">
                                             <div class="icon-md bg-orange bg-opacity-10 text-orange rounded-circle">
-                                                <i class="fas fa-user-graduate"></i>
+                                             <i class="fa fa-eye"></i>
                                             </div>
                                             <span class="h6 fw-light mb-0 ms-2">
                                                 <?= number_format($course['Views']) ?>
@@ -48,9 +48,6 @@
                                             <span class="h6 fw-light mb-0 ms-2">4.5</span>
                                         </li>
                                     </ul>
-                                    <div class="avatar avatar-sm">
-                                        <img class="avatar-img rounded-circle" src="assets/images/avatar/09.jpg" alt="avatar">
-                                    </div>
                                 </div>
                                 <hr>
                                 <h6 class="card-title">
@@ -65,7 +62,7 @@
                                             <?= htmlspecialchars($course['CategorieNamen'] ?? 'General') ?>
                                         </a>
                                     </div>
-                                    <h5 class="text-success mb-0">$<?= rand(100, 300) ?></h5>
+                                    
                                 </div>
                             </div>
                         </div>

@@ -9,17 +9,26 @@
 	$search = isset($_GET['search']) ? trim($_GET['search']) : '';
 	$category = isset($_GET['category']) ? trim($_GET['category']) : '';
 	$sort = isset($_GET['sort']) ? trim($_GET['sort']) : '';
+	$page = isset($_GET['page']) ? max(1, intval($_GET['page'])) : 1;
+
 
 	$categories = $categoryController->getAllCategories();
+	$filters = [
+		'search' => $search,
+		'status' => '',       // niet nodig bij courses
+		'category' => $category,
+		'sort' => $sort
+	];
 
-	//Dynamisch zoeken, filteren en sorteren
-	if (!empty($search)) {
-		$courses = $courseController->searchCourses($search);
-	} elseif ($category > 0) {
-		$courses = $categoryController->getCoursesByCategory($category);
-	} else {
-		$courses = $courseController->getAllCourses();
-	}
+	$limit = 8; // ✅ 8 cursussen per pagina
+	
+	$pagination = $courseController->getFilteredCourses($filters, $limit, $page);
+
+	$courses = iterator_to_array($pagination['result']);
+	$totalPages = $pagination['pages'];
+	$currentPage = $pagination['page'];
+	$totalCourses = $pagination['total'];
+
 
 	?>
 
@@ -103,19 +112,23 @@ Page content START -->
 
 					<!-- Select option -->
 					<div class="col-sm-6 col-xl-3 mt-3 mt-xl-0">
-						<form class="border rounded p-2 input-borderless">
-							<select class="form-select form-select-sm js-choice" aria-label=".form-select-sm">
+						<form method="GET" class="border rounded p-2 input-borderless">
+							<input type="hidden" name="search" value="<?= htmlspecialchars($search) ?>">
+							<input type="hidden" name="category" value="<?= htmlspecialchars($category) ?>">
+
+							<select name="sort" class="form-select form-select-sm js-choice"
+								onchange="this.form.submit()">
 								<option value="">Sort by</option>
-								<option>Free</option>
-								<option>Most viewed</option>
-								<option>Popular</option>
+								<option value="rating" <?= $sort === 'rating' ? 'selected' : '' ?>>Most rated</option>
+								<option value="views" <?= $sort === 'views' ? 'selected' : '' ?>>Most viewed</option>
+								<option value="recent" <?= $sort === 'recent' ? 'selected' : '' ?>>Most recent</option>
 							</select>
 						</form>
 					</div>
 
 					<!-- Button -->
 					<div class="col-sm-6 col-xl-2 mt-3 mt-xl-0 d-grid">
-						<a href="#" class="btn btn-lg btn-primary mb-0">Filter Results</a>
+						<a href="all-courses.php" class="btn btn-lg btn-primary mb-0">Filter Results</a>
 					</div>
 				</div>
 				<!-- Search option END -->
@@ -138,7 +151,8 @@ Page content START -->
 											<div class="col-md-8">
 												<div class="card-body">
 													<h5 class="card-title mb-0">
-														<a href="course-detail.php?id=<?= htmlspecialchars($course['Id'], ENT_QUOTES) ?>">
+														<a
+															href="course-detail.php?id=<?= htmlspecialchars($course['Id'], ENT_QUOTES) ?>">
 															<?= htmlspecialchars($course['Titel'], ENT_QUOTES) ?>
 														</a>
 													</h5>
@@ -162,16 +176,31 @@ Page content START -->
 					<!-- Pagination START -->
 					<div class="col-12">
 						<nav class="mt-4 d-flex justify-content-center" aria-label="navigation">
-							<ul class="pagination pagination-primary-soft d-inline-block d-md-flex rounded mb-0">
-								<li class="page-item mb-0"><a class="page-link" href="#" tabindex="-1"><i
-											class="fas fa-angle-double-left"></i></a></li>
-								<li class="page-item mb-0"><a class="page-link" href="#">1</a></li>
-								<li class="page-item mb-0 active"><a class="page-link" href="#">2</a></li>
-								<li class="page-item mb-0"><a class="page-link" href="#">..</a></li>
-								<li class="page-item mb-0"><a class="page-link" href="#">6</a></li>
-								<li class="page-item mb-0"><a class="page-link" href="#"><i
-											class="fas fa-angle-double-right"></i></a></li>
+							<ul class="pagination">
+								<?php if ($page > 1): ?>
+									<li class="page-item"><a class="page-link"
+											href="?search=<?= urlencode($search) ?>&category=<?= $category ?>&sort=<?= $sort ?>&page=<?= $page - 1 ?>">
+											&laquo;
+										</a></li>
+								<?php endif; ?>
+
+								<?php for ($i = 1; $i <= $totalPages; $i++): ?>
+									<li class="page-item <?= $i == $page ? 'active' : '' ?>">
+										<a class="page-link"
+											href="?search=<?= urlencode($search) ?>&category=<?= $category ?>&sort=<?= $sort ?>&page=<?= $i ?>">
+											<?= $i ?>
+										</a>
+									</li>
+								<?php endfor; ?>
+
+								<?php if ($page < $totalPages): ?>
+									<li class="page-item"><a class="page-link"
+											href="?search=<?= urlencode($search) ?>&category=<?= $category ?>&sort=<?= $sort ?>&page=<?= $page + 1 ?>">
+											&raquo;
+										</a></li>
+								<?php endif; ?>
 							</ul>
+
 						</nav>
 					</div>
 					<!-- Pagination END -->
@@ -249,6 +278,7 @@ Footer END -->
 
 	<!-- Vendors -->
 	<script src="assets/vendor/choices.js/public/assets/scripts/choices.min.js"></script>
+
 
 	<?php include("partials/footer-scripts.php"); ?>
 

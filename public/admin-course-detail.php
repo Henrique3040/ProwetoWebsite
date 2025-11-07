@@ -1,7 +1,3 @@
-<?php if (isset($_GET['error']) && $_GET['error'] == 'forbidden'): ?>
-    <div class="alert alert-danger">Je moet eerst inloggen.</div>
-<?php endif; ?>
-
 <!DOCTYPE html>
 <html lang="en">
 
