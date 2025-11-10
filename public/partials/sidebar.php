@@ -4,7 +4,7 @@
 	<!-- Navbar brand for xl START -->
 	<div class="d-flex align-items-center">
 		<a class="navbar-brand" href="index.php">
-			<img class="navbar-brand-item" src="assets/images/logo-light.svg" alt="">
+			<img class="navbar-brand-item" src="assets/images/prowetoLogoEdit.png" alt="">
 		</a>
 	</div>
 	<!-- Navbar brand for xl END -->
@@ -38,9 +38,6 @@
 			<!-- Sidebar footer START -->
 			<div class="px-3 mt-auto pt-3">
 				<div class="d-flex align-items-center justify-content-between text-primary-hover">
-						<a class="h5 mb-0 text-body" href="admin-setting.php" data-bs-toggle="tooltip" data-bs-placement="top" title="Settings">
-							<i class="bi bi-gear-fill"></i>
-						</a>
 						<a class="h5 mb-0 text-body" href="index.php" data-bs-toggle="tooltip" data-bs-placement="top" title="Home">
 							<i class="bi bi-globe"></i>
 						</a>
@@ -50,7 +47,6 @@
 				</div>
 			</div>
 			<!-- Sidebar footer END -->
-			
 		</div>
 	</div>
 </nav>

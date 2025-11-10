@@ -4,7 +4,7 @@
         <div class="row mb-4">
             <div class="col-lg-8 text-center mx-auto">
                 <h2 class="fs-1 mb-0">Our Courses</h2>
-                <p class="mb-0">Explore top picks of the week</p>
+                <p class="mb-0">Explore diferent Topics</p>
             </div>
         </div>
 
@@ -45,7 +45,7 @@
                                             <div class="icon-md bg-warning bg-opacity-15 text-warning rounded-circle">
                                                 <i class="fas fa-star"></i>
                                             </div>
-                                            <span class="h6 fw-light mb-0 ms-2">4.5</span>
+                                            <span class="h6 fw-light mb-0 ms-2"><?= number_format($course ['Rating']) ?></span>
                                         </li>
                                     </ul>
                                 </div>

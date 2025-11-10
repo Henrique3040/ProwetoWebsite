@@ -2,8 +2,7 @@
 <header class="navbar-light navbar-sticky navbar-transparent"> <!-- Logo Nav START -->
     <nav class="navbar navbar-expand-xl">
         <div class="container"> <!-- Logo START --> <a class="navbar-brand" href="index.php"> <img
-                    class="light-mode-item navbar-brand-item" src="assets/images/logo.svg" alt="logo"> <img
-                    class="dark-mode-item navbar-brand-item" src="assets/images/logo-light.svg" alt="logo"> </a>
+                    class="light-mode-item navbar-brand-item" src="assets/images/prowetoLogoEdit.png" alt="logo"> </a>
             <!-- Logo END --> <!-- Responsive navbar toggler --> <button class="navbar-toggler ms-auto" type="button"
                 data-bs-toggle="collapse" data-bs-target="#navbarCollapse" aria-controls="navbarCollapse"
                 aria-expanded="true" aria-label="Toggle navigation"> <span class="me-2"><i
@@ -62,11 +61,15 @@
                 <div class="col-xl-8">
                     <div class="nav my-3 my-xl-0 px-4 flex-nowrap align-items-center">
                         <div class="nav-item w-100">
-                            <form class="rounded position-relative"> <input
-                                    class="form-control pe-5 bg-secondary bg-opacity-10 border-0" type="search"
-                                    placeholder="Search" aria-label="Search"> <button
+                            <form class="rounded position-relative" method="GET" action="search.php">  
+                                <input
+                                    class="form-control pe-5 bg-secondary bg-opacity-10 border-0" type="search" name="q"
+                                    placeholder="Search" aria-label="Search"> 
+                                    <button
                                     class="btn btn-link bg-transparent px-2 py-0 position-absolute top-50 end-0 translate-middle-y"
-                                    type="submit"><i class="fas fa-search fs-6 text-primary"></i></button> </form>
+                                    type="submit"><i class="fas fa-search fs-6 text-primary"></i>
+                                    </button> 
+                            </form>
                         </div>
                     </div>
                 </div> <!-- Nav Search END -->

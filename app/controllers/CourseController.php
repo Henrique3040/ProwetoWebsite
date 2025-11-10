@@ -39,6 +39,10 @@ class CourseController
         return $this->model->getAllCourses();
     }
 
+    public function getAllCount(){
+        return $this->model->getAllCount();
+    }
+
     public function getActivatedCourses()
     {
         return $this->model->getActivatedCourses();
@@ -54,6 +58,12 @@ class CourseController
     {
         return $this->model->getFilteredCourses($filters, $limit, $page);
     }
+
+    public function getCoursesAdmin($filters = [], $limit = 10, $page = 1)
+    {
+        return $this->model->getCoursesAdmin($filters, $limit, $page);
+    }
+
 
 
     //Slaag cursus op de database via de model

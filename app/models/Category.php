@@ -34,8 +34,10 @@ class Category
             c.Titel,
             c.FotoURL,
             c.Link,
-            c.Views
+            c.Views,
+            d.Rating
         FROM Cursus c
+        JOIN Cursusdetails d ON c.id = d.cursus_id
         INNER JOIN CursusCategorie cc ON c.Id = cc.cursus_id
         WHERE cc.categorie_id = ?
         ORDER BY c.Views DESC";

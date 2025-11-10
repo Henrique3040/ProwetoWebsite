@@ -20,12 +20,6 @@ class CategoryController
         return $this->model->getWithLimit($limit);
     }
 
-    // Get all categories with their courses
-    public function getAllWithCourses()
-    {
-        return $this->model->getAllWithCourses();
-    }
-
     public function getCoursesByCategory($categoryId)
     {
         return $this->model->getCoursesByCategory($categoryId);

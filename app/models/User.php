@@ -39,14 +39,7 @@ class User
     public function verifyLogin($username, $password)
     {
         $user = $this->getUserByUsername($username);
-        var_dump("User fetched:", $user);
-        if (!$user) {
-            return false;
-        }
-
-        var_dump($password);
-        var_dump($user['password']);
-        var_dump(password_verify($password, $user['password']));
+        
 
         if (password_verify($password, $user['password'])) {
             return $user;
