@@ -1,16 +1,35 @@
 <?php
 include_once __DIR__ . '/../helpers/generateUUID.php';
 
+/**
+ * User
+ *
+ * Modelklasse voor het beheren van admin users.
+ */
 class User
 {
+     /**
+     * @var mysqli $conn Databaseverbinding
+     */
     private $conn;
 
+        /**
+     * Constructor
+     *
+     * @param mysqli $db Databaseverbinding
+     */
     public function __construct($db)
     {
         $this->conn = $db;
     }
 
-    // Maak een nieuwe admin user
+    /**
+     * Maak een nieuwe admin user aan
+     *
+     * @param string $username Gebruikersnaam
+     * @param string $password Wachtwoord
+     * @return bool True bij succes, false bij falen
+     */
     public function createUser($username, $password)
     {
         $id = generateUUID();
@@ -23,7 +42,12 @@ class User
         return mysqli_stmt_execute($stmt);
     }
 
-    // Haal user op via username
+    /**
+     * Haal een user op via gebruikersnaam
+     *
+     * @param string $username Gebruikersnaam
+     * @return array|null Associatieve array van user of null als niet gevonden
+     */
     public function getUserByUsername($username)
     {
         $sql = "SELECT * FROM users WHERE username = ?";
@@ -35,7 +59,13 @@ class User
         return mysqli_fetch_assoc($result);
     }
 
-    // Login controle
+    /**
+     * Controleer login credentials
+     *
+     * @param string $username Gebruikersnaam
+     * @param string $password Wachtwoord
+     * @return array|false User array bij correct, false bij fout
+     */
     public function verifyLogin($username, $password)
     {
         $user = $this->getUserByUsername($username);

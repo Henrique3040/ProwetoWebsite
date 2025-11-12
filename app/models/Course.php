@@ -1,15 +1,35 @@
 <?php
+/**
+ * Course
+ *
+ * Modelklasse voor het beheren van cursussen.
+ * Bevat methodes voor CRUD, ratings, views, filters, categorieën en FAQ's.
+ */
+
 include_once __DIR__ . '/../helpers/generateUUID.php';
 class Course
 {
+    /**
+     * @var mysqli $conn De actieve databaseverbinding.
+     */
     private $conn;
 
+     /**
+     * Constructor
+     *
+     * @param mysqli $db De databaseverbinding.
+     */
     public function __construct($db)
     {
         $this->conn = $db;
     }
 
-    // Haal de meest bekeken cursussen op
+    /**
+     * Haalt de meest bekeken cursussen op.
+     *
+     * @param int $limit Maximaal aantal cursussen.
+     * @return array Associatieve array van cursussen.
+     */
     public function getFeaturedCourses($limit = 8)
     {
         $sql = "
@@ -53,7 +73,12 @@ class Course
     }
 
 
-    // Haal cursus + detailinformatie op
+     /**
+     * Haalt detailinformatie van een cursus op, inclusief FAQ's.
+     *
+     * @param string $courseId ID van de cursus.
+     * @return array Associatieve array met cursusdata.
+     */
     public function getCourseDetail($courseId)
     {
         $sql = "
@@ -105,6 +130,13 @@ class Course
         return $course;
     }
 
+    /**
+     * Voeg een rating toe aan een cursus en werk het gemiddelde bij.
+     *
+     * @param string $courseId
+     * @param int $rating
+     * @return bool
+     */
     public function addRating($courseId, $rating)
     {
         $id = generateUUID();
@@ -133,6 +165,11 @@ class Course
     }
 
 
+    /**
+     * Verhoog het aantal views voor een cursus.
+     *
+     * @param string $courseId
+     */
     public function addView($courseId)
     {
         $sql = "UPDATE Cursus SET Views = Views + 1 WHERE Id = ?";
@@ -143,7 +180,12 @@ class Course
 
 
 
-    // Zoek cursussen op titel
+    /**
+     * Zoek cursussen op basis van titel.
+     *
+     * @param string $query
+     * @return mysqli_result
+     */
     public function searchCourses($query)
     {
         $sql = "
@@ -177,6 +219,11 @@ class Course
         return $result;
     }
 
+    /**
+     * Haal totaal aantal cursussen op.
+     *
+     * @return int
+     */
     public function getAllCount(){
         $sql = "SELECT COUNT(DISTINCT c.Id) AS total
         FROM Cursus c
@@ -195,6 +242,7 @@ class Course
         $total = mysqli_fetch_assoc($result)['total'] ?? 0;
         return $total;
     }
+
 
     public function getAllCourses()
     {
@@ -461,28 +509,11 @@ class Course
     }
 
 
-
-
-    public function getCategoriesByCourse($courseId)
-    {
-        $sql = "
-        SELECT cat.id AS CategorieID, cat.Naam
-        FROM Categorie cat
-        INNER JOIN CursusCategorie cc ON cat.id = cc.categorie_id
-        WHERE cc.cursus_id = ?";
-
-        $stmt = mysqli_prepare($this->conn, $sql);
-        mysqli_stmt_bind_param($stmt, "s", $courseId);
-        mysqli_stmt_execute($stmt);
-        $result = mysqli_stmt_get_result($stmt);
-
-        $categories = [];
-        while ($row = mysqli_fetch_assoc($result)) {
-            $categories[] = $row;
-        }
-        return $categories;
-    }
-
+     /**
+     * Haal alle actieve cursussen op.
+     *
+     * @return mysqli_result
+     */
     public function getActivatedCourses()
     {
         $sql = "
@@ -511,7 +542,11 @@ class Course
     }
 
 
-
+     /**
+     * Haal inactieve cursussen op.
+     *
+     * @return mysqli_result
+     */
     public function getInactiveCourses()
     {
         $sql = "
@@ -581,6 +616,12 @@ class Course
     }
 
 
+    /**
+     * Haal laatst bijgewerkte cursussen op.
+     *
+     * @param int $limit
+     * @return mysqli_result
+     */
     public function getLatestUpdatedCourses($limit = 5)
     {
         $sql = "

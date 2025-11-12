@@ -1,15 +1,42 @@
 <?php
+/**
+ * Category
+ *
+ * Modelklasse voor het beheren van categorieën en hun relatie met cursussen.
+ * Communiceert direct met de database via mysqli.
+ *
+ * Functionaliteiten:
+ * - Ophalen van categorieën
+ * - Ophalen van cursussen per categorie
+ * - CRUD-acties voor categorieën
+ *
+ * @author  
+ * @version 1.0
+ */
+
 include_once __DIR__ . '/../helpers/generateUUID.php';
 class Category
 {
+    /**
+     * @var mysqli $conn De actieve databaseverbinding.
+     */
     private $conn;
 
+    /**
+     * Constructor
+     *
+     * @param mysqli $db De databaseverbinding.
+     */
     public function __construct($db)
     {
         $this->conn = $db;
     }
 
-    //get all categories
+    /**
+     * Haalt alle categorieën op uit de database.
+     *
+     * @return array Associatieve array met categorieën.
+     */
     public function getAll()
     {
         $sql = "SELECT Id, Naam, Icon, CreatedAt, UpdatedAt FROM Categorie ORDER BY Naam ASC";
@@ -25,7 +52,12 @@ class Category
 
     }
 
-    // Get all courses belonging to a category
+    /**
+     * Haalt alle cursussen op die gekoppeld zijn aan een bepaalde categorie.
+     *
+     * @param int $categoryId Het ID van de categorie.
+     * @return array Lijst van cursussen binnen de categorie.
+     */
     public function getCoursesByCategory($categoryId)
     {
         $sql = "
@@ -66,28 +98,12 @@ class Category
     
     }
 
-    // Get all categories and their courses
-    public function getAllWithCourses()
-    {
-        $categories = [];
-        $categoryQuery = "SELECT Id, Naam, Icon, CreatedAt, UpdatedAt FROM Categorie ORDER BY Naam ASC";
-        $categoryResult = mysqli_query($this->conn, $categoryQuery);
-
-        while ($cat = mysqli_fetch_assoc($categoryResult)) {
-            $catId = (int) $cat['ID'];
-            $courses = $this->getCoursesByCategory($catId);
-
-            $cat['courses'] = [];
-            while ($course = mysqli_fetch_assoc($courses)) {
-                $cat['courses'][] = $course;
-            }
-
-            $categories[] = $cat;
-        }
-
-        return $categories;
-    }
-
+    /**
+     * Haalt een beperkt aantal categorieën op, inclusief het aantal gekoppelde cursussen.
+     *
+     * @param int $limit Het maximum aantal categorieën.
+     * @return array Associatieve array van categorieën met course count.
+     */
     public function getWithLimit($limit)
     {
         $sql = "SELECT 
@@ -124,7 +140,11 @@ class Category
 
 
 
-    /* Get all categories with the count of associated courses */
+    /**
+     * Haalt alle categorieën op met het aantal gekoppelde cursussen.
+     *
+     * @return mysqli_result Resultaatset van de query.
+     */
     public function getAllWithCourseCount()
     {
         $sql = "
@@ -149,6 +169,12 @@ class Category
     }
 
 
+    /**
+     * Haalt categorieën op die gekoppeld zijn aan een specifieke cursus.
+     *
+     * @param int $courseId Het ID van de cursus.
+     * @return array Lijst van categorieën voor de cursus.
+     */
     public function getCategoriesByCourse($courseId)
     {
         $sql = "
@@ -169,6 +195,13 @@ class Category
         return $categories;
     }
 
+    /**
+     * Maakt een nieuwe categorie aan.
+     *
+     * @param string $naam De naam van de categorie.
+     * @param string $icon Het icon voor de categorie.
+     * @return bool True als succesvol, anders false.
+     */
     public function createCategorie($naam, $icon)
     {
         $uuid = generateUUID();
@@ -178,6 +211,14 @@ class Category
         return mysqli_stmt_execute($stmt);
     }
 
+    /**
+     * Werkt een bestaande categorie bij.
+     *
+     * @param int $id Het ID van de categorie.
+     * @param string $naam Nieuwe naam.
+     * @param string $icon Nieuwe icon.
+     * @return bool True als succesvol, anders false.
+     */
     public function updateCategorie($id, $naam, $icon)
     {
         $sql = "UPDATE Categorie SET Naam = ?, Icon = ? WHERE Id = ?";
@@ -186,6 +227,12 @@ class Category
         return mysqli_stmt_execute($stmt);
     }
 
+    /**
+     * Verwijdert een categorie uit de database.
+     *
+     * @param int $id Het ID van de categorie.
+     * @return bool True als succesvol, anders false.
+     */
     public function deleteCategorie($id)
     {
         $sql = "DELETE FROM Categorie WHERE Id = ?";

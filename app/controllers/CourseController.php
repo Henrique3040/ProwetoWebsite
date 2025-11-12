@@ -1,20 +1,54 @@
 <?php
+/**
+ * CourseController
+ *
+ * Deze controller beheert alle logica met betrekking tot cursussen.
+ * Hij handelt weergave, zoeken, filtering en CRUD-bewerkingen af 
+ * door te communiceren met het Course-model.
+ *
+ * @author  
+ * @version 1.0
+ */
+
 require_once __DIR__ . '/../models/Course.php';
 
 class CourseController
 {
+    /**
+     * @var Course Het model dat database-interacties voor cursussen beheert.
+     */
     private $model;
 
+    /**
+     * Constructor
+     *
+     * Initialiseert de controller en laadt het Course-model met de databaseverbinding.
+     *
+     * @param mysqli $db De actieve databaseverbinding.
+     */
     public function __construct($db)
     {
         $this->model = new Course($db);
     }
 
+    /**
+     * Haalt uitgelichte cursussen op (voor homepage of sectie "Aanbevolen cursussen").
+     *
+     * @param int $limit Het maximum aantal cursussen (standaard 8).
+     * @return array Associatieve array van uitgelichte cursussen.
+     */
     public function featured($limit = 8)
     {
         return $this->model->getFeaturedCourses($limit);
     }
 
+    /**
+     * Haalt de details van een specifieke cursus op.
+     * Voegt tevens een weergave ("view") toe aan de cursus.
+     *
+     * @param int $courseId Het ID van de cursus.
+     * @return array Associatieve array met cursusdetails.
+     */
     public function getCourseDetail($courseId)
     {
         // eerst view toevoegen
@@ -23,50 +57,108 @@ class CourseController
         return $this->model->getCourseDetail($courseId);
     }
 
+     /**
+     * Voegt een beoordeling (rating) toe aan een cursus.
+     *
+     * @param int $courseId Het ID van de cursus.
+     * @param int|float $rating De toegevoegde beoordeling (bijv. 1-5 sterren).
+     * @return bool True als de beoordeling succesvol is toegevoegd.
+     */
+
     public function rateCourse($courseId, $rating)
     {
         return $this->model->addRating($courseId, $rating);
     }
 
-
+    /**
+     * Zoekt naar cursussen op basis van een zoekterm.
+     *
+     * @param string $query De zoekterm.
+     * @return array Resultaten van de zoekopdracht.
+     */
     public function searchCourses($query)
     {
         return $this->model->searchCourses($query);
     }
 
+    /**
+     * Haalt alle cursussen op.
+     *
+     * @return array Lijst van alle cursussen.
+     */
     public function getAllCourses()
     {
         return $this->model->getAllCourses();
     }
 
+    /**
+     * Haalt het totaal aantal cursussen op.
+     *
+     * @return int Het aantal cursussen.
+     */
     public function getAllCount(){
         return $this->model->getAllCount();
     }
 
+    /**
+     * Haalt alle geactiveerde cursussen op.
+     *
+     * @return array Lijst van actieve cursussen.
+     */
     public function getActivatedCourses()
     {
         return $this->model->getActivatedCourses();
     }
 
+    /**
+     * Haalt alle gedeactiveerde cursussen op.
+     *
+     * @return array Lijst van inactieve cursussen.
+     */
     public function getInactiveCourses()
     {
         return $this->model->getInactiveCourses();
     }
 
 
+    /**
+     * Haalt cursussen op met filters (bijvoorbeeld categorie, leerjaar, status).
+     *
+     * @param array $filters Filtercriteria (optioneel).
+     * @param int $limit Aantal resultaten per pagina.
+     * @param int $page Huidige pagina.
+     * @return array Gefilterde lijst van cursussen.
+     */
     public function getFilteredCourses($filters = [], $limit = 10, $page = 1)
     {
         return $this->model->getFilteredCourses($filters, $limit, $page);
     }
 
+    /**
+     * Haalt cursussen op met filters voor de admin-omgeving.
+     *
+     * @param array $filters Filtercriteria (optioneel).
+     * @param int $limit Aantal resultaten per pagina.
+     * @param int $page Huidige pagina.
+     * @return array Lijst van cursussen met admin-specifieke informatie.
+     */
     public function getCoursesAdmin($filters = [], $limit = 10, $page = 1)
     {
         return $this->model->getCoursesAdmin($filters, $limit, $page);
     }
 
-
-
-    //Slaag cursus op de database via de model
+    /**
+     * Slaat een nieuwe cursus op in de database.
+     *
+     * Verwacht een POST-verzoek met o.a.:
+     * - `titel`, `korte_beschrijving`, `beschrijving`
+     * - `categorie_id`, `video_link`, `leerjaar_id`
+     * - `foto` (bestand upload)
+     * - `faqs` (JSON string)
+     * - `materiaal`, `documenten`, `active` (checkboxen)
+     *
+     * @return void
+     */
     public function store()
     {
 
@@ -123,19 +215,42 @@ class CourseController
     }
 
 
-    // Verwijder cursus via model
+     /**
+     * Verwijdert een cursus uit de database.
+     *
+     * @param int $courseId Het ID van de te verwijderen cursus.
+     * @return bool True als de cursus succesvol verwijderd is.
+     */
     public function delete($courseId)
     {
         return $this->model->deleteCourse($courseId);
     }
 
+    /**
+     * Haalt de laatst bijgewerkte cursussen op.
+     *
+     * @param int $limit Het aantal cursussen om op te halen (standaard 5).
+     * @return array Lijst van recent bijgewerkte cursussen.
+     */
     public function getLatestUpdatedCourses($limit = 5)
     {
         return $this->model->getLatestUpdatedCourses($limit);
     }
 
 
-    // Update cursus via model
+    /**
+     * Werkt een bestaande cursus bij in de database.
+     *
+     * Verwacht een POST-verzoek met:
+     * - `titel`, `korte_beschrijving`, `beschrijving`
+     * - `categorie_id`, `video_link`, `leerjaar_id`
+     * - `foto` (optionele nieuwe upload)
+     * - `faqs` (JSON-string met FAQ’s)
+     * - `deletedFaqs` (JSON-string met te verwijderen FAQ-ID’s)
+     *
+     * @param int $courseId Het ID van de te updaten cursus.
+     * @return void
+     */
     public function update($courseId)
     {
         if ($_SERVER['REQUEST_METHOD'] === 'POST') {
