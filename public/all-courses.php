@@ -56,16 +56,7 @@
 				<div class="row">
 					<div class="col-12">
 						<!-- Title -->
-						<h1 class="text-white">Course List Minimal</h1>
-						<!-- Breadcrumb -->
-						<div class="d-flex">
-							<nav aria-label="breadcrumb">
-								<ol class="breadcrumb breadcrumb-dark breadcrumb-dots mb-0">
-									<li class="breadcrumb-item"><a href="#">Home</a></li>
-									<li class="breadcrumb-item active" aria-current="page">Courses</li>
-								</ol>
-							</nav>
-						</div>
+						<h1 class="text-white">Course List</h1>
 					</div>
 				</div>
 			</div>
@@ -128,7 +119,7 @@ Page content START -->
 
 					<!-- Button -->
 					<div class="col-sm-6 col-xl-2 mt-3 mt-xl-0 d-grid">
-						<a href="all-courses.php" class="btn btn-lg btn-primary mb-0">Filter Results</a>
+						<a href="all-courses.php" class="btn btn-lg btn-primary mb-0">Reset</a>
 					</div>
 				</div>
 				<!-- Search option END -->
@@ -160,6 +151,9 @@ Page content START -->
 													<p class="mb-2"><i
 															class="fas fa-eye text-success me-1"></i><?= (int) $course['Views'] ?>
 														views</p>
+
+														<p class="mb-2"> <i class="fas fa-star text-warning"></i>
+														<?= number_format($course['Rating']) ?> Rating</p>
 												</div>
 											</div>
 										</div>
@@ -232,32 +226,6 @@ Action box START -->
 					</svg>
 				</figure>
 
-				<div class="bg-success p-4 p-sm-5 rounded-3">
-					<div class="row justify-content-center position-relative">
-						<!-- Svg -->
-						<figure class="fill-white opacity-1 position-absolute top-50 start-0 translate-middle-y">
-							<svg width="141px" height="141px">
-								<path
-									d="M140.520,70.258 C140.520,109.064 109.062,140.519 70.258,140.519 C31.454,140.519 -0.004,109.064 -0.004,70.258 C-0.004,31.455 31.454,-0.003 70.258,-0.003 C109.062,-0.003 140.520,31.455 140.520,70.258 Z" />
-							</svg>
-						</figure>
-						<!-- Action box -->
-						<div class="col-11 position-relative">
-							<div class="row align-items-center">
-								<!-- Title -->
-								<div class="col-lg-7">
-									<h3 class="text-white">Become an Instructor!</h3>
-									<p class="text-white mb-3 mb-lg-0">Speedily say has suitable disposal add boy. On
-										forth doubt miles of child. Exercise joy man children rejoiced. Yet uncommonly
-										his ten who diminution astonished.</p>
-								</div>
-								<!-- Button -->
-								<div class="col-lg-5 text-lg-end">
-									<a href="#" class="btn btn-dark mb-0">Start Teaching today</a>
-								</div>
-							</div>
-						</div>
-					</div> <!-- Row END -->
 				</div>
 			</div>
 		</section>

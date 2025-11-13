@@ -11,11 +11,11 @@
 
 	<?php
 	require_once __DIR__ . '/../app/core/init.php';
-	require_once __DIR__ . '/../app/helpers/auth.php'; 
-    requireAdmin();
+	require_once __DIR__ . '/../app/helpers/auth.php';
+	requireAdmin();
 
 	// Haal alle cursussen op
-	$coursesTotaal = $courseController->getAllCourses();
+	$coursesTotaal = $courseController->getAllCount();
 	$activatedCourses = $courseController->getActivatedCourses();
 	$inactiveCourses = $courseController->getInactiveCourses();
 
@@ -36,13 +36,15 @@
 		'sort' => $_GET['sort'] ?? ''
 	];
 
-	$filteredData = $courseController->getFilteredCourses($filters, $limit, $page);
+	if (isset($_GET['reset'])) {
+		header("Location: admin-course-list.php");
+		exit;
+	}	
+	$filteredData = $courseController->getCoursesAdmin($filters, $limit, $page);
 	$courses = $filteredData['result'];
 	$totalPages = $filteredData['pages'];
 	$currentPage = $filteredData['page'];
 	$totalCourses = $filteredData['total'];
-
-
 
 	?>
 
@@ -60,7 +62,7 @@
 		<!-- Page content START -->
 		<div class="page-content">
 
-			<?php include("partials/topbar.php"); ?>
+			
 
 			<!-- Page main content START -->
 			<div class="page-content-wrapper border">
@@ -75,16 +77,12 @@
 
 				<!-- Course boxes START -->
 				<div class="row g-4 mb-4">
-					<?php
-					$totalCourses = mysqli_num_rows($coursesTotaal);
-					mysqli_data_seek($coursesTotaal, 0); // reset pointer voor de while-loop hierboven
-					?>
 
 					<!-- Course item -->
 					<div class="col-sm-6 col-lg-4">
 						<div class="text-center p-4 bg-primary bg-opacity-10 border border-primary rounded-3">
 							<h6>Total Courses</h6>
-							<h2 class="mb-0 fs-1 text-primary"><?= $totalCourses ?></h2>
+							<h2 class="mb-0 fs-1 text-primary"><?= $coursesTotaal ?></h2>
 						</div>
 					</div>
 					<?php
@@ -119,24 +117,33 @@
 					<!-- Card header START -->
 					<div class="card-header bg-light border-bottom">
 						<!-- Search and select START -->
-						<form class="row g-3 align-items-center justify-content-between" id="filterForm">
+						<form class="row g-3 align-items-center justify-content-between" method="GET" action="">
 							<div class="col-md-8">
-								<input id="searchCourses" class="form-control bg-body" type="search"
-									placeholder="Search courses..." aria-label="Search">
+								<input name="search" class="form-control bg-body" type="search"
+									placeholder="Search courses..."
+									value="<?= htmlspecialchars($_GET['search'] ?? '') ?>"
+									onchange="this.form.submit()">
 							</div>
 
 							<div class="col-md-3 d-flex gap-2">
-								<select id="sortCourses" class="form-select border-0 z-index-9" aria-label="Sort by">
+
+								<select name="sort" class="form-select border-0 z-index-9"
+									onchange="this.form.submit()">
 									<option value="">Sort by</option>
-									<option value="newest">Newest</option>
-									<option value="oldest">Oldest</option>
-									<option value="active">Active</option>
-									<option value="pending">Pending</option>
+									<option value="newest" <?= ($filters['sort'] == 'newest') ? 'selected' : '' ?>>Newest
+									</option>
+									<option value="oldest" <?= ($filters['sort'] == 'oldest') ? 'selected' : '' ?>>Oldest
+									</option>
+									<option value="active" <?= ($filters['status'] == 'active') ? 'selected' : '' ?>>Active
+									</option>
+									<option value="pending" <?= ($filters['status'] == 'pending') ? 'selected' : '' ?>>
+										Pending</option>
 								</select>
 
-								<!-- Reset knop -->
-								<button type="button" id="resetFilters"
-									class="btn btn-sm btn-primary mb-0">Reset</button>
+								<button type="submit" name="reset" value="1" class="btn btn-sm btn-primary mb-0">
+									Reset
+								</button>
+
 							</div>
 						</form>
 
@@ -295,8 +302,7 @@
 	<!-- Vendors -->
 	<script src="assets/vendor/choices.js/public/assets/scripts/choices.min.js"></script>
 	<script src="assets/vendor/overlayscrollbars/browser/overlayscrollbars.browser.es6.min.js"></script>
-	<!-- Admin JS -->
-	<script src="js/admin-course-list.js"></script>
+
 
 	<?php include("partials/footer-scripts.php"); ?>
 

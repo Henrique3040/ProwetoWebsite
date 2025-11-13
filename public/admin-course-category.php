@@ -43,7 +43,7 @@
 		<?php include("partials/sidebar.php"); ?>
 
 		<div class="page-content">
-			<?php include("partials/topbar.php"); ?>
+			
 
 			<div class="page-content-wrapper border">
 
@@ -62,16 +62,8 @@
 				<div class="card bg-transparent border">
 					<div class="card-header bg-light border-bottom">
 						<div class="row g-3 align-items-center justify-content-between">
-							<div class="col-md-8">
-								<form class="rounded position-relative">
-									<input class="form-control bg-body" type="search" placeholder="Search"
-										aria-label="Search" id="searchCategory">
-									<button
-										class="bg-transparent p-2 position-absolute top-50 end-0 translate-middle-y border-0 text-primary-hover text-reset"
-										type="button">
-										<i class="fas fa-search fs-6 "></i>
-									</button>
-								</form>
+							<div class="col-12 col-md-6">
+								<h5 class="mb-0">All Categories</h5>
 							</div>
 						</div>
 					</div>

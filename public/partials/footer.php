@@ -7,8 +7,7 @@
 				<div class="col-lg-3">
 					<!-- logo -->
 					<a class="me-0" href="index.php">
-						<img class="light-mode-item h-40px" src="assets/images/logo.svg" alt="logo">
-						<img class="dark-mode-item h-40px" src="assets/images/logo-light.svg" alt="logo">
+						<img class="light-mode-item h-40px" src="assets/images/prowetoLogoEdit.png" alt="logo">
 					</a>
 					<p class="my-3">Eduport education theme, built specifically for the education centers which is
 						dedicated to teaching and involve learners. </p>
@@ -76,16 +75,6 @@
 
 					<p class="mb-0">Email:<span class="h6 fw-light ms-2">example@gmail.com</span></p>
 
-					<div class="row g-2 mt-2">
-						<!-- Google play store button -->
-						<div class="col-6 col-sm-4 col-md-3 col-lg-6">
-							<a href="#"> <img src="assets/images/client/google-play.svg" alt=""> </a>
-						</div>
-						<!-- App store button -->
-						<div class="col-6 col-sm-4 col-md-3 col-lg-6">
-							<a href="#"> <img src="assets/images/client/app-store.svg" alt="app-store"> </a>
-						</div>
-					</div> <!-- Row END -->
 				</div>
 				<!-- Widget 3 END -->
 			</div><!-- Row END -->

@@ -1,15 +1,35 @@
 <?php
+/**
+ * Course
+ *
+ * Modelklasse voor het beheren van cursussen.
+ * Bevat methodes voor CRUD, ratings, views, filters, categorieën en FAQ's.
+ */
+
 include_once __DIR__ . '/../helpers/generateUUID.php';
 class Course
 {
+    /**
+     * @var mysqli $conn De actieve databaseverbinding.
+     */
     private $conn;
 
+     /**
+     * Constructor
+     *
+     * @param mysqli $db De databaseverbinding.
+     */
     public function __construct($db)
     {
         $this->conn = $db;
     }
 
-    // Haal de meest bekeken cursussen op
+    /**
+     * Haalt de meest bekeken cursussen op.
+     *
+     * @param int $limit Maximaal aantal cursussen.
+     * @return array Associatieve array van cursussen.
+     */
     public function getFeaturedCourses($limit = 8)
     {
         $sql = "
@@ -19,10 +39,13 @@ class Course
             c.FotoURL,
             c.Link,
             c.Views,
+            d.Rating,
             GROUP_CONCAT(cat.Naam SEPARATOR ', ') AS CategorieNamen
         FROM Cursus c
+        JOIN Cursusdetails d ON c.id = d.cursus_id
         LEFT JOIN CursusCategorie cc ON c.Id = cc.cursus_id
         LEFT JOIN Categorie cat ON cc.categorie_id = cat.id
+        where c.active = 1
         GROUP BY c.Id
         ORDER BY c.Views DESC
         LIMIT ?
@@ -50,7 +73,12 @@ class Course
     }
 
 
-    // Haal cursus + detailinformatie op
+     /**
+     * Haalt detailinformatie van een cursus op, inclusief FAQ's.
+     *
+     * @param string $courseId ID van de cursus.
+     * @return array Associatieve array met cursusdata.
+     */
     public function getCourseDetail($courseId)
     {
         $sql = "
@@ -102,6 +130,13 @@ class Course
         return $course;
     }
 
+    /**
+     * Voeg een rating toe aan een cursus en werk het gemiddelde bij.
+     *
+     * @param string $courseId
+     * @param int $rating
+     * @return bool
+     */
     public function addRating($courseId, $rating)
     {
         $id = generateUUID();
@@ -130,6 +165,11 @@ class Course
     }
 
 
+    /**
+     * Verhoog het aantal views voor een cursus.
+     *
+     * @param string $courseId
+     */
     public function addView($courseId)
     {
         $sql = "UPDATE Cursus SET Views = Views + 1 WHERE Id = ?";
@@ -140,7 +180,12 @@ class Course
 
 
 
-    // Zoek cursussen op titel
+    /**
+     * Zoek cursussen op basis van titel.
+     *
+     * @param string $query
+     * @return mysqli_result
+     */
     public function searchCourses($query)
     {
         $sql = "
@@ -150,11 +195,13 @@ class Course
             c.FotoURL,
             c.Link,
             c.Views,
+            d.Rating,
             GROUP_CONCAT(cat.Naam SEPARATOR ', ') AS CategorieNamen
         FROM Cursus c
+        JOIN Cursusdetails d ON c.id = d.cursus_id
         LEFT JOIN CursusCategorie cc ON c.id = cc.cursus_id
         LEFT JOIN Categorie cat ON cc.categorie_id = cat.id
-        WHERE c.Titel LIKE CONCAT('%', ?, '%')
+        WHERE c.Titel LIKE CONCAT('%', ?, '%') AND c.Active = 1
         GROUP BY c.Id
         ORDER BY c.Views DESC
         ";
@@ -172,6 +219,31 @@ class Course
         return $result;
     }
 
+    /**
+     * Haal totaal aantal cursussen op.
+     *
+     * @return int
+     */
+    public function getAllCount(){
+        $sql = "SELECT COUNT(DISTINCT c.Id) AS total
+        FROM Cursus c
+        ";
+        $stmt = mysqli_prepare($this->conn, $sql);
+
+        if (!$stmt) {
+            die('Prepare failed: ' . mysqli_error($this->conn));
+        }
+        mysqli_stmt_execute($stmt);
+        $result = mysqli_stmt_get_result($stmt);
+        if (!$result) {
+            die('Query failed: ' . mysqli_error($this->conn));
+        }
+
+        $total = mysqli_fetch_assoc($result)['total'] ?? 0;
+        return $total;
+    }
+
+
     public function getAllCourses()
     {
         $sql = "
@@ -187,6 +259,7 @@ class Course
         FROM Cursus c
         LEFT JOIN CursusCategorie cc ON c.id = cc.cursus_id
         LEFT JOIN Categorie cat ON cc.categorie_id = cat.id
+        WHERE c.Active = 1
         GROUP BY c.id
         ORDER BY c.Titel ASC";
 
@@ -205,61 +278,179 @@ class Course
         return $result;
     }
 
-
-    public function getFilteredCourses($filters = [], $limit = 10, $page = 1)
+    public function getCoursesAdmin($filters = [], $limit = 10, $page = 1)
     {
-        $search   = $filters['search']   ?? '';
+        $search = $filters['search'] ?? '';
+        $status = $filters['status'] ?? '';
+        $sort = $filters['sort'] ?? '';
         $category = $filters['category'] ?? '';
-        $sort     = $filters['sort']     ?? '';
-    
+
         $offset = ($page - 1) * $limit;
-    
+
         $where = [];
         $params = [];
-        $types  = '';
-    
+        $types = '';
+
         // ✅ SEARCH
         if (!empty($search)) {
             $where[] = "c.Titel LIKE ?";
             $params[] = "%$search%";
             $types .= "s";
         }
-    
+
         // ✅ CATEGORY
         if (!empty($category)) {
             $where[] = "cc.categorie_id = ?";
             $params[] = $category;
             $types .= "s";
         }
-    
+
+        // ✅ STATUS FILTER (actief / pending)
+        if ($status === "active") {
+            $where[] = "c.Active = 1";
+        } elseif ($status === "pending") {
+            $where[] = "c.Active = 0";
+        }
+
         // ✅ WHERE SQL
         $whereSql = "";
         if (count($where) > 0) {
             $whereSql = "WHERE " . implode(" AND ", $where);
         }
-    
+
         // ✅ SORTERING
         switch ($sort) {
-            case "views":
-                $orderBy = "ORDER BY c.Views DESC";
-                break;
-    
-            case "rating":
-                $orderBy = "ORDER BY d.Rating DESC";
-                break;
-    
-            case "recent":
+            case "newest":
                 $orderBy = "ORDER BY c.CreatedAt DESC";
                 break;
-    
+
             case "oldest":
                 $orderBy = "ORDER BY c.CreatedAt ASC";
                 break;
-    
+
+            case "active":
+                $orderBy = "ORDER BY c.Active DESC";
+                break;
+
+            case "pending":
+                $orderBy = "ORDER BY c.Active ASC";
+                break;
+
             default:
                 $orderBy = "ORDER BY c.CreatedAt DESC";
         }
-    
+
+        // ✅ COUNT (totaal voor paginatie)
+        $countSql = "
+        SELECT COUNT(DISTINCT c.Id) AS total
+        FROM Cursus c
+        LEFT JOIN CursusCategorie cc ON c.id = cc.cursus_id
+        LEFT JOIN Cursusdetails d ON c.id = d.cursus_id
+        $whereSql
+    ";
+
+        $countStmt = mysqli_prepare($this->conn, $countSql);
+        if (!empty($params)) {
+            mysqli_stmt_bind_param($countStmt, $types, ...$params);
+        }
+        mysqli_stmt_execute($countStmt);
+        $countResult = mysqli_stmt_get_result($countStmt);
+        $total = mysqli_fetch_assoc($countResult)['total'] ?? 0;
+
+        // ✅ MAIN QUERY
+        $sql = "
+        SELECT 
+            c.Id, c.Titel, c.FotoURL, c.Link, c.Views, c.CreatedAt, c.Active,
+            d.Rating,
+            GROUP_CONCAT(cat.Naam SEPARATOR ', ') AS CategorieNamen
+        FROM Cursus c
+        LEFT JOIN Cursusdetails d ON c.id = d.cursus_id
+        LEFT JOIN CursusCategorie cc ON c.id = cc.cursus_id
+        LEFT JOIN Categorie cat ON cc.categorie_id = cat.id
+        $whereSql
+        GROUP BY c.Id
+        $orderBy
+        LIMIT ? OFFSET ?
+    ";
+
+        $stmt = mysqli_prepare($this->conn, $sql);
+
+        // ✅ Bind filters + limit + offset
+        if (!empty($params)) {
+            $types .= "ii";
+            $params[] = $limit;
+            $params[] = $offset;
+            mysqli_stmt_bind_param($stmt, $types, ...$params);
+        } else {
+            mysqli_stmt_bind_param($stmt, "ii", $limit, $offset);
+        }
+
+        mysqli_stmt_execute($stmt);
+        $result = mysqli_stmt_get_result($stmt);
+
+        return [
+            'result' => $result,
+            'total' => $total,
+            'limit' => $limit,
+            'page' => $page,
+            'pages' => ceil($total / $limit)
+        ];
+    }
+
+
+
+    public function getFilteredCourses($filters = [], $limit = 10, $page = 1)
+    {
+        $search = $filters['search'] ?? '';
+        $category = $filters['category'] ?? '';
+        $sort = $filters['sort'] ?? '';
+
+        $offset = ($page - 1) * $limit;
+
+        $where = [];
+        $params = [];
+        $types = '';
+
+        $where[] = "c.Active = 1";
+
+        // ✅ SEARCH
+        if (!empty($search)) {
+            $where[] = "c.Titel LIKE ?";
+            $params[] = "%$search%";
+            $types .= "s";
+        }
+
+        // ✅ CATEGORY
+        if (!empty($category)) {
+            $where[] = "cc.categorie_id = ?";
+            $params[] = $category;
+            $types .= "s";
+        }
+
+        // ✅ WHERE SQL
+        $whereSql = "";
+        if (count($where) > 0) {
+            $whereSql = "WHERE " . implode(" AND ", $where);
+        }
+
+        // ✅ SORTERING
+        switch ($sort) {
+            case "recent":
+                $orderBy = "ORDER BY c.CreatedAt DESC";
+                break;
+
+            case "rating":
+                $orderBy = "ORDER BY d.Rating DESC";
+                break;
+
+            case "views":
+                $orderBy = "ORDER BY c.Views DESC";
+                break;
+
+            default:
+                $orderBy = "ORDER BY c.CreatedAt DESC";
+        }
+
         // ✅ COUNT (totaal voor paginatie)
         $countSql = "
             SELECT COUNT(*) AS total
@@ -268,7 +459,7 @@ class Course
             LEFT JOIN Cursusdetails d ON c.id = d.cursus_id
             $whereSql
         ";
-    
+
         $countStmt = mysqli_prepare($this->conn, $countSql);
         if (!empty($params)) {
             mysqli_stmt_bind_param($countStmt, $types, ...$params);
@@ -276,7 +467,7 @@ class Course
         mysqli_stmt_execute($countStmt);
         $countResult = mysqli_stmt_get_result($countStmt);
         $total = mysqli_fetch_assoc($countResult)['total'] ?? 0;
-    
+
         // ✅ MAIN QUERY
         $sql = "
             SELECT 
@@ -292,9 +483,9 @@ class Course
             $orderBy
             LIMIT ? OFFSET ?
         ";
-    
+
         $stmt = mysqli_prepare($this->conn, $sql);
-    
+
         // ✅ Bind filters + limit + offset
         if (!empty($params)) {
             $types .= "ii";
@@ -304,42 +495,25 @@ class Course
         } else {
             mysqli_stmt_bind_param($stmt, "ii", $limit, $offset);
         }
-    
+
         mysqli_stmt_execute($stmt);
         $result = mysqli_stmt_get_result($stmt);
-    
+
         return [
             'result' => $result,
-            'total'  => $total,
-            'limit'  => $limit,
-            'page'   => $page,
-            'pages'  => ceil($total / $limit)
+            'total' => $total,
+            'limit' => $limit,
+            'page' => $page,
+            'pages' => ceil($total / $limit)
         ];
     }
-    
 
 
-
-    public function getCategoriesByCourse($courseId)
-    {
-        $sql = "
-        SELECT cat.id AS CategorieID, cat.Naam
-        FROM Categorie cat
-        INNER JOIN CursusCategorie cc ON cat.id = cc.categorie_id
-        WHERE cc.cursus_id = ?";
-
-        $stmt = mysqli_prepare($this->conn, $sql);
-        mysqli_stmt_bind_param($stmt, "s", $courseId);
-        mysqli_stmt_execute($stmt);
-        $result = mysqli_stmt_get_result($stmt);
-
-        $categories = [];
-        while ($row = mysqli_fetch_assoc($result)) {
-            $categories[] = $row;
-        }
-        return $categories;
-    }
-
+     /**
+     * Haal alle actieve cursussen op.
+     *
+     * @return mysqli_result
+     */
     public function getActivatedCourses()
     {
         $sql = "
@@ -368,7 +542,11 @@ class Course
     }
 
 
-
+     /**
+     * Haal inactieve cursussen op.
+     *
+     * @return mysqli_result
+     */
     public function getInactiveCourses()
     {
         $sql = "
@@ -438,6 +616,12 @@ class Course
     }
 
 
+    /**
+     * Haal laatst bijgewerkte cursussen op.
+     *
+     * @param int $limit
+     * @return mysqli_result
+     */
     public function getLatestUpdatedCourses($limit = 5)
     {
         $sql = "

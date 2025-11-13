@@ -55,7 +55,7 @@
 		<!-- Page content START -->
 		<div class="page-content">
 
-			<?php include("partials/topbar.php"); ?>
+			
 
 			<!-- Page main content START -->
 			<div class="page-content-wrapper border">
