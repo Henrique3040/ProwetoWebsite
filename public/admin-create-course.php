@@ -15,8 +15,8 @@
 
 	<?php
 	require_once __DIR__ . '/../app/core/init.php';
-	require_once __DIR__ . '/../app/helpers/auth.php'; 
-    requireAdmin();
+	require_once __DIR__ . '/../app/helpers/auth.php';
+	requireAdmin();
 	$categorieen = $categoryController->getAllCategories();
 	$courseController->store();
 	$leerjaren = $leerjaarController->getAllLeerjaren();
@@ -27,12 +27,12 @@
 
 <body>
 
-	
+
 
 	<!-- **************** MAIN CONTENT START **************** -->
 	<main>
 
-	<?php include("partials/sidebar.php"); ?>
+		<?php include("partials/sidebar.php"); ?>
 		<!-- =======================
 Page Banner START -->
 		<section class="py-0 bg-blue h-100px align-items-center d-flex h-200px rounded-0"
@@ -113,7 +113,8 @@ Steps START -->
 						<div class="card-body">
 							<!-- Step content START -->
 							<div class="bs-stepper-content">
-								<form id="courseForm" action="admin-create-course.php" method="POST" enctype="multipart/form-data">
+								<form id="courseForm" action="admin-create-course.php" method="POST"
+									enctype="multipart/form-data">
 
 
 									<!-- Step 1 content START -->
@@ -405,6 +406,15 @@ Steps START -->
 														<label class="input-group-text">.OGG</label>
 													</div>
 												</div>
+
+												<div class="col-12 mt-4">
+													<h5>Upload documenten</h5>
+													<input type="file" name="documents[]" class="form-control" multiple
+														accept=".pdf,.jpg,.jpeg,.png,.doc,.docx,.zip">
+													<small class="text-muted">Je kunt meerdere bestanden
+														selecteren.</small>
+												</div>
+
 
 												<!-- Preview -->
 												<h5 class="mt-4">Video preview</h5>

@@ -124,6 +124,43 @@ Page content START -->
 							</div>
 							<!-- About course END -->
 
+							<?php if (!empty($course['DocumentenLijst'])): ?>
+								<div class="col-12">
+									<div class="card border">
+										<!-- Header -->
+										<div class="card-header border-bottom">
+											<h3 class="mb-0">📂 Cursusdocumenten</h3>
+										</div>
+
+										<!-- Body -->
+										<div class="card-body">
+											<ul class="list-group list-group-flush">
+												<?php foreach ($course['DocumentenLijst'] as $doc): ?>
+													<li
+														class="list-group-item d-flex justify-content-between align-items-center">
+														<div class="d-flex align-items-center">
+															<i class="bi bi-file-earmark-text text-primary me-2 fs-5"></i>
+															<span><?= htmlspecialchars($doc['Naam']) ?></span>
+														</div>
+														<a href="<?= htmlspecialchars($doc['BestandURL']) ?>"
+															class="btn btn-sm btn-outline-primary" download>
+															<i class="bi bi-download me-1"></i> Download
+														</a>
+													</li>
+												<?php endforeach; ?>
+											</ul>
+										</div>
+									</div>
+								</div>
+							<?php else: ?>
+								<div class="col-12">
+									<div class="alert alert-light border text-muted">
+										<i class="bi bi-info-circle me-1"></i> Er zijn nog geen documenten toegevoegd voor
+										deze cursus.
+									</div>
+								</div>
+							<?php endif; ?>
+
 							<!-- Curriculum START -->
 
 							<!-- Curriculum END -->
@@ -224,18 +261,19 @@ Page content START -->
 											<li class="list-group-item px-0 d-flex justify-content-between">
 												<span class="h6 fw-light mb-0"><i
 														class="fas fa-fw fa-book-open text-primary"></i>Materialen</span>
-												<span>Ja</span>
+												<span><?= !empty($course['Materiaal']) ? 'Ja' : 'Nee' ?></span>
+
 											</li>
 
 											<li class="list-group-item px-0 d-flex justify-content-between">
 												<span class="h6 fw-light mb-0"><i
 														class="fas fa-fw fa-globe text-primary"></i>Language</span>
-												<span>English</span>
+												<span><?= $course['Taal'] ?></span>
 											</li>
 											<li class="list-group-item px-0 d-flex justify-content-between">
 												<span class="h6 fw-light mb-0"><i
 														class="fas fa-fw fa-user-clock text-primary"></i>Document</span>
-												<span>Nee</span>
+												<span><?= !empty($course['Documenten']) ? 'Ja' : 'Nee' ?></span>
 											</li>
 
 										</ul>
@@ -246,7 +284,7 @@ Page content START -->
 										<!-- Rating and follow -->
 										<div
 											class="d-sm-flex justify-content-sm-between align-items-center mt-0 mt-sm-2">
-											
+
 											<!-- Rating star -->
 											<?php if (!isset($_COOKIE["rated_" . $course['id']])): ?>
 												<div id="rating" data-course="<?= $course['id'] ?>" class="star-rating">
@@ -277,8 +315,8 @@ Page content START -->
 											if ($categories) {
 												foreach ($categories as $cat) {
 													echo '<li class="list-inline-item">
-                            <a class="btn btn-outline-light btn-sm" href="#">' . htmlspecialchars($cat['Naam']) . '</a>
-                          </li>';
+                                                            <a class="btn btn-outline-light btn-sm" href="#">' . htmlspecialchars($cat['Naam']) . '</a>
+                                                          </li>';
 												}
 											} else {
 												echo '<li class="list-inline-item text-muted">Geen categorieën</li>';

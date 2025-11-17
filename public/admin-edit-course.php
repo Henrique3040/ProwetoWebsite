@@ -16,8 +16,8 @@
 
 	<?php
 	require_once __DIR__ . '/../app/core/init.php';
-	require_once __DIR__ . '/../app/helpers/auth.php'; 
-    requireAdmin();
+	require_once __DIR__ . '/../app/helpers/auth.php';
+	requireAdmin();
 
 	if (!isset($_GET['id'])) {
 		header("Location: admin-course-list.php");
@@ -55,7 +55,7 @@
 		<!-- Page content START -->
 		<div class="page-content">
 
-			
+
 
 			<!-- Page main content START -->
 			<div class="page-content-wrapper border">
@@ -300,6 +300,47 @@
 										</div>
 									</div>
 									<!-- Upload image END -->
+
+									<hr class="my-4">
+									<h5>Documenten</h5>
+
+									<div class="mb-3">
+										<label class="form-label">Upload nieuwe documenten (PDF, DOCX, PPTX,
+											ZIP)</label>
+										<input type="file" name="nieuwe_documenten[]" class="form-control" multiple
+											accept=".pdf,.docx,.pptx,.zip">
+										<p class="small text-muted mt-1">Je kunt meerdere documenten tegelijk
+											selecteren.</p>
+									</div>
+
+									<!-- Huidige documenten tonen -->
+									<?php
+									$documents = $course['DocumentenLijst'] ?? []; // komt uit getCourseDetail()
+									?>
+									<?php if (!empty($documents)): ?>
+										<h6 class="mt-4">Bestaande documenten</h6>
+										<ul class="list-group">
+											<?php foreach ($documents as $doc): ?>
+												<li class="list-group-item d-flex justify-content-between align-items-center">
+													<a href="<?= htmlspecialchars($doc['BestandURL']) ?>" target="_blank">
+														<?= htmlspecialchars(basename($doc['BestandURL'])) ?>
+													</a>
+													<div>
+														<button type="button" class="btn btn-sm btn-danger-soft delete-doc"
+															data-id="<?= htmlspecialchars($doc['id']) ?>">
+															<i class="fas fa-trash"></i>
+														</button>
+													</div>
+												</li>
+											<?php endforeach; ?>
+										</ul>
+									<?php else: ?>
+										<p class="text-muted mt-2">Nog geen documenten toegevoegd.</p>
+									<?php endif; ?>
+
+									<!-- Verborgen input voor verwijderde documenten -->
+									<input type="hidden" name="deletedDocuments" id="deletedDocuments" value="[]">
+
 
 									<!-- Upload video START -->
 									<div class="col-12">

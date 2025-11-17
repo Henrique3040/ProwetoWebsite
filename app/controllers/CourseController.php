@@ -11,6 +11,8 @@
  */
 
 require_once __DIR__ . '/../models/Course.php';
+require_once __DIR__ . '/../models/Document.php';
+
 
 class CourseController
 {
@@ -22,13 +24,15 @@ class CourseController
     /**
      * Constructor
      *
-     * Initialiseert de controller en laadt het Course-model met de databaseverbinding.
+     * Initialiseert de controller en laadt het Course-model en Document-model met de databaseverbinding.
      *
      * @param mysqli $db De actieve databaseverbinding.
      */
     public function __construct($db)
     {
         $this->model = new Course($db);
+        $this->documentModel = new Document($db);
+
     }
 
     /**
@@ -57,7 +61,7 @@ class CourseController
         return $this->model->getCourseDetail($courseId);
     }
 
-     /**
+    /**
      * Voegt een beoordeling (rating) toe aan een cursus.
      *
      * @param int $courseId Het ID van de cursus.
@@ -96,7 +100,8 @@ class CourseController
      *
      * @return int Het aantal cursussen.
      */
-    public function getAllCount(){
+    public function getAllCount()
+    {
         return $this->model->getAllCount();
     }
 
@@ -206,6 +211,7 @@ class CourseController
             ]);
 
             if ($cursusId) {
+                $this->uploadDocuments($cursusId);
                 header('Location: admin-create-course.php?controller=course&action=success');
                 exit;
             } else {
@@ -215,7 +221,7 @@ class CourseController
     }
 
 
-     /**
+    /**
      * Verwijdert een cursus uit de database.
      *
      * @param int $courseId Het ID van de te verwijderen cursus.
@@ -284,6 +290,25 @@ class CourseController
                 $fotoURL = $targetFile;
             }
 
+            
+            // Nieuwe documenten uploaden
+            $uploadedDocs = [];
+            if (isset($_FILES['nieuwe_documenten']) && !empty($_FILES['nieuwe_documenten']['name'][0])) {
+                $uploadDir = 'uploads/documents/';
+                if (!is_dir($uploadDir))
+                    mkdir($uploadDir, 0755, true);
+
+                foreach ($_FILES['nieuwe_documenten']['tmp_name'] as $key => $tmpName) {
+                    if ($_FILES['nieuwe_documenten']['error'][$key] === UPLOAD_ERR_OK) {
+                        $filename = time() . '_' . basename($_FILES['nieuwe_documenten']['name'][$key]);
+                        $targetFile = $uploadDir . $filename;
+                        move_uploaded_file($tmpName, $targetFile);
+                        $uploadedDocs[] = $targetFile;
+                    }
+                }
+            }
+
+
             // FAQ’s (optioneel)
             $faqs = [];
             if (isset($_POST['faqs']) && !empty($_POST['faqs'])) {
@@ -294,6 +319,11 @@ class CourseController
             $deletedFaqIDs = [];
             if (isset($_POST['deletedFaqs']) && !empty($_POST['deletedFaqs'])) {
                 $deletedFaqIDs = json_decode($_POST['deletedFaqs'], true);
+            }
+
+            $deleteDocIDs = [];
+            if (isset($_POST['deletedDocuments']) && !empty($_POST['deletedDocuments'])) {
+                $deleteDocIDs = json_decode($_POST['deletedDocuments'], true);
             }
 
             // Update via model
@@ -309,7 +339,9 @@ class CourseController
                 'Documenten' => $documenten,
                 'LeerJaarID' => $leerjaarId,
                 'Faqs' => $faqs,
-                'DeletedFaqIDs' => $deletedFaqIDs // belangrijk!
+                'DeletedFaqIDs' => $deletedFaqIDs, // belangrijk!
+                'UploadedDocuments' => $uploadedDocs,
+                'DeletedDocumentIDs' => $deleteDocIDs // belangrijk!
             ]);
 
             if ($updated) {
@@ -320,6 +352,27 @@ class CourseController
             }
         }
     }
+
+    public function uploadDocuments($courseId)
+    {
+        if (isset($_FILES['documents'])) {
+            $uploadDir = 'uploads/documents/';
+            if (!is_dir($uploadDir))
+                mkdir($uploadDir, 0755, true);
+
+            foreach ($_FILES['documents']['name'] as $key => $name) {
+                if ($_FILES['documents']['error'][$key] === UPLOAD_ERR_OK) {
+                    $filename = time() . '_' . basename($name);
+                    $targetFile = $uploadDir . $filename;
+                    move_uploaded_file($_FILES['documents']['tmp_name'][$key], $targetFile);
+
+                    $fileType = pathinfo($name, PATHINFO_EXTENSION);
+                    $this->documentModel->addDocument($courseId, $name, $targetFile, $fileType);
+                }
+            }
+        }
+    }
+
 
 }
 ?>

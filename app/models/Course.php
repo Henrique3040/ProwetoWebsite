@@ -14,7 +14,7 @@ class Course
      */
     private $conn;
 
-     /**
+    /**
      * Constructor
      *
      * @param mysqli $db De databaseverbinding.
@@ -73,7 +73,7 @@ class Course
     }
 
 
-     /**
+    /**
      * Haalt detailinformatie van een cursus op, inclusief FAQ's.
      *
      * @param string $courseId ID van de cursus.
@@ -126,6 +126,18 @@ class Course
         $faqs = mysqli_fetch_all($resultFaq, MYSQLI_ASSOC);
 
         $course['Faqs'] = $faqs;
+
+        // ✅ Haal documenten op
+        $sqlDocs = "SELECT id, Naam, BestandURL, Bestandstype, UploadedAt 
+        FROM CursusDocumenten 
+        WHERE cursus_id = ?";
+        $stmtDocs = mysqli_prepare($this->conn, $sqlDocs);
+        mysqli_stmt_bind_param($stmtDocs, "s", $courseId);
+        mysqli_stmt_execute($stmtDocs);
+        $resultDocs = mysqli_stmt_get_result($stmtDocs);
+        $documents = mysqli_fetch_all($resultDocs, MYSQLI_ASSOC);
+
+        $course['DocumentenLijst'] = $documents;
 
         return $course;
     }
@@ -224,7 +236,8 @@ class Course
      *
      * @return int
      */
-    public function getAllCount(){
+    public function getAllCount()
+    {
         $sql = "SELECT COUNT(DISTINCT c.Id) AS total
         FROM Cursus c
         ";
@@ -509,7 +522,7 @@ class Course
     }
 
 
-     /**
+    /**
      * Haal alle actieve cursussen op.
      *
      * @return mysqli_result
@@ -542,7 +555,7 @@ class Course
     }
 
 
-     /**
+    /**
      * Haal inactieve cursussen op.
      *
      * @return mysqli_result
@@ -761,10 +774,13 @@ class Course
             mysqli_stmt_execute($stmt2);
 
             // 3️⃣ Categorie opnieuw koppelen
-            mysqli_query(
+            $stmtDelCat = mysqli_prepare(
                 $this->conn,
                 "DELETE FROM CursusCategorie WHERE cursus_id = ?"
             );
+            mysqli_stmt_bind_param($stmtDelCat, "s", $courseId);
+            mysqli_stmt_execute($stmtDelCat);
+            
 
             if (!empty($data['CategorieID'])) {
                 $stmtCat = mysqli_prepare(
@@ -774,6 +790,38 @@ class Course
                 mysqli_stmt_bind_param($stmtCat, "ss", $courseId, $data['CategorieID']);
                 mysqli_stmt_execute($stmtCat);
             }
+
+
+            // 6️⃣ Documenten verwerken
+            // Verwijder geselecteerde documenten
+            if (!empty($data['DeletedDocumentIDs'])) {
+                foreach ($data['DeletedDocumentIDs'] as $docId) {
+                    $stmtPath = mysqli_prepare($this->conn, "SELECT BestandURL FROM CursusDocumenten WHERE Id = ?");
+                    mysqli_stmt_bind_param($stmtPath, "s", $docId);
+                    mysqli_stmt_execute($stmtPath);
+                    $resPath = mysqli_stmt_get_result($stmtPath);
+                    $doc = mysqli_fetch_assoc($resPath);
+                    if ($doc && file_exists($doc['BestandURL']))
+                    {
+                        unlink($doc['BestandURL']);
+                    }
+
+                    $stmtDel = mysqli_prepare($this->conn, "DELETE FROM CursusDocumenten WHERE Id = ?");
+                    mysqli_stmt_bind_param($stmtDel, "s", $docId);
+                    mysqli_stmt_execute($stmtDel);
+                }
+            }
+
+            // Nieuwe documenten toevoegen
+            if (!empty($data['UploadedDocuments'])) {
+                foreach ($data['UploadedDocuments'] as $path) {
+                    $docId = generateUUID();
+                    $stmtAdd = mysqli_prepare($this->conn, "INSERT INTO CursusDocumenten (Id, cursus_id, BestandURL) VALUES (?, ?, ?)");
+                    mysqli_stmt_bind_param($stmtAdd, "sss", $docId, $courseId, $path);
+                    mysqli_stmt_execute($stmtAdd);
+                }
+            }
+
 
             // 4️⃣ Update FAQ’s
             if (!empty($data['Faqs'])) {
