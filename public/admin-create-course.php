@@ -20,6 +20,7 @@
 	$categorieen = $categoryController->getAllCategories();
 	$courseController->store();
 	$leerjaren = $leerjaarController->getAllLeerjaren();
+	$materialen = $materiaalController->getAllMaterials();
 	?>
 
 	<?php include("partials/head-css.php"); ?>
@@ -168,6 +169,22 @@ Steps START -->
 													<?php endforeach; ?>
 												</select>
 											</div>
+
+
+											<!-- Materialen multi-select -->
+											<div class="col-md-12">
+												<label class="form-label">Select materials</label>
+												<select class="form-select js-choice" name="material_ids[]" multiple>
+													<?php foreach ($materialen as $mat): ?>
+														<option value="<?= $mat['Id'] ?>">
+															<?= htmlspecialchars($mat['Naam']) ?>
+														</option>
+													<?php endforeach; ?>
+												</select>
+												<small class="text-muted">Je kunt meerdere materialen
+													selecteren.</small>
+											</div>
+
 
 											<!-- Switches -->
 											<div class="col-md-4 d-flex align-items-center mt-4">

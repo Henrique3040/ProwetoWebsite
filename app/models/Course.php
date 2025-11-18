@@ -139,6 +139,19 @@ class Course
 
         $course['DocumentenLijst'] = $documents;
 
+        // ✅ haal cursus materialen op
+        $sqlMat = "
+                   SELECT m.Id, m.Naam 
+                   FROM Materialen m
+                   JOIN CursusMaterialen cm ON m.Id = cm.materiaal_id
+                   WHERE cm.cursus_id = ?";
+
+        $stmtMat = mysqli_prepare($this->conn, $sqlMat);
+        mysqli_stmt_bind_param($stmtMat, "s", $courseId);
+        mysqli_stmt_execute($stmtMat);
+        $course['Materialen'] = mysqli_fetch_all(mysqli_stmt_get_result($stmtMat), MYSQLI_ASSOC);
+
+
         return $course;
     }
 
@@ -625,6 +638,19 @@ class Course
             }
         }
 
+        // Material koppelen
+        if (!empty($data['material_ids'])) {
+            foreach ($data['material_ids'] as $matId) {
+                $linkId = generateUUID();
+
+                $sqlMat = "INSERT INTO CursusMaterialen (Id, cursus_id, materiaal_id) VALUES (?, ?, ?)";
+                $stmtMat = mysqli_prepare($this->conn, $sqlMat);
+
+                mysqli_stmt_bind_param($stmtMat, "sss", $linkId, $Id, $matId);
+                mysqli_stmt_execute($stmtMat);
+            }
+        }
+
         return $Id;
     }
 
@@ -780,7 +806,7 @@ class Course
             );
             mysqli_stmt_bind_param($stmtDelCat, "s", $courseId);
             mysqli_stmt_execute($stmtDelCat);
-            
+
 
             if (!empty($data['CategorieID'])) {
                 $stmtCat = mysqli_prepare(
@@ -801,8 +827,7 @@ class Course
                     mysqli_stmt_execute($stmtPath);
                     $resPath = mysqli_stmt_get_result($stmtPath);
                     $doc = mysqli_fetch_assoc($resPath);
-                    if ($doc && file_exists($doc['BestandURL']))
-                    {
+                    if ($doc && file_exists($doc['BestandURL'])) {
                         unlink($doc['BestandURL']);
                     }
 
@@ -822,6 +847,42 @@ class Course
                 }
             }
 
+            //materiaal koppeling verwijderen
+            if (!empty($data['DeletedMaterialIDs'])) {
+                foreach ($data['DeletedMaterialIDs'] as $matId) {
+                    $stmtDel = mysqli_prepare(
+                        $this->conn,
+                        "DELETE FROM CursusMaterialen WHERE cursus_id=? AND materiaal_id=?"
+                    );
+                    mysqli_stmt_bind_param($stmtDel, "ss", $courseId, $matId);
+                    mysqli_stmt_execute($stmtDel);
+                }
+            }
+
+            foreach ($data['Materialen'] as $mat) {
+
+                if (!empty($mat['Id'])) {
+                    // Bestaat al → alleen koppelen indien niet bestaat
+                    $stmtCheck = mysqli_prepare(
+                        $this->conn,
+                        "SELECT 1 FROM CursusMaterialen WHERE cursus_id=? AND materiaal_id=?"
+                    );
+                    mysqli_stmt_bind_param($stmtCheck, "ss", $courseId, $mat['Id']);
+                    mysqli_stmt_execute($stmtCheck);
+                    $exists = mysqli_fetch_assoc(mysqli_stmt_get_result($stmtCheck));
+
+                    if (!$exists) {
+                        $linkId = generateUUID();
+                        $stmtLink = mysqli_prepare(
+                            $this->conn,
+                            "INSERT INTO CursusMaterialen (Id, cursus_id, materiaal_id) VALUES (?, ?, ?)"
+                        );
+                        mysqli_stmt_bind_param($stmtLink, "sss", $linkId, $courseId, $mat['Id']);
+                        mysqli_stmt_execute($stmtLink);
+                    }
+
+                }
+            }
 
             // 4️⃣ Update FAQ’s
             if (!empty($data['Faqs'])) {
