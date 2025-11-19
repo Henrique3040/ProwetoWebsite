@@ -167,9 +167,6 @@ class CourseController
     public function store()
     {
 
-       
-
-
         if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             $titel = $_POST['titel'];
             $korteBeschrijving = $_POST['korte_beschrijving'];
@@ -214,7 +211,7 @@ class CourseController
                 'faqs' => $faqs,
                 'material_ids' => $selectedMaterials
             ]);
-            
+
 
             if ($cursusId) {
                 $this->uploadDocuments($cursusId);
@@ -277,6 +274,11 @@ class CourseController
             $materiaal = isset($_POST['materiaal']) ? 1 : 0;
             $documenten = isset($_POST['documenten']) ? 1 : 0;
             $active = isset($_POST['active']) ? 1 : 0;
+            $deletedMaterialIDs = isset($_POST['DeletedMaterialIDs']) ? json_decode($_POST['DeletedMaterialIDs'], true) : [];
+            $selectedMaterialIds = $_POST['material_ids'] ?? [];
+
+
+
 
             // Upload nieuwe foto (optioneel)
             $fotoURL = null;
@@ -347,7 +349,10 @@ class CourseController
                 'Faqs' => $faqs,
                 'DeletedFaqIDs' => $deletedFaqIDs, // belangrijk!
                 'UploadedDocuments' => $uploadedDocs,
-                'DeletedDocumentIDs' => $deleteDocIDs // belangrijk!
+                'DeletedDocumentIDs' => $deleteDocIDs, // belangrijk!
+                'SelectedMaterialIds' => $selectedMaterialIds,
+                'DeletedMaterialIDs' => $deletedMaterialIDs,
+
             ]);
 
             if ($updated) {

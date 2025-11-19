@@ -18,6 +18,12 @@ class MaterialController
         return $this->model->getAll();
     }
 
+
+    public function getMaterialById($id)
+    {
+        return $this->model->getById($id);
+    }
+
     /* ---------------------------------------------------
         CREATE MATERIAL
     --------------------------------------------------- */

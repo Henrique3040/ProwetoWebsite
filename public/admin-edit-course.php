@@ -35,6 +35,10 @@
 	$course = $courseController->getCourseDetail($courseId);
 	$categories = $categoryController->getAllCategories();
 	$leerjaren = $leerjaarController->getAllLeerjaren();
+	$materialen = $materiaalController->getAllMaterials();
+	$selectedMaterialIds = array_column($course['Materialen'], 'Id');
+
+
 
 	// Beveiliging: redirect als cursus niet gevonden is
 	if (!$course) {
@@ -168,6 +172,46 @@
 													<?php endforeach; ?>
 												</select>
 											</div>
+
+											<!-- Course Materials -->
+											<hr class="my-4">
+											<h5>Materialen</h5>
+
+											<div id="materialList">
+												<?php foreach ($course['Materialen'] as $mat): ?>
+													<div
+														class="d-flex justify-content-between align-items-center border p-2 rounded mb-2">
+														<span><?= htmlspecialchars($mat['Naam']) ?></span>
+														<button type="button"
+															class="btn btn-sm btn-danger-soft delete-material"
+															data-id="<?= $mat['Id'] ?>">
+															<i class="fas fa-trash"></i>
+														</button>
+													</div>
+												<?php endforeach; ?>
+											</div>
+
+											<!-- input om nieuwe materiaal toe te voegen -->
+											<div class="col-md-12">
+												<label class="form-label">Select materials</label>
+
+												<select class="form-select js-choice" name="material_ids[]" multiple>
+													<?php foreach ($materialen as $mat): ?>
+														<option value="<?= $mat['Id'] ?>" <?= in_array($mat['Id'], $selectedMaterialIds) ? 'selected' : '' ?>>
+															<?= htmlspecialchars($mat['Naam']) ?>
+														</option>
+													<?php endforeach; ?>
+												</select>
+
+												<small class="text-muted">Je kunt meerdere materialen
+													selecteren.</small>
+											</div>
+
+											<!-- Hidden inputs -->
+											<input type="hidden" name="DeletedMaterialIDs" id="DeletedMaterialIDs"
+												value="[]">
+
+
 
 											<!-- Switches -->
 											<div class="col-md-4 d-flex align-items-center mt-4">

@@ -136,5 +136,30 @@ $(document).ready(function () {
       $(this).closest("li").remove();
     }
   });
-  
+
+  let deletedMaterialIDs = [];
+
+  // materiaal verwijderen
+  $(document).on("click", ".delete-material", function () {
+    const matId = $(this).data("id");
+
+    if (confirm("Verwijder dit materiaal?")) {
+      // voeg toe aan deleted lijst
+      deletedMaterialIDs.push(matId);
+
+      // UI verwijderen
+      $(this).closest("div").remove();
+
+      // VERWIJDER OOK VANUIT MULTISELECT
+      $("select[name='material_ids[]'] option[value='" + matId + "']").prop(
+        "selected",
+        false
+      );
+    }
+  });
+
+  // vóór submit
+  $("#updateCourseBtn").on("click", function () {
+    $("#DeletedMaterialIDs").val(JSON.stringify(deletedMaterialIDs));
+  });
 });

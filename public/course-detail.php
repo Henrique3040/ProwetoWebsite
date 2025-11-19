@@ -18,6 +18,7 @@
 	$categories = $categoryController->getCategoriesByCourse($course['id']);
 
 	$faqs = $faqController->index($course['id']);
+
 	?>
 
 	<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
@@ -161,13 +162,70 @@ Page content START -->
 								</div>
 							<?php endif; ?>
 
-							<!-- Curriculum START -->
+							<?php if (!empty($course['Materialen'])): ?>
+								<div class="col-12">
+									<div class="card border">
+										<div
+											class="card-header border-bottom d-flex align-items-center justify-content-between">
+											<h3 class="mb-0">📚 Cursusmaterialen</h3>
+											<small class="text-muted"><?= count($course['Materialen']) ?>
+												beschikbaar</small>
+										</div>
 
-							<!-- Curriculum END -->
+										<div class="card-body">
+											<!-- Grid van materialen -->
+											<div class="row g-3">
+												<?php foreach ($course['Materialen'] as $mat): ?>
+													<?php
+													// veilige velden
+													$matNaam = htmlspecialchars($mat['Naam']);
+													$matFoto = !empty($mat['FotoURL']) && file_exists($mat['FotoURL']) ? $mat['FotoURL'] : 'assets/images/placeholder-material.png';
+													$matId = htmlspecialchars($mat['Id']);
+													?>
+													<div class="col-12 col-sm-6 col-md-4">
+														<div class="card h-100 shadow-sm">
+															<div class="ratio ratio-4x3">
+																<img src="<?= htmlspecialchars($matFoto) ?>"
+																	alt="<?= $matNaam ?>" class="card-img-top object-fit-cover">
+															</div>
+															<div class="card-body d-flex flex-column">
+																<h6 class="card-title mb-2"><?= $matNaam ?></h6>
 
-							<!-- FAQs START -->
+																<?php if (!empty($mat['Beschrijving'])): ?>
+																	<p class="card-text small text-muted mb-2">
+																		<?= htmlspecialchars($mat['Beschrijving']) ?></p>
+																<?php endif; ?>
 
-							<!-- FAQ Tab Content -->
+																<div
+																	class="mt-auto d-flex justify-content-between align-items-center">
+																	<a href="#" class="btn btn-outline-secondary btn-sm"
+																		target="_blank" rel="noopener">
+																		<i class="bi bi-info-circle me-1"></i> Info
+																	</a>
+
+																	<!-- Reserveer-knop: data-attributes voor JS / backend -->
+																	<button class="btn btn-primary btn-sm reserve-material-btn"
+																		data-material-id="<?= $matId ?>"
+																		data-material-name="<?= $matNaam ?>">
+																		<i class="bi bi-calendar-plus me-1"></i> Reserveer
+																	</button>
+																</div>
+															</div>
+														</div>
+													</div>
+												<?php endforeach; ?>
+											</div>
+										</div>
+									</div>
+								</div>
+							<?php else: ?>
+								<div class="col-12">
+									<div class="alert alert-light border text-muted">
+										<i class="bi bi-info-circle me-1"></i> Er zijn nog geen materialen toegevoegd voor
+										deze cursus.
+									</div>
+								</div>
+							<?php endif; ?>
 
 							<div id="course-pills-5" role="tabpanel" aria-labelledby="course-pills-tab-5">
 								<!-- Title -->

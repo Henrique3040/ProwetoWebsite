@@ -141,7 +141,7 @@ class Course
 
         // ✅ haal cursus materialen op
         $sqlMat = "
-                   SELECT m.Id, m.Naam 
+                   SELECT m.Id, m.Naam, m.FotoURL 
                    FROM Materialen m
                    JOIN CursusMaterialen cm ON m.Id = cm.materiaal_id
                    WHERE cm.cursus_id = ?";
@@ -373,7 +373,7 @@ class Course
         LEFT JOIN CursusCategorie cc ON c.id = cc.cursus_id
         LEFT JOIN Cursusdetails d ON c.id = d.cursus_id
         $whereSql
-    ";
+     ";
 
         $countStmt = mysqli_prepare($this->conn, $countSql);
         if (!empty($params)) {
@@ -397,7 +397,7 @@ class Course
         GROUP BY c.Id
         $orderBy
         LIMIT ? OFFSET ?
-    ";
+     ";
 
         $stmt = mysqli_prepare($this->conn, $sql);
 
@@ -859,31 +859,16 @@ class Course
                 }
             }
 
-            foreach ($data['Materialen'] as $mat) {
-
-                if (!empty($mat['Id'])) {
-                    // Bestaat al → alleen koppelen indien niet bestaat
-                    $stmtCheck = mysqli_prepare(
-                        $this->conn,
-                        "SELECT 1 FROM CursusMaterialen WHERE cursus_id=? AND materiaal_id=?"
-                    );
-                    mysqli_stmt_bind_param($stmtCheck, "ss", $courseId, $mat['Id']);
-                    mysqli_stmt_execute($stmtCheck);
-                    $exists = mysqli_fetch_assoc(mysqli_stmt_get_result($stmtCheck));
-
-                    if (!$exists) {
-                        $linkId = generateUUID();
-                        $stmtLink = mysqli_prepare(
-                            $this->conn,
-                            "INSERT INTO CursusMaterialen (Id, cursus_id, materiaal_id) VALUES (?, ?, ?)"
-                        );
-                        mysqli_stmt_bind_param($stmtLink, "sss", $linkId, $courseId, $mat['Id']);
-                        mysqli_stmt_execute($stmtLink);
-                    }
-
-                }
+            foreach ($data['SelectedMaterialIds'] as $matId) {
+                $linkId = generateUUID();
+                $stmtAdd = mysqli_prepare(
+                    $this->conn,
+                    "INSERT INTO CursusMaterialen (Id, cursus_id, materiaal_id) VALUES (?, ?, ?)"
+                );
+                mysqli_stmt_bind_param($stmtAdd, "sss", $linkId, $courseId, $matId);
+                mysqli_stmt_execute($stmtAdd);
             }
-
+            
             // 4️⃣ Update FAQ’s
             if (!empty($data['Faqs'])) {
                 foreach ($data['Faqs'] as $faq) {

@@ -31,6 +31,7 @@
 						<li class="nav-item"> <a class="nav-link" href="admin-course-list.php">All Courses</a></li>
 						<li class="nav-item"> <a class="nav-link" href="admin-course-category.php">Course Category</a></li>
 						<li class="nav-item"> <a class="nav-link" href="admin-subwebsites.php">SubWebsites</a></li>
+						<li class="nav-item"> <a class="nav-link" href="admin-materialen.php">Materialen</a></li>
 						<li class="nav-item"> <a class="nav-link" href="admin-create-course.php">Add New Course</a></li>
 					</ul>
 				</li>
