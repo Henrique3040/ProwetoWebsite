@@ -38,6 +38,75 @@ class Material
         return mysqli_stmt_execute($stmt);
     }
 
+    public function addAvailability($data)
+    {
+        $id = generateUUID();
+
+        $sql = "INSERT INTO materiaal_beschikbaarheid (Id, materiaal_id, startdatum, einddatum, starttijd, eindtijd)
+                VALUES (?, ?, ?, ?, ?, ?)";
+        $stmt = mysqli_prepare($this->conn, $sql);
+        $stmt->bind_param("ssssss", $id, $data['materiaal_id'], $data['startdatum'], $data['einddatum'], $data['starttijd'], $data['eindtijd']);
+        $stmt->execute();
+
+        return $id;
+    }
+
+    public function reserve($user_id, $materialId, $date)
+    {
+
+        // check of admin deze dag beschikbaar maakte
+        $check = $this->conn->prepare(
+            "SELECT Id FROM materiaal_beschikbaarheid WHERE materiaal_id = ? AND datum = ?"
+        );
+        $check->bind_param("ss", $materialId, $date);
+        $check->execute();
+        $res = $check->get_result()->fetch_assoc();
+
+        if (!$res) {
+            return false; // not allowed
+        }
+
+        // check of dag al gereserveerd is
+        $check = $this->conn->prepare(
+            "SELECT Id FROM materiaal_reservaties WHERE materiaal_id=? AND datum=?"
+        );
+        $check->bind_param("ss", $materialId, $date);
+        $check->execute();
+
+        if ($check->get_result()->fetch_assoc()) {
+            return false; // al gereserveerd
+        }
+
+        // reservatie opslaan
+        $id = generateUUID();
+        $stmtR = $this->conn->prepare(
+            "INSERT INTO materiaal_reservaties (Id, materiaal_id, user_id, datum)
+         VALUES (?, ?, ?, ?)"
+        );
+        $stmtR->bind_param("ssss", $id, $materialId, $user_id, $date);
+        return $stmtR->execute();
+
+    }
+
+    public function getMaterialAvailability($materiaal_id)
+    {
+        $stmt = $this->conn->prepare("SELECT * FROM materiaal_beschikbaarheid WHERE materiaal_id = ?");
+        $stmt->bind_param("s", $materiaal_id);
+        $stmt->execute();
+        $result = $stmt->get_result();
+
+        return $result->fetch_all(MYSQLI_ASSOC);
+    }
+
+    public function deleteAvailability($id)
+    {
+        $stmt = $this->conn->prepare("DELETE FROM materiaal_beschikbaarheid WHERE Id = ?");
+        $stmt->bind_param("s", $id);
+
+        return $stmt->execute();
+
+    }
+
     /* ---------------------------------------------------
         GET SINGLE MATERIAL
     --------------------------------------------------- */

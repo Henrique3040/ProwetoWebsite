@@ -125,6 +125,7 @@ Page content START -->
 							</div>
 							<!-- About course END -->
 
+								<!-- Document start -->
 							<?php if (!empty($course['DocumentenLijst'])): ?>
 								<div class="col-12">
 									<div class="card border">
@@ -161,7 +162,10 @@ Page content START -->
 									</div>
 								</div>
 							<?php endif; ?>
+							<!-- Document end -->
 
+
+							<!-- materialen start -->
 							<?php if (!empty($course['Materialen'])): ?>
 								<div class="col-12">
 									<div class="card border">
@@ -226,6 +230,7 @@ Page content START -->
 									</div>
 								</div>
 							<?php endif; ?>
+							<!-- materialen end -->
 
 							<div id="course-pills-5" role="tabpanel" aria-labelledby="course-pills-tab-5">
 								<!-- Title -->

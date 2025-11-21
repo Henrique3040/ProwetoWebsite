@@ -65,7 +65,7 @@ class MaterialController
 
         $this->model->update($id, $naam, $fotoPath);
 
-        header("Location: admin-course-materials.php?updated=1");
+        header("Location: admin-materialen?succes=1.php?");
         exit;
     }
 
@@ -78,7 +78,7 @@ class MaterialController
 
         $this->model->delete($id);
 
-        header("Location: admin-course-materials.php?deleted=1");
+        header("Location: admin-materialen.php");
         exit;
     }
 
@@ -105,4 +105,55 @@ class MaterialController
         // Return browser-friendly path
         return "uploads/materials/" . $newName;
     }
+
+
+    public function addAvailability()
+    {
+
+        //data opslaan via model
+        $dateId = $this->model->addAvailability([
+            'materiaal_id' => $_POST['materiaal_id'],
+            'startdatum' => $_POST['startdatum'],
+            'einddatum' => $_POST['einddatum'],
+            'starttijd' => $_POST['starttijd'] ?? null,
+            'eindtijd' => $_POST['eindtijd'] ?? null
+        ]);
+
+        if ($dateId) {
+            header("Location: admin-material-availability.php");
+            exit;
+        } else {
+            die("Fout bij het toevoegen van beschikbaarheid.");
+        }
+    }
+
+    public function getMaterialAvailability($materiaal_id)
+    {
+        return $this->model->getMaterialAvailability($materiaal_id);
+    }
+
+    public function reseve()
+    {
+        $user_id = $_POST['user_id'];
+        $materialId = $_POST['material_id'];
+        $date = $_POST['datum'];
+
+
+        $this->model->reserve($user_id, $materialId, $date);
+
+        if ($this->model->reserve($user_id, $materialId, $date)) {
+            header("Location: admin-materialen");
+        } else {
+            header("Location: material-details.php?error=1");
+        }
+
+    }
+
+    public function deleteAvailability($id)
+    { 
+        $this->model->deleteAvailability($id);
+    }
+
+
+
 }
