@@ -18,11 +18,15 @@
 		$password = $_POST['password'] ?? '';
 
 		if ($userController->login($username, $password)) {
-			header("Location: admin-dashboard.php");
+
+			if ($_SESSION['user']['admin'] == 1) {
+				header("Location: /admin-dashboard.php");
+			} else {
+				header("Location: /index.php");
+			}
 			exit;
-		} else {
-			$error = "Ongeldige gebruikersnaam of wachtwoord.";
 		}
+		
 	}
 	?>
 
@@ -115,6 +119,10 @@
 								<?php endif; ?>
 
 								<!-- Form END -->
+								 <!-- Sign up link -->
+								<div class="mt-4 text-center">
+									<span>Don't have an account? <a href="sign-up.php">Signup here</a></span>
+								</div>
 
 							</div>
 						</div> <!-- Row END -->

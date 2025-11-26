@@ -132,21 +132,17 @@ class MaterialController
         return $this->model->getMaterialAvailability($materiaal_id);
     }
 
-    public function reseve()
+    public function reserve($userId, $materialId, $date)
     {
-        $user_id = $_POST['user_id'];
-        $materialId = $_POST['material_id'];
-        $date = $_POST['datum'];
+        
+        $success = $this->model->reserve($userId, $materialId, $date);
 
+        return $success;
 
-        $this->model->reserve($user_id, $materialId, $date);
+    }
 
-        if ($this->model->reserve($user_id, $materialId, $date)) {
-            header("Location: admin-materialen");
-        } else {
-            header("Location: material-details.php?error=1");
-        }
-
+    public function getCourseIdFromMaterial($materialId){
+        return $this->model->getCourseIdFromMaterial($materialId);
     }
 
     public function deleteAvailability($id)

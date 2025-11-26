@@ -19,6 +19,8 @@
 
 	$faqs = $faqController->index($course['id']);
 
+
+
 	?>
 
 	<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
@@ -125,7 +127,7 @@ Page content START -->
 							</div>
 							<!-- About course END -->
 
-								<!-- Document start -->
+							<!-- Document start -->
 							<?php if (!empty($course['DocumentenLijst'])): ?>
 								<div class="col-12">
 									<div class="card border">
@@ -197,7 +199,8 @@ Page content START -->
 
 																<?php if (!empty($mat['Beschrijving'])): ?>
 																	<p class="card-text small text-muted mb-2">
-																		<?= htmlspecialchars($mat['Beschrijving']) ?></p>
+																		<?= htmlspecialchars($mat['Beschrijving']) ?>
+																	</p>
 																<?php endif; ?>
 
 																<div
@@ -207,10 +210,12 @@ Page content START -->
 																		<i class="bi bi-info-circle me-1"></i> Info
 																	</a>
 
-																	<!-- Reserveer-knop: data-attributes voor JS / backend -->
-																	<button class="btn btn-primary btn-sm reserve-material-btn"
+																	<!-- Trigger-knop voor modal -->
+																	<button type="button"
+																		class="btn btn-primary btn-sm open-reserve-modal-btn"
 																		data-material-id="<?= $matId ?>"
-																		data-material-name="<?= $matNaam ?>">
+																		data-material-name="<?= $matNaam ?>"
+																		data-logged-in="<?= AuthController::isLoggedIn() ? '1' : '0' ?>">
 																		<i class="bi bi-calendar-plus me-1"></i> Reserveer
 																	</button>
 																</div>
@@ -401,6 +406,40 @@ Page content START -->
 		<!-- =======================
 Page content END -->
 
+
+		<!-- Reserveer Modal -->
+		<div class="modal fade" id="reserveModal" tabindex="-1" aria-hidden="true">
+			<div class="modal-dialog modal-dialog-centered">
+				<div class="modal-content">
+
+					<div class="modal-header">
+						<h5 class="modal-title">Materiaal reserveren</h5>
+						<button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+					</div>
+
+					<div class="modal-body">
+						<p><strong>Materiaal:</strong> <span id="materialName"></span></p>
+
+						<div id="calendarContainer">
+							<p class="text-muted">Kalender wordt geladen...</p>
+						</div>
+
+						<form id="reserveForm" method="POST" action="ajax/reserve_material.php" style="display:none;">
+							<input type="hidden" name="material_id" id="materialId">
+							<input type="hidden" name="datum" id="selectedDate">
+
+							<button type="submit" class="btn btn-success w-100 mt-3">
+								Reservering bevestigen
+							</button>
+						</form>
+					</div>
+
+				</div>
+			</div>
+		</div>
+
+
+
 	</main>
 	<!-- **************** MAIN CONTENT END **************** -->
 
@@ -417,6 +456,7 @@ Footer END -->
 	<script src="assets/vendor/sticky-js/sticky.min.js"></script>
 	<script src="assets/vendor/plyr/plyr.min.js"></script>
 	<script src="js/rating.js"></script>
+	<script src="js/calenderUsers.js"></script>
 
 	<?php include("partials/footer-scripts.php"); ?>
 

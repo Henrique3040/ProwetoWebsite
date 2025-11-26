@@ -17,6 +17,8 @@
 session_start();
 
 
+
+
 /**
  * ------------------------------------------------------------
  * Databaseverbinding
@@ -45,6 +47,7 @@ require_once __DIR__ . '/../controllers/FaqController.php';
 require_once __DIR__ . '/../controllers/LeerjaarController.php';
 require_once __DIR__ . '/../controllers/UserController.php';
 require_once __DIR__ . '/../controllers/MaterialController.php';
+require_once __DIR__ . '/../helpers/auth.php';
 
 
 /**
@@ -63,4 +66,3 @@ $userController = new UserController($conn);
 $materiaalController = new MaterialController($conn);
 
 ?>
-

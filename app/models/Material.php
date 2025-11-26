@@ -54,39 +54,71 @@ class Material
     public function reserve($user_id, $materialId, $date)
     {
 
-        // check of admin deze dag beschikbaar maakte
-        $check = $this->conn->prepare(
-            "SELECT Id FROM materiaal_beschikbaarheid WHERE materiaal_id = ? AND datum = ?"
+        $query = $this->conn->prepare(
+            "SELECT startdatum, einddatum, starttijd, eindtijd
+             FROM materiaal_beschikbaarheid
+             WHERE materiaal_id = ?"
         );
-        $check->bind_param("ss", $materialId, $date);
-        $check->execute();
-        $res = $check->get_result()->fetch_assoc();
+        $query->bind_param("s", $materialId);
+        $query->execute();
+        $availability = $query->get_result()->fetch_assoc();
 
-        if (!$res) {
-            return false; // not allowed
+        if (!$availability) {
+            return ["success" => false, "reason" => "NO_AVAILABILITY"];
         }
 
-        // check of dag al gereserveerd is
+        $start = $availability['startdatum'];
+        $end = $availability['einddatum'];
+
+        // 2. Check of iemand deze periode al volledig gereserveerd heeft
         $check = $this->conn->prepare(
-            "SELECT Id FROM materiaal_reservaties WHERE materiaal_id=? AND datum=?"
+            "SELECT Id FROM materiaal_reservaties
+             WHERE materiaal_id = ?
+             AND ? BETWEEN startdatum AND einddatum"
         );
         $check->bind_param("ss", $materialId, $date);
         $check->execute();
 
         if ($check->get_result()->fetch_assoc()) {
-            return false; // al gereserveerd
+            return ["success" => false, "reason" => "ALREADY_RESERVED"];
         }
 
-        // reservatie opslaan
+        // 3. Opslaan
         $id = generateUUID();
-        $stmtR = $this->conn->prepare(
-            "INSERT INTO materiaal_reservaties (Id, materiaal_id, user_id, datum)
-         VALUES (?, ?, ?, ?)"
+
+        $insert = $this->conn->prepare(
+            "INSERT INTO materiaal_reservaties 
+             (Id, materiaal_id, user_id, startdatum, einddatum, starttijd, eindtijd)
+             VALUES (?, ?, ?, ?, ?, ?, ?)"
         );
-        $stmtR->bind_param("ssss", $id, $materialId, $user_id, $date);
-        return $stmtR->execute();
+
+        $insert->bind_param(
+            "sssssss",
+            $id,
+            $materialId,
+            $user_id,
+            $availability['startdatum'],
+            $availability['einddatum'],
+            $availability['starttijd'],
+            $availability['eindtijd']
+        );
+
+        $insert->execute();
+
+        return ["success" => true];
 
     }
+
+    public function getCourseIdFromMaterial($materialId)
+    {
+        $stmt = $this->conn->prepare(
+            "SELECT cursus_id FROM cursusmaterialen WHERE materiaal_id = ?"
+        );
+        $stmt->bind_param("s", $materialId);
+        $stmt->execute();
+        return $stmt->get_result()->fetch_assoc()['cursus_id'] ?? null;
+    }
+
 
     public function getMaterialAvailability($materiaal_id)
     {

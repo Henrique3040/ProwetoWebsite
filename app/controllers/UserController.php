@@ -19,7 +19,7 @@ require_once __DIR__ . '/../models/User.php';
 
 class UserController
 {
-     /**
+    /**
      * @var User $model Het model dat database-interacties voor gebruikers beheert.
      */
     private $model;
@@ -48,7 +48,7 @@ class UserController
         return $this->model->createUser($username, $password);
     }
 
-     /**
+    /**
      * Probeert een gebruiker in te loggen met de opgegeven inloggegevens.
      *
      * Als de login geldig is, wordt een sessie gestart met:
@@ -62,17 +62,27 @@ class UserController
      */
     public function login($username, $password)
     {
-        $user = $this->model->verifyLogin($username, $password);
+        $user = $this->model->getUserByUsername($username);
 
-        if ($user) {
-            $_SESSION['admin_logged_in'] = true;
-            $_SESSION['admin_id'] = $user['id'];
-            $_SESSION['username'] = $user['username'];
-            return true;
+        if (!$user) {
+            return false;
         }
 
-        return false;
+        if (!password_verify($password, $user['password'])) {
+            return false;
+        }
+
+        // Sessie vullen met user info
+        $_SESSION['user'] = [
+            'id' => $user['id'],
+            'username' => $user['username'],
+            'admin' => intval($user['Admin']) === 1,
+            'created' => $user['CreatedAt'],
+        ];
+
+        return true;
     }
+
 
     /**
      * Logt de huidige gebruiker uit.
@@ -89,14 +99,5 @@ class UserController
         exit;
     }
 
-    /**
-     * Controleert of er momenteel een gebruiker is ingelogd.
-     *
-     * @return bool True als een gebruiker is ingelogd, anders false.
-     */
-    public function isLoggedIn()
-    {
-        return isset($_SESSION['admin_logged_in']) && $_SESSION['admin_logged_in'] === true;
-    }
 }
 ?>
