@@ -1,5 +1,7 @@
 <?php
 
+use LDAP\Result;
+
 class Material
 {
     private $conn;
@@ -51,7 +53,7 @@ class Material
         return $id;
     }
 
-    public function reserve($user_id, $materialId, $date)
+    public function reserve($user_id, $materialId, $cursusId, $date)
     {
 
         $query = $this->conn->prepare(
@@ -88,14 +90,15 @@ class Material
 
         $insert = $this->conn->prepare(
             "INSERT INTO materiaal_reservaties 
-             (Id, materiaal_id, user_id, startdatum, einddatum, starttijd, eindtijd)
-             VALUES (?, ?, ?, ?, ?, ?, ?)"
+             (Id, materiaal_id, cursus_id ,user_id, startdatum, einddatum, starttijd, eindtijd)
+             VALUES (?, ?, ?, ?, ?, ?, ?, ?)"
         );
 
         $insert->bind_param(
-            "sssssss",
+            "ssssssss",
             $id,
             $materialId,
+            $cursusId,
             $user_id,
             $availability['startdatum'],
             $availability['einddatum'],
@@ -201,4 +204,124 @@ class Material
 
         return false;
     }
+
+    public function getAllReservations()
+    {
+
+        $sql = " SELECT 
+                r.Id,
+                r.startdatum,
+                r.einddatum,
+                r.starttijd,
+                r.eindtijd,
+                r.status,
+                r.aangemaakt_op,
+                u.username,
+                m.Naam AS materiaal_naam,
+                c.Titel AS cursus_titel
+            FROM materiaal_reservaties r
+            JOIN users u ON r.user_id = u.id
+            JOIN materialen m ON r.materiaal_id = m.Id
+            JOIN cursus c ON r.cursus_id = c.Id
+            ORDER BY r.aangemaakt_op DESC";
+
+
+        $stmt = mysqli_prepare($this->conn, $sql);
+
+        // Debug: toon SQL fout
+        if (!$stmt) {
+            die("SQL Error: " . mysqli_error($this->conn));
+        }
+
+        mysqli_stmt_execute($stmt);
+        $result = mysqli_stmt_get_result($stmt);
+
+        $reservaties = [];
+        while ($row = mysqli_fetch_assoc($result)) {
+            $reservaties[] = $row;
+        }
+
+        return $reservaties;
+    }
+
+
+    public function deleteReservation($id)
+    {
+        $stmt = $this->conn->prepare("DELETE FROM materiaal_reservaties WHERE Id = ?");
+        $stmt->bind_param("s", $id);
+        return $stmt->execute();
+    }
+
+    public function updateReservationStatus($id, $status)
+    {
+        $stmt = $this->conn->prepare("UPDATE materiaal_reservaties SET status = ? WHERE Id = ?");
+        $stmt->bind_param("ss", $status, $id);
+        return $stmt->execute();
+    }
+
+    public function getReservationById($id)
+    {
+        $stmt = $this->conn->prepare("SELECT * FROM materiaal_reservaties WHERE Id = ?");
+        $stmt->bind_param("s", $id);
+        $stmt->execute();
+        return $stmt->get_result()->fetch_assoc();
+    }
+
+
+    // Haal alle reservaties voor 1 gebruiker
+    public function getReservationsByUser(string $userId): array
+    {
+        $sql = "
+           SELECT r.Id, r.materiaal_id, r.startdatum, r.einddatum, r.starttijd, r.eindtijd, r.status, r.aangemaakt_op,
+                  m.Naam AS materiaal_naam,
+                  c.Titel AS cursus_titel
+           FROM materiaal_reservaties r
+           JOIN Materialen m ON r.materiaal_id = m.Id
+           JOIN Cursus c ON c.Id = r.cursus_id   -- Verbind enkel met de cursus waar de reservatie voor is
+           WHERE r.user_id = ?
+           ORDER BY r.aangemaakt_op DESC
+           ";
+        $stmt = $this->conn->prepare($sql);
+        $stmt->bind_param("s", $userId);
+        $stmt->execute();
+        $res = $stmt->get_result();
+        return $res->fetch_all(MYSQLI_ASSOC);
+    }
+
+    /**
+     * Verwijdert een reservatie door de user zelf, alleen als status toegestaan.
+     * Retourneert array met success boolean en optional reason.
+     */
+    public function deleteReservationByUser(string $reservationId, string $userId): array
+    {
+        // Eerst status ophalen en user_id checken
+        $stmt = $this->conn->prepare("SELECT status, user_id FROM materiaal_reservaties WHERE Id = ?");
+        $stmt->bind_param("s", $reservationId);
+        $stmt->execute();
+        $row = $stmt->get_result()->fetch_assoc();
+
+        if (!$row) {
+            return ['success' => false, 'reason' => 'NOT_FOUND'];
+        }
+
+        // Controleer eigenaar
+        if ($row['user_id'] !== $userId) {
+            return ['success' => false, 'reason' => 'NOT_OWNER'];
+        }
+
+        // Alleen verwijderen als status toegestaan
+        $allowed = ['goedgekeurd', 'afgerond'];
+        if (!in_array($row['status'], $allowed, true)) {
+            return ['success' => false, 'reason' => 'STATUS_NOT_ALLOWED'];
+        }
+
+        // Verwijderen
+        $del = $this->conn->prepare("DELETE FROM materiaal_reservaties WHERE Id = ?");
+        $del->bind_param("s", $reservationId);
+        $ok = $del->execute();
+
+        return ['success' => (bool) $ok];
+    }
+
+
 }

@@ -47,6 +47,7 @@ require_once __DIR__ . '/../controllers/FaqController.php';
 require_once __DIR__ . '/../controllers/LeerjaarController.php';
 require_once __DIR__ . '/../controllers/UserController.php';
 require_once __DIR__ . '/../controllers/MaterialController.php';
+require_once __DIR__ . '/../controllers/NotificatieController.php';
 require_once __DIR__ . '/../helpers/auth.php';
 
 
@@ -64,5 +65,6 @@ $faqController = new FaqController($conn);
 $leerjaarController = new LeerjaarController($conn);
 $userController = new UserController($conn);
 $materiaalController = new MaterialController($conn);
+$notificatieController = new NotificatieController($conn);
 
 ?>

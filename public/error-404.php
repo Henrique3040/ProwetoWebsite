@@ -5,6 +5,10 @@
 	<?php include("partials/title-meta.php"); ?>
 
 	<?php include("partials/head-css.php"); ?>
+
+	<?php
+	include_once __DIR__ . '/../app/core/init.php';
+	 ?>
 </head>
 
 <body>

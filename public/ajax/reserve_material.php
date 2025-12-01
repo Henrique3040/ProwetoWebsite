@@ -8,6 +8,7 @@ require_once "../../app/core/init.php";
 
  $userId = $_SESSION['user']['id'];
  $materialId = $_POST['material_id'];
+ $courseId = $_POST['course_id'];
  $date = $_POST['datum'];
 
  if (!$materialId || !$date) {
@@ -16,14 +17,14 @@ require_once "../../app/core/init.php";
 }
 
 
- $result = $materiaalController->reserve($userId, $materialId, $date);
- $cursusid = $materiaalController->getCourseIdFromMaterial($materialId);
+ $result = $materiaalController->reserve($userId, $materialId, $courseId,$date);
+ 
  
 
  if ($result['success']) {
-   header("Location: /course-detail.php?id=" . $cursusid);
+   header("Location: /course-detail.php?id=" . $courseId);
    exit;
  } else {
-   header("Location: /course-detail.php?id=" . $cursusid . "&error=" . $result['reason']);
+   header("Location: /course-detail.php?id=" . $courseId . "&error=" . $result['reason']);
    exit;
  }

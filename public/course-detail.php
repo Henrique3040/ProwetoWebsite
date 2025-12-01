@@ -427,6 +427,8 @@ Page content END -->
 						<form id="reserveForm" method="POST" action="ajax/reserve_material.php" style="display:none;">
 							<input type="hidden" name="material_id" id="materialId">
 							<input type="hidden" name="datum" id="selectedDate">
+							<input type="hidden" name="course_id" value="<?=$course['id']?>">
+
 
 							<button type="submit" class="btn btn-success w-100 mt-3">
 								Reservering bevestigen

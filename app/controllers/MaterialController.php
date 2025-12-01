@@ -1,5 +1,6 @@
 <?php
 require_once __DIR__ . '/../models/Material.php';
+require_once __DIR__ . '/../models/Notificatie.php';
 
 class MaterialController
 {
@@ -8,6 +9,7 @@ class MaterialController
     public function __construct($db)
     {
         $this->model = new Material($db);
+        $this->notificatieModel = new NotificatieController($db);
     }
 
     /* ---------------------------------------------------
@@ -132,23 +134,64 @@ class MaterialController
         return $this->model->getMaterialAvailability($materiaal_id);
     }
 
-    public function reserve($userId, $materialId, $date)
+    public function reserve($userId, $materialId, $cursusId, $date)
     {
-        
-        $success = $this->model->reserve($userId, $materialId, $date);
+
+        $success = $this->model->reserve($userId, $materialId, $cursusId, $date);
 
         return $success;
 
     }
 
-    public function getCourseIdFromMaterial($materialId){
+    public function getCourseIdFromMaterial($materialId)
+    {
         return $this->model->getCourseIdFromMaterial($materialId);
     }
 
     public function deleteAvailability($id)
-    { 
+    {
         $this->model->deleteAvailability($id);
     }
+
+
+    public function getAllReservations()
+    {
+        return $this->model->getAllReservations();
+    }
+
+    public function deleteReservation($id)
+    {
+        return $this->model->deleteReservation($id);
+    }
+
+    public function updateReservationStatus($id, $status)
+    {
+        // 1. status bijwerken in de database
+        $this->model->updateReservationStatus($id, $status);
+
+        // 2. ophalen user-id van de reservatie
+        $reservation = $this->model->getReservationById($id);
+
+        // 3. notificatie toevoegen
+        $message = "De status van je reservatie is gewijzigd naar: $status.";
+        $this->notificatieModel->addNotification($reservation['user_id'], $message);
+
+        return true;
+    }
+
+
+    // Haal reservaties van ingelogde user
+    public function getUserReservations(string $userId): array
+    {
+        return $this->model->getReservationsByUser($userId);
+    }
+
+    // User verwijdert eigen reservatie (wrapper)
+    public function deleteReservationForUser(string $reservationId, string $userId): array
+    {
+        return $this->model->deleteReservationByUser($reservationId, $userId);
+    }
+
 
 
 
