@@ -1,6 +1,5 @@
 <?php
 require_once "../../app/core/init.php";
-
 header("Content-Type: application/json");
 
 if (!AuthController::isLoggedIn()) {
@@ -9,16 +8,15 @@ if (!AuthController::isLoggedIn()) {
     exit;
 }
 
+$materialId = $_GET['material_id'] ?? null;
+$date = $_GET['date'] ?? null;
 
-$materialId = $_GET['material_id'];
-
-if(!$materialId){
+if (!$materialId) {
     echo json_encode(["error" => "Material ID is required"]);
     exit;
 }
 
-$data = $materiaalController->getMaterialAvailability($materialId);
-
+$data = $materiaalController->getMaterialAvailability($materialId, $date);
 
 echo json_encode($data);
 exit;

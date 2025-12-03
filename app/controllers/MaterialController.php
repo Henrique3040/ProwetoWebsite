@@ -1,6 +1,7 @@
 <?php
 require_once __DIR__ . '/../models/Material.php';
 require_once __DIR__ . '/../models/Notificatie.php';
+require __DIR__ . "/../core/Mailer.php";
 
 class MaterialController
 {
@@ -15,7 +16,7 @@ class MaterialController
     /* ---------------------------------------------------
         GET ALL MATERIALS (FOR ADMIN)
     --------------------------------------------------- */
-    public function getAllMaterials()
+    public function getAllMaterials(): array
     {
         return $this->model->getAll();
     }
@@ -36,6 +37,8 @@ class MaterialController
         }
 
         $naam = trim($_POST['naam']);
+        $aantal = (int) ($_POST['aantal'] ?? 1);
+
 
         // --- Foto upload ---
         if (!isset($_FILES['foto']) || $_FILES['foto']['error'] !== 0) {
@@ -44,7 +47,7 @@ class MaterialController
 
         $fotoPath = $this->uploadFile($_FILES['foto']);
 
-        $this->model->create($naam, $fotoPath);
+        $this->model->create($naam, $fotoPath, $aantal);
 
         header("Location: admin-materialen.php");
         exit;
@@ -57,6 +60,8 @@ class MaterialController
     {
         $id = $_POST['id'];
         $naam = trim($_POST['naam']);
+        $aantal = (int) ($_POST['aantal'] ?? 1);
+
 
         $fotoPath = null;
 
@@ -65,7 +70,7 @@ class MaterialController
             $fotoPath = $this->uploadFile($_FILES['foto']);
         }
 
-        $this->model->update($id, $naam, $fotoPath);
+        $this->model->update($id, $naam, $aantal, $fotoPath);
 
         header("Location: admin-materialen?succes=1.php?");
         exit;
@@ -129,15 +134,15 @@ class MaterialController
         }
     }
 
-    public function getMaterialAvailability($materiaal_id)
+    public function getMaterialAvailability($materiaal_id, $date)
     {
-        return $this->model->getMaterialAvailability($materiaal_id);
+        return $this->model->getMaterialAvailability($materiaal_id, $date);
     }
 
-    public function reserve($userId, $materialId, $cursusId, $date)
+    public function reserve($userId, $materialId, $cursusId, $date, $aantal)
     {
 
-        $success = $this->model->reserve($userId, $materialId, $cursusId, $date);
+        $success = $this->model->reserve($userId, $materialId, $cursusId, $date, $aantal);
 
         return $success;
 
@@ -171,6 +176,18 @@ class MaterialController
 
         // 2. ophalen user-id van de reservatie
         $reservation = $this->model->getReservationById($id);
+
+        // --- EMAIL STUREN ---
+        if (!empty($reservation['email'])) {
+            $subject = "Update van je reservatie";
+            $body = "
+            <p>Beste gebruiker,</p>
+            <p>De status van je reservatie is gewijzigd naar: <strong>$status</strong>.</p>
+            <p>Met vriendelijke groet,<br>Het reservatiesysteem</p>
+        ";
+
+            Mailer::sendMail($reservation['email'], $subject, $body);
+        }
 
         // 3. notificatie toevoegen
         $message = "De status van je reservatie is gewijzigd naar: $status.";

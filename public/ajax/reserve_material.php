@@ -10,6 +10,8 @@ require_once "../../app/core/init.php";
  $materialId = $_POST['material_id'];
  $courseId = $_POST['course_id'];
  $date = $_POST['datum'];
+ $aantal = $_POST['aantal'] ?? 1;
+
 
  if (!$materialId || !$date) {
    echo "MISSING_DATA";
@@ -17,7 +19,8 @@ require_once "../../app/core/init.php";
 }
 
 
- $result = $materiaalController->reserve($userId, $materialId, $courseId,$date);
+ $result = $materiaalController->reserve($userId, $materialId, $courseId, $date, $aantal);
+
  
  
 

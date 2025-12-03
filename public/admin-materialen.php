@@ -90,7 +90,9 @@
 											<td>
 												<button class="btn btn-sm btn-success editBtn" data-id="<?= $m['Id'] ?>"
 													data-naam="<?= htmlspecialchars($m['Naam']) ?>"
-													data-foto="<?= htmlspecialchars($m['FotoURL']) ?>">
+													data-foto="<?= htmlspecialchars($m['FotoURL']) ?>"
+													data-aantal="<?= $m['Aantal'] ?>">
+													
 													Edit
 												</button>
 
@@ -138,6 +140,9 @@
 						<label class="form-label mt-3">Foto (optional)</label>
 						<input type="file" name="foto" class="form-control" accept="image/*">
 
+						<label class="form-label mt-3">Aantal beschikbaar</label>
+						<input type="number" name="aantal" class="form-control" min="1" required value="1">
+
 					</div>
 
 					<div class="modal-footer">
@@ -170,6 +175,10 @@
 
 						<label class="form-label mt-3">Foto vervangen</label>
 						<input type="file" name="foto" class="form-control" accept="image/*">
+
+						<label class="form-label mt-3">Aantal beschikbaar</label>
+						<input type="number" name="aantal" id="editMateriaalAantal" class="form-control" min="1"
+							required>
 
 						<div class="mt-2">
 							<img id="editFotoPreview" src="" width="80" class="rounded d-none">

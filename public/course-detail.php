@@ -427,7 +427,13 @@ Page content END -->
 						<form id="reserveForm" method="POST" action="ajax/reserve_material.php" style="display:none;">
 							<input type="hidden" name="material_id" id="materialId">
 							<input type="hidden" name="datum" id="selectedDate">
-							<input type="hidden" name="course_id" value="<?=$course['id']?>">
+							<input type="hidden" name="course_id" value="<?= $course['id'] ?>">
+							<div class="mt-3">
+								<label for="aantal" class="form-label">Aantal stuks</label>
+								<input type="number" class="form-control" name="aantal" id="aantal" min="1" required>
+								<small id="availableText" class="text-muted"></small>
+							</div>
+
 
 
 							<button type="submit" class="btn btn-success w-100 mt-3">

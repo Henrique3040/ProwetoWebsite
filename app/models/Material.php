@@ -16,7 +16,7 @@ class Material
     --------------------------------------------------- */
     public function getAll()
     {
-        $sql = "SELECT Id, Naam, FotoURL, CreatedAt, UpdatedAt 
+        $sql = "SELECT Id, Naam, FotoURL, CreatedAt, UpdatedAt, Aantal 
                 FROM Materialen 
                 ORDER BY CreatedAt DESC";
 
@@ -27,15 +27,15 @@ class Material
     /* ---------------------------------------------------
         CREATE MATERIAL
     --------------------------------------------------- */
-    public function create($naam, $fotoPath)
+    public function create($naam, $fotoPath, $aantal)
     {
         $id = generateUUID();
 
-        $sql = "INSERT INTO Materialen (Id, Naam, FotoURL) 
-                VALUES (?, ?, ?)";
+        $sql = "INSERT INTO Materialen (Id, Naam, FotoURL, Aantal) 
+                VALUES (?, ?, ?, ?)";
 
         $stmt = mysqli_prepare($this->conn, $sql);
-        mysqli_stmt_bind_param($stmt, "sss", $id, $naam, $fotoPath);
+        mysqli_stmt_bind_param($stmt, "sssi", $id, $naam, $fotoPath, $aantal);
 
         return mysqli_stmt_execute($stmt);
     }
@@ -53,64 +53,82 @@ class Material
         return $id;
     }
 
-    public function reserve($user_id, $materialId, $cursusId, $date)
+    public function reserve($user_id, $materialId, $cursusId, $date, $aantal)
     {
+        // 1. Haal totaal voorraad
+        $stmt = $this->conn->prepare("SELECT Aantal FROM Materialen WHERE Id = ?");
+        $stmt->bind_param("s", $materialId);
+        $stmt->execute();
+        $row = $stmt->get_result()->fetch_assoc();
 
-        $query = $this->conn->prepare(
-            "SELECT startdatum, einddatum, starttijd, eindtijd
-             FROM materiaal_beschikbaarheid
-             WHERE materiaal_id = ?"
-        );
-        $query->bind_param("s", $materialId);
-        $query->execute();
-        $availability = $query->get_result()->fetch_assoc();
+        if (!$row) {
+            return ["success" => false, "reason" => "MATERIAL_NOT_FOUND"];
+        }
 
-        if (!$availability) {
+        $total_stock = (int) $row['Aantal'];
+
+        // 2. Bereken reeds gereserveerd
+        $stmt2 = $this->conn->prepare("
+        SELECT SUM(aantal) as reserved 
+        FROM materiaal_reservaties
+        WHERE materiaal_id = ?
+        AND ? BETWEEN startdatum AND einddatum");
+        $stmt2->bind_param("ss", $materialId, $date);
+        $stmt2->execute();
+        $reserved = (int) ($stmt2->get_result()->fetch_assoc()['reserved'] ?? 0);
+
+        // 3. Controleer beschikbaarheid
+        $available = $total_stock - $reserved;
+
+        if ($available < $aantal) {
+            return [
+                "success" => false,
+                "reason" => "NOT_ENOUGH_STOCK",
+                "available" => $available
+            ];
+        }
+
+        // 4. Haal beschikbaarheidsperiodes
+        $stmt3 = $this->conn->prepare("
+        SELECT startdatum, einddatum, starttijd, eindtijd 
+        FROM materiaal_beschikbaarheid 
+        WHERE materiaal_id = ?
+        LIMIT 1");
+        $stmt3->bind_param("s", $materialId);
+        $stmt3->execute();
+        $avail = $stmt3->get_result()->fetch_assoc();
+
+        if (!$avail) {
             return ["success" => false, "reason" => "NO_AVAILABILITY"];
         }
 
-        $start = $availability['startdatum'];
-        $end = $availability['einddatum'];
+        // 5. Opslaan
+        $newId = generateUUID();
 
-        // 2. Check of iemand deze periode al volledig gereserveerd heeft
-        $check = $this->conn->prepare(
-            "SELECT Id FROM materiaal_reservaties
-             WHERE materiaal_id = ?
-             AND ? BETWEEN startdatum AND einddatum"
-        );
-        $check->bind_param("ss", $materialId, $date);
-        $check->execute();
+        $stmt4 = $this->conn->prepare("
+        INSERT INTO materiaal_reservaties
+        (Id, materiaal_id, cursus_id, user_id, startdatum, einddatum, starttijd, eindtijd, status, aantal)
+        VALUES (?, ?, ?, ?, ?, ?, ?, ?, 'in_afwachting', ?)");
 
-        if ($check->get_result()->fetch_assoc()) {
-            return ["success" => false, "reason" => "ALREADY_RESERVED"];
-        }
-
-        // 3. Opslaan
-        $id = generateUUID();
-
-        $insert = $this->conn->prepare(
-            "INSERT INTO materiaal_reservaties 
-             (Id, materiaal_id, cursus_id ,user_id, startdatum, einddatum, starttijd, eindtijd)
-             VALUES (?, ?, ?, ?, ?, ?, ?, ?)"
-        );
-
-        $insert->bind_param(
-            "ssssssss",
-            $id,
+        $stmt4->bind_param(
+            "ssssssssi",
+            $newId,
             $materialId,
             $cursusId,
             $user_id,
-            $availability['startdatum'],
-            $availability['einddatum'],
-            $availability['starttijd'],
-            $availability['eindtijd']
+            $date,
+            $date,
+            $avail['starttijd'],
+            $avail['eindtijd'],
+            $aantal
         );
 
-        $insert->execute();
+        $stmt4->execute();
 
         return ["success" => true];
-
     }
+
+
 
     public function getCourseIdFromMaterial($materialId)
     {
@@ -123,15 +141,51 @@ class Material
     }
 
 
-    public function getMaterialAvailability($materiaal_id)
+    public function getMaterialAvailability($materiaal_id, $date = null)
     {
-        $stmt = $this->conn->prepare("SELECT * FROM materiaal_beschikbaarheid WHERE materiaal_id = ?");
+        // 1. totale voorraad van materiaal houden
+        $q1 = $this->conn->prepare("SELECT Aantal FROM Materialen WHERE Id = ?");
+        $q1->bind_param("s", $materiaal_id);
+        $q1->execute();
+        $total = (int) $q1->get_result()->fetch_assoc()['Aantal'];
+
+        // 2. bestaande beschikbaarheidsregels (zoals jij ze al had)
+        $stmt = $this->conn->prepare("
+        SELECT * 
+        FROM materiaal_beschikbaarheid 
+        WHERE materiaal_id = ?");
         $stmt->bind_param("s", $materiaal_id);
         $stmt->execute();
-        $result = $stmt->get_result();
+        $records = $stmt->get_result()->fetch_all(MYSQLI_ASSOC);
 
-        return $result->fetch_all(MYSQLI_ASSOC);
+        // 3. als geen datum is meegegeven → gewoon originele data terug
+        if (!$date) {
+            return [
+                "success" => true,
+                "total_stock" => $total,
+                "records" => $records
+            ];
+        }
+
+        // 4. Bereken hoeveel al gereserveerd op die datum
+        $q2 = $this->conn->prepare("
+        SELECT SUM(aantal) AS reserved 
+        FROM materiaal_reservaties 
+        WHERE materiaal_id = ?
+        AND ? BETWEEN startdatum AND einddatum");
+        $q2->bind_param("ss", $materiaal_id, $date);
+        $q2->execute();
+        $reserved = (int) $q2->get_result()->fetch_assoc()['reserved'];
+
+        return [
+            "success" => true,
+            "total_stock" => $total,
+            "reserved" => $reserved,
+            "available" => max(0, $total - $reserved),
+            "records" => $records
+        ];
     }
+
 
     public function deleteAvailability($id)
     {
@@ -160,27 +214,26 @@ class Material
     /* ---------------------------------------------------
         UPDATE MATERIAL
     --------------------------------------------------- */
-    public function update($id, $naam, $fotoPath = null)
+    public function update($id, $naam, $aantal, $fotoPath = null)
     {
         if ($fotoPath === null) {
-            // Naam alleen wijzigen
-            $sql = "UPDATE Materialen SET Naam = ?, UpdatedAt = NOW() WHERE Id = ?";
+            $sql = "UPDATE Materialen SET Naam = ?, Aantal = ?, UpdatedAt = NOW() WHERE Id = ?";
             $stmt = mysqli_prepare($this->conn, $sql);
-            mysqli_stmt_bind_param($stmt, "ss", $naam, $id);
+            mysqli_stmt_bind_param($stmt, "sis", $naam, $aantal, $id);
         } else {
-            // Foto vervangen
             $old = $this->getById($id);
             if ($old && file_exists($old['FotoURL'])) {
                 unlink($old['FotoURL']);
             }
 
-            $sql = "UPDATE Materialen SET Naam = ?, FotoURL = ?, UpdatedAt = NOW() WHERE Id = ?";
+            $sql = "UPDATE Materialen SET Naam = ?, Aantal = ?, FotoURL = ?, UpdatedAt = NOW() WHERE Id = ?";
             $stmt = mysqli_prepare($this->conn, $sql);
-            mysqli_stmt_bind_param($stmt, "sss", $naam, $fotoPath, $id);
+            mysqli_stmt_bind_param($stmt, "siss", $naam, $aantal, $fotoPath, $id);
         }
 
         return mysqli_stmt_execute($stmt);
     }
+
 
     /* ---------------------------------------------------
         DELETE MATERIAL
@@ -261,7 +314,10 @@ class Material
 
     public function getReservationById($id)
     {
-        $stmt = $this->conn->prepare("SELECT * FROM materiaal_reservaties WHERE Id = ?");
+        $stmt = $this->conn->prepare("SELECT r.*, u.email 
+        FROM materiaal_reservaties r
+        LEFT JOIN users u ON u.id = r.user_id
+        WHERE r.Id = ?");
         $stmt->bind_param("s", $id);
         $stmt->execute();
         return $stmt->get_result()->fetch_assoc();
