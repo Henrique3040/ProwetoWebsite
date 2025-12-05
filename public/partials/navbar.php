@@ -5,6 +5,8 @@
 		$userId = $_SESSION['user']['id'];
 		$notifications = $notificatieController->getUserNotifications($userId);
 		$unreadCount = $notificatieController->getUnreadCount($userId);
+
+		$userEmailNotif = $userController->getEmailNotification($userId);
 	}
 
 	?>
@@ -147,6 +149,27 @@
 						</li>
 						<!-- Notification dropdown END -->
 
+						<li class="nav-item ms-2 ms-md-3 dropdown">
+							<a class="btn btn-light btn-round mb-0" href="#" role="button" data-bs-toggle="dropdown">
+								<i class="bi bi-gear fa-fw"></i>
+							</a>
+							<div class="dropdown-menu dropdown-menu-end p-3 shadow-lg">
+								<form method="POST" action="ajax/update_email_notif.php">
+									<div class="form-check">
+										<input class="form-check-input" type="checkbox" name="value" value="1"
+											id="emailNotificationToggle" <?= $userEmailNotif ? 'checked' : '' ?>>
+										<label class="form-check-label" for="emailNotificationToggle">
+											Ontvang e-mail notificaties
+										</label>
+									</div>
+									<input type="hidden" name="user_id" value="<?= $userId ?>">
+									<button type="submit" class="btn btn-primary btn-sm mt-2">Opslaan</button>
+								</form>
+							</div>
+						</li>
+
+
+
 					</ul>
 				<?php endif; ?>
 
@@ -168,9 +191,9 @@
 					</ul>
 				<?php endif; ?>
 
-
 			</div>
 		</div>
 	</nav>
+
 </header>
 <!-- Header END -->

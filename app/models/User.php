@@ -42,6 +42,26 @@ class User
         return mysqli_stmt_execute($stmt);
     }
 
+    public function getAllAdmins (){
+        $sql = "SELECT id, username, email FROM users WHERE admin = 1";
+        $stmt = mysqli_prepare($this->conn, $sql);
+        mysqli_stmt_execute($stmt);
+        $result = mysqli_stmt_get_result($stmt);
+    
+        return mysqli_fetch_all($result, MYSQLI_ASSOC);
+    }
+
+    public function getUserById($userId)
+    {
+        $sql = "SELECT * FROM users WHERE Id = ?";
+        $stmt = mysqli_prepare($this->conn, $sql);
+        mysqli_stmt_bind_param($stmt, "s", $userId);
+        mysqli_stmt_execute($stmt);
+        $result = mysqli_stmt_get_result($stmt);
+        
+        return mysqli_fetch_assoc($result);
+    }
+
     /**
      * Haal een user op via gebruikersnaam
      *
@@ -76,6 +96,23 @@ class User
         }
 
         return false;
+    }
+
+    public function getEmailNotificationSetting($userId) {
+        $sql = "SELECT email_notifications FROM users WHERE id=?";
+        $stmt = mysqli_prepare($this->conn, $sql);
+        mysqli_stmt_bind_param($stmt, "s", $userId);
+        mysqli_stmt_execute($stmt);
+        $result = mysqli_stmt_get_result($stmt);
+        $row = mysqli_fetch_assoc($result);
+        return $row['email_notifications'] ?? 1;
+    }
+
+    public function updateEmailNotificationSetting($userId, $value) {
+        $sql = "UPDATE users SET email_notifications=? WHERE id=?";
+        $stmt = mysqli_prepare($this->conn, $sql);
+        mysqli_stmt_bind_param($stmt, "is", $value, $userId);
+        return mysqli_stmt_execute($stmt);
     }
 }
 ?>

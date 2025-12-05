@@ -1,13 +1,28 @@
+/**
+ * Script: Cursus aanmaken / bewerken
+ *
+ * Functionaliteiten:
+ *  - Quill editor initialiseren voor rijke tekstbeschrijving
+ *  - Submit-knop: validatie + FAQ toevoegen + Quill HTML naar hidden input
+ *  - FAQ logica: toevoegen en verwijderen van veelgestelde vragen
+ *  - Voorkom dat step-knoppen (wizard) formulier submitten
+ *
+ * Vereisten:
+ *  - jQuery
+ *  - Bootstrap 5 (voor modals)
+ *  - Quill editor
+ */
+
 $(document).ready(function() {
     console.log('jQuery status:', typeof jQuery);
 
     // ----------------------------
-    // 1️ Variabelen
+    // 1️⃣ Variabelen
     // ----------------------------
     let faqs = [];
 
     // ----------------------------
-    // 2️ Quill initialiseren
+    // 2️⃣ Quill initialiseren
     // ----------------------------
     var quill = new Quill('#quilleditor', {
         theme: 'snow',
@@ -17,7 +32,7 @@ $(document).ready(function() {
     });
 
     // ----------------------------
-    // 3️ Submit-knop click event
+    // 3️⃣ Submit-knop click event
     // ----------------------------
     $('#submitCourseBtn').on('click', function(e) {
         e.preventDefault();
@@ -29,14 +44,14 @@ $(document).ready(function() {
         let beschrijving = $('textarea[name="korte_beschrijving"]').val();
         let foto = $('input[name="foto"]').val();
 
-        // Zet Quill HTML in verborgen input
+        // Zet Quill HTML in hidden input
         $('#beschrijving').val(quill.root.innerHTML);
 
         // Voeg FAQ's toe
         form.find('input[name="faqs"]').remove(); // verwijder bestaande hidden inputs
         let jsonFaqs = JSON.stringify(faqs)
-        .replace(/'/g, "&apos;")
-        .replace(/"/g, "&quot;");
+            .replace(/'/g, "&apos;")
+            .replace(/"/g, "&quot;");
         form.append(`<input type="hidden" name="faqs" value="${jsonFaqs}">`);
 
         // Validatie
@@ -51,6 +66,7 @@ $(document).ready(function() {
         }
         if (!foto.trim()) errors.push('Kies een foto.');
 
+        // Toon errors of submit
         if (errors.length > 0) {
             $('#errorMessage').remove();
             form.prepend(`
@@ -63,11 +79,10 @@ $(document).ready(function() {
         }
 
         form[0].submit();
-
     });
 
     // ----------------------------
-    // 4️ FAQ LOGICA
+    // 4️⃣ FAQ logica
     // ----------------------------
     $('#saveFaqBtn').on('click', function() {
         let vraag = $('#faqQuestion').val().trim();
@@ -118,7 +133,7 @@ $(document).ready(function() {
     });
 
     // ----------------------------
-    // 5️ Zorg dat step-knoppen geen submit doen
+    // 5️⃣ Zorg dat step-knoppen geen submit doen
     // ----------------------------
     $('.next-btn, .prev-btn').attr('type', 'button');
 });

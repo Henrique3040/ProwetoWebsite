@@ -16,7 +16,8 @@
 // Start een PHP-sessie (voor gebruikersauthenticatie, status, etc.)
 session_start();
 
-
+require_once __DIR__ . '/loadEnv.php'; // jouw loader
+loadEnv(__DIR__ . '/../../.env'); 
 
 
 /**
@@ -31,6 +32,7 @@ require_once __DIR__ . '/../config/database.php';
 // Haal de singleton Database-instantie op en verkrijg de verbinding
 $db = Database::getInstance();
 $conn = $db->getConnection();
+
 
 
 /**

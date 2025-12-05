@@ -107,5 +107,6 @@ $(document).ready(function(){
 </script>
 
 <?php include("partials/footer-scripts.php"); ?>
+<script src="js/emailNotificaties.js"></script>
 </body>
 </html>

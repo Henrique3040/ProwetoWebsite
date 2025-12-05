@@ -221,6 +221,7 @@ Footer END -->
 	<!-- Vendors -->
 	<script src="assets/vendor/tiny-slider/min/tiny-slider.js"></script>
 	<script src="assets/vendor/glightbox/js/glightbox.min.js"></script>
+	
 
 	<?php include("partials/footer-scripts.php"); ?>
 

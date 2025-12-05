@@ -839,13 +839,37 @@ class Course
 
             // Nieuwe documenten toevoegen
             if (!empty($data['UploadedDocuments'])) {
-                foreach ($data['UploadedDocuments'] as $path) {
+                foreach ($data['UploadedDocuments'] as $doc) {
+            
                     $docId = generateUUID();
-                    $stmtAdd = mysqli_prepare($this->conn, "INSERT INTO CursusDocumenten (Id, cursus_id, BestandURL) VALUES (?, ?, ?)");
-                    mysqli_stmt_bind_param($stmtAdd, "sss", $docId, $courseId, $path);
+                    $bestandUrl = $doc['path'];
+                    $bestandNaam = $doc['name'];
+                    $bestandType = $doc['type'];
+            
+                    $stmtAdd = mysqli_prepare(
+                        $this->conn,
+                        "INSERT INTO CursusDocumenten (Id, cursus_id, Naam, BestandURL, Bestandstype) 
+                         VALUES (?, ?, ?, ?, ?)"
+                    );
+            
+                    if (!$stmtAdd) {
+                        throw new Exception("Prepare failed: " . mysqli_error($this->conn));
+                    }
+            
+                    mysqli_stmt_bind_param(
+                        $stmtAdd,
+                        "sssss",
+                        $docId,
+                        $courseId,
+                        $bestandNaam,   // juiste kolom!
+                        $bestandUrl,
+                        $bestandType    // juiste kolom!
+                    );
+            
                     mysqli_stmt_execute($stmtAdd);
                 }
             }
+            
 
             //materiaal koppeling verwijderen
             if (!empty($data['DeletedMaterialIDs'])) {

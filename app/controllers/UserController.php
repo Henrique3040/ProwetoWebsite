@@ -83,6 +83,24 @@ class UserController
         return true;
     }
 
+    public function getAllAdmins (){
+        $result = $this->model->getAllAdmins();
+        return $result;
+    }
+
+    public function getUserById($userId){
+        $result = $this->model->getUserById($userId);
+        return $result;
+    }
+
+    public function setEmailNotification($userId, $value) {
+        return $this->model->updateEmailNotificationSetting($userId, $value);
+    }
+
+    public function getEmailNotification($userId) {
+        return $this->model->getEmailNotificationSetting($userId);
+    }
+
 
     /**
      * Logt de huidige gebruiker uit.

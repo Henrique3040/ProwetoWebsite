@@ -308,13 +308,24 @@ class CourseController
 
                 foreach ($_FILES['nieuwe_documenten']['tmp_name'] as $key => $tmpName) {
                     if ($_FILES['nieuwe_documenten']['error'][$key] === UPLOAD_ERR_OK) {
-                        $filename = time() . '_' . basename($_FILES['nieuwe_documenten']['name'][$key]);
+
+                        $origName = $_FILES['nieuwe_documenten']['name'][$key];
+                        $fileType = pathinfo($origName, PATHINFO_EXTENSION);
+
+                        $filename = time() . '_' . basename($origName);
                         $targetFile = $uploadDir . $filename;
                         move_uploaded_file($tmpName, $targetFile);
-                        $uploadedDocs[] = $targetFile;
+
+                        // Bewaar info voor model
+                        $uploadedDocs[] = [
+                            "name" => $origName,
+                            "path" => $targetFile,
+                            "type" => $fileType
+                        ];
                     }
                 }
             }
+
 
 
             // FAQ’s (optioneel)
@@ -372,15 +383,18 @@ class CourseController
                 mkdir($uploadDir, 0755, true);
 
             foreach ($_FILES['documents']['name'] as $key => $name) {
-                if ($_FILES['documents']['error'][$key] === UPLOAD_ERR_OK) {
+                if ($_FILES['documents']['error'][$key] === UPLOAD_ERR_OK && !empty($name)) {
                     $filename = time() . '_' . basename($name);
                     $targetFile = $uploadDir . $filename;
                     move_uploaded_file($_FILES['documents']['tmp_name'][$key], $targetFile);
 
                     $fileType = pathinfo($name, PATHINFO_EXTENSION);
-                    $this->documentModel->addDocument($courseId, $name, $targetFile, $fileType);
+                    $added = $this->documentModel->addDocument($courseId, $name, $targetFile, $fileType);
+                    if (!$added)
+                        error_log("Document toevoegen mislukt: $name");
                 }
             }
+
         }
     }
 

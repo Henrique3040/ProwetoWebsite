@@ -1,86 +1,109 @@
-// js/admin-material-availability.js
+/**
+ * Script: Materiaal beschikbaarheid beheren (Admin)
+ *
+ * Functionaliteiten:
+ *  - FullCalendar initialiseren met bestaande beschikbaarheid
+ *  - Nieuwe beschikbaarheid toevoegen via modal
+ *  - Beschikbaarheid verwijderen via eventClick
+ *
+ * Vereisten:
+ *  - availabilityData: array met bestaande beschikbaarheden (injected via PHP)
+ *  - materialId: ID van het materiaal
+ */
 
 let calendar;
 
 $(document).ready(function () {
-  // availabilityData = array vanuit PHP
-  // materialId = materiaal ID
+    // ----------------------------------------
+    // 1️⃣ FullCalendar Initialisatie
+    // ----------------------------------------
+    calendar = new FullCalendar.Calendar(document.getElementById("calendar"), {
+        initialView: "dayGridMonth",
+        selectable: true,
+        height: 650,
 
-  calendar = new FullCalendar.Calendar(document.getElementById("calendar"), {
-    initialView: "dayGridMonth",
-    selectable: true,
-    height: 650,
+        /**
+         * Datum aangeklikt → open modal
+         * Modal krijgt de geselecteerde datum
+         * Reset start- en eindtijd
+         */
+        dateClick: function (info) {
+            $("#selectedDate").val(info.dateStr);
+            $("#dateLabel").text(info.dateStr);
 
-    // Klik op een datum → open modal
-    dateClick: function (info) {
-      $("#selectedDate").val(info.dateStr);
-      $("#dateLabel").text(info.dateStr);
+            $("#starttijd").val("");
+            $("#eindtijd").val("");
 
-      // Tijden resetten
-      $("#starttijd").val("");
-      $("#eindtijd").val("");
+            $("#availabilityModal").modal("show");
+        },
 
-      $("#availabilityModal").modal("show");
-    },
+        /**
+         * Voeg bestaande beschikbaarheid toe als events
+         * title: "Beschikbaar"
+         * color: groen (#28a745)
+         */
+        events: availabilityData.map((item) => ({
+            id: item.Id,
+            title: "Beschikbaar",
+            start: item.startdatum,
+            end: item.einddatum ? item.einddatum : item.startdatum,
+            color: "#28a745",
+        })),
 
-    // Voeg bestaande beschikbaarheden toe als events
-    events: availabilityData.map((item) => ({
-      id: item.Id,
-      title: "Beschikbaar",
-      start: item.startdatum, // startdatum
-      end: item.einddatum ? item.einddatum : item.startdatum, // einddatum
-      color: "#28a745",
-    })),
+        /**
+         * Event aangeklikt → verwijderen
+         * Backend via POST, frontend update calendar
+         */
+        eventClick: function (info) {
+            if (confirm("Weet je zeker dat je deze beschikbaarheid wil verwijderen?")) {
+                $.post(
+                    "admin-material-availability.php?id=" + materialId,
+                    {
+                        action: "deleteAvailability",
+                        id: info.event.id,
+                    },
+                    function () {
+                        info.event.remove(); // verwijder event uit kalender
+                    }
+                );
+            }
+        },
+    });
 
-    // Klik op een event → verwijderen
-    eventClick: function (info) {
-      if (
-        confirm("Weet je zeker dat je deze beschikbaarheid wil verwijderen?")
-      ) {
+    // Render de kalender
+    calendar.render();
+
+    // ----------------------------------------
+    // 2️⃣ Form submit: nieuwe beschikbaarheid
+    // ----------------------------------------
+    $("#saveAvailabilityBtn").on("click", function () {
+        const startDate = $("#startdatum").val();
+        const endDate = $("#einddatum").val();
+        const startTime = $("#starttijd").val();
+        const endTime = $("#eindtijd").val();
+
+        // Validatie
+        if (!startDate || !endDate) {
+            alert("Start- en einddatum moeten ingevuld zijn.");
+            return;
+        }
+
+        // POST naar backend
         $.post(
-          "admin-material-availability.php?id=" + materialId,
-          {
-            action: "deleteAvailability",
-            id: info.event.id,
-          },
-          function () {
-            info.event.remove();
-          }
+            "admin-material-availability.php?id=" + materialId,
+            {
+                action: "addAvailability",
+                materiaal_id: materialId,
+                startdatum: startDate,
+                einddatum: endDate,
+                starttijd: startTime,
+                eindtijd: endTime,
+            },
+            function () {
+                // Modal sluiten en pagina herladen
+                $("#availabilityModal").modal("hide");
+                location.reload();
+            }
         );
-      }
-    },
-  });
-
-  calendar.render();
-
-  // FORM SUBMIT – nieuwe beschikbaarheid opslaan
-  $("#saveAvailabilityBtn").on("click", function () {
-    const startDate = $("#startdatum").val();
-    const endDate = $("#einddatum").val();
-    const startTime = $("#starttijd").val();
-    const endTime = $("#eindtijd").val();
-
-    if (!startDate || !endDate) {
-      alert("Start- en einddatum moeten ingevuld zijn.");
-      return;
-    }
-
-    $.post(
-      "admin-material-availability.php?id=" + materialId,
-      {
-        action: "addAvailability",
-        materiaal_id: materialId,
-        startdatum: startDate,
-        einddatum: endDate,
-        starttijd: startTime,
-        eindtijd: endTime,
-      },
-      function () {
-        // Modal sluiten
-        $("#availabilityModal").modal("hide");
-        // Herlaad pagina om lijst en kalender te verversen
-        location.reload();
-      }
-    );
-  });
+    });
 });

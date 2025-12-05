@@ -387,7 +387,7 @@ Page content START -->
                                                           </li>';
 												}
 											} else {
-												echo '<li class="list-inline-item text-muted">Geen categorieën</li>';
+												         echo '<li class="list-inline-item text-muted">Geen categorieën</li>';
 											}
 											?>
 										</ul>
@@ -467,6 +467,7 @@ Footer END -->
 	<script src="js/calenderUsers.js"></script>
 
 	<?php include("partials/footer-scripts.php"); ?>
+	
 
 </body>
 

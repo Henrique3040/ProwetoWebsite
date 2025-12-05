@@ -1,7 +1,8 @@
 <?php
 require_once __DIR__ . '/../models/Material.php';
 require_once __DIR__ . '/../models/Notificatie.php';
-require __DIR__ . "/../core/Mailer.php";
+require_once __DIR__ . "/../core/Mailer.php";
+require_once __DIR__ . '/../models/User.php';
 
 class MaterialController
 {
@@ -11,6 +12,7 @@ class MaterialController
     {
         $this->model = new Material($db);
         $this->notificatieModel = new NotificatieController($db);
+        $this->UserModel = new UserController($db);
     }
 
     /* ---------------------------------------------------
@@ -141,11 +143,62 @@ class MaterialController
 
     public function reserve($userId, $materialId, $cursusId, $date, $aantal)
     {
+        $result = $this->model->reserve($userId, $materialId, $cursusId, $date, $aantal);
 
-        $success = $this->model->reserve($userId, $materialId, $cursusId, $date, $aantal);
+        if (!$result['success']) {
+            return $result;
+        }
 
-        return $success;
+        // -------------------------------------------
+        // 1. Ophalen volledige reservatie + user info
+        // -------------------------------------------
+        $reservation = $this->model->getReservationById($result['reservation_id']);
+        $user = $this->UserModel->getUserById($userId);
+        
 
+        // -------------------------------------------
+        // 2. Mail naar gebruiker (bevestiging)
+        // -------------------------------------------
+        if (!empty($user['email']) && intval($user['email_notifications']) === 1) {
+            $subject = "Bevestiging van je reservatie";
+            $body = "
+            <p>Beste {$user['username']},</p>
+            <p>Je reservatie is succesvol ontvangen.</p>
+            <p><strong>Materiaal:</strong> {$reservation['materiaal_id']}<br>
+               <strong>Aantal:</strong> {$reservation['aantal']}<br>
+               <strong>Datum:</strong> {$reservation['startdatum']}</p>
+            <p>Status: <strong>In afwachting</strong></p>
+        ";
+
+            Mailer::sendMail($user['email'], $subject, $body);
+        }
+
+        sleep(10); // 1 seconde wachten zodat Mailtrap niet blokkeert
+
+        // -------------------------------------------
+        // 3. Mail naar ALLE admins
+        // -------------------------------------------
+        $admins = $this->UserModel->getAllAdmins();
+        error_log("ADMINS: " . print_r($admins, true));
+        foreach ($admins as $admin) {
+            if (!empty($admin['email']) && intval($user['email_notifications']) === 1) {
+                $subject = "Nieuwe reservatie geplaatst";
+                $body = "
+                <p>Hallo admin,</p>
+                <p>Er is een nieuwe reservatie geplaatst:</p>
+                <p>
+                    <strong>Gebruiker:</strong> {$user['username']}<br>
+                    <strong>Materiaal:</strong> {$reservation['materiaal_id']}<br>
+                    <strong>Aantal:</strong> {$reservation['aantal']}<br>
+                    <strong>Datum:</strong> {$reservation['startdatum']}
+                </p>
+            ";
+
+                Mailer::sendMail($admin['email'], $subject, $body);
+            }
+        }
+
+        return $result;
     }
 
     public function getCourseIdFromMaterial($materialId)
@@ -178,7 +231,7 @@ class MaterialController
         $reservation = $this->model->getReservationById($id);
 
         // --- EMAIL STUREN ---
-        if (!empty($reservation['email'])) {
+        if (!empty($reservation['email']) && intval($reservation['email_notifications']) === 1) {
             $subject = "Update van je reservatie";
             $body = "
             <p>Beste gebruiker,</p>

@@ -50,6 +50,11 @@
                             <span class="badge bg-orange bg-opacity-10 text-orange"><?= count($reservations) ?></span>
                         </h1>
                     </div>
+
+                    <a href="admin-export-reservaties.php" class="btn btn-primary">
+                        <i class="bi bi-file-earmark-excel"></i> Exporteren naar Excel
+                    </a>
+
                 </div>
 
                 <div class="card bg-transparent border">

@@ -125,7 +125,10 @@ class Material
 
         $stmt4->execute();
 
-        return ["success" => true];
+        return [
+            "success" => true,
+            "reservation_id" => $newId
+        ];
     }
 
 
@@ -314,7 +317,7 @@ class Material
 
     public function getReservationById($id)
     {
-        $stmt = $this->conn->prepare("SELECT r.*, u.email 
+        $stmt = $this->conn->prepare("SELECT r.*, u.email, u.email_notifications 
         FROM materiaal_reservaties r
         LEFT JOIN users u ON u.id = r.user_id
         WHERE r.Id = ?");
