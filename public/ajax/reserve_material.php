@@ -25,18 +25,13 @@ require_once "../../app/core/init.php";
     exit;
  }
 
- // Stap 2: Ophalen gebruiker en POST-waardes
- $userId = $_SESSION['user']['id'];
- $materialId = $_POST['material_id'];
- $courseId = $_POST['course_id'];
- $date = $_POST['datum'];
- $aantal = $_POST['aantal'] ?? 1;
 
-// Stap 3: Validatie van noodzakelijke velden
- if (!$materialId || !$date) {
-   echo "MISSING_DATA";
-   exit;
-}
+
+ $materialId = $_POST['material_id'];
+ $userId = $_SESSION['user']['id'];
+
+ 
+
 
 /**
  * @var MateriaalController $materiaalController  
@@ -44,17 +39,24 @@ require_once "../../app/core/init.php";
  */
 
 // Stap 4: Reservatie uitvoeren
- $result = $materiaalController->reserve($userId, $materialId, $courseId, $date, $aantal);
+ $result = $result = $materiaalController->reserve(
+  $userId,
+  $_POST['material_id'],
+  $_POST['course_id'],
+  $_POST['datum'],
+  $_POST['aantal'],
+);
 
  
  
 // Stap 5: Redirect op basis van resultaat
  if ($result['success']) {
   // Succesvolle reservatie
-   header("Location: /course-detail.php?id=" . $courseId);
-   exit;
+ // Redirect terug naar de pagina waar de gebruiker vandaan kwam
+  header("Location: " . $_SERVER['HTTP_REFERER']);
+  exit;
  } else {
   // Mislukt → stuur foutcode mee
-   header("Location: /course-detail.php?id=" . $courseId . "&error=" . $result['reason']);
+   header("Location: " . $_SERVER['HTTP_REFERER'] . "&error=" . $result['reason']);
    exit;
  }

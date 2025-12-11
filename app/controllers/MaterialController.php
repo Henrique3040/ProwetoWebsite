@@ -119,13 +119,33 @@ class MaterialController
     public function addAvailability()
     {
 
+        //Tijd van nammiddag enzo kunt aangepast worden naar gelang de nodige uren van het school
+        $periode = $_POST['periode'];
+        switch ($periode) {
+            case "voormiddag":
+                $starttijd = "08:00";
+                $eindtijd = "12:00";
+                break;
+
+            case "namiddag":
+                $starttijd = "12:00";
+                $eindtijd = "17:00";
+                break;
+
+            default:
+            case "hele_dag":
+                $starttijd = "08:00";
+                $eindtijd = "17:00";
+        }
+
         //data opslaan via model
         $dateId = $this->model->addAvailability([
             'materiaal_id' => $_POST['materiaal_id'],
             'startdatum' => $_POST['startdatum'],
             'einddatum' => $_POST['einddatum'],
-            'starttijd' => $_POST['starttijd'] ?? null,
-            'eindtijd' => $_POST['eindtijd'] ?? null
+            'starttijd' => $starttijd,
+            'eindtijd' => $eindtijd,
+            'periode' => $periode
         ]);
 
         if ($dateId) {
@@ -136,9 +156,20 @@ class MaterialController
         }
     }
 
-    public function getMaterialAvailability($materiaal_id, $date)
+    public function getMaterialAvailability($materiaal_id, $date = null)
     {
-        return $this->model->getMaterialAvailability($materiaal_id, $date);
+        if (!$date) {
+            return $this->model->getAvailabilityWithStock($materiaal_id);
+        }
+
+        return $this->model->getDayAvailability($materiaal_id, $date);
+    }
+
+
+
+    public function getAllAvailability($materiaal_id)
+    {
+        return $this->model->getAllAvailability($materiaal_id);
     }
 
     public function reserve($userId, $materialId, $cursusId, $date, $aantal)
@@ -154,7 +185,7 @@ class MaterialController
         // -------------------------------------------
         $reservation = $this->model->getReservationById($result['reservation_id']);
         $user = $this->UserModel->getUserById($userId);
-        
+
 
         // -------------------------------------------
         // 2. Mail naar gebruiker (bevestiging)
@@ -168,7 +199,7 @@ class MaterialController
                <strong>Aantal:</strong> {$reservation['aantal']}<br>
                <strong>Datum:</strong> {$reservation['startdatum']}</p>
             <p>Status: <strong>In afwachting</strong></p>
-        ";
+         ";
 
             Mailer::sendMail($user['email'], $subject, $body);
         }
@@ -179,7 +210,6 @@ class MaterialController
         // 3. Mail naar ALLE admins
         // -------------------------------------------
         $admins = $this->UserModel->getAllAdmins();
-        error_log("ADMINS: " . print_r($admins, true));
         foreach ($admins as $admin) {
             if (!empty($admin['email']) && intval($user['email_notifications']) === 1) {
                 $subject = "Nieuwe reservatie geplaatst";
@@ -192,7 +222,7 @@ class MaterialController
                     <strong>Aantal:</strong> {$reservation['aantal']}<br>
                     <strong>Datum:</strong> {$reservation['startdatum']}
                 </p>
-            ";
+             ";
 
                 Mailer::sendMail($admin['email'], $subject, $body);
             }
@@ -237,7 +267,7 @@ class MaterialController
             <p>Beste gebruiker,</p>
             <p>De status van je reservatie is gewijzigd naar: <strong>$status</strong>.</p>
             <p>Met vriendelijke groet,<br>Het reservatiesysteem</p>
-        ";
+         ";
 
             Mailer::sendMail($reservation['email'], $subject, $body);
         }

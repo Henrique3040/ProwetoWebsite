@@ -397,31 +397,6 @@
 												placeholder="Enter video url">
 
 										</div>
-										<div class="position-relative my-4">
-											<hr>
-											<p
-												class="small position-absolute top-50 start-50 translate-middle bg-body px-3 mb-0">
-												Or</p>
-										</div>
-
-										<div class="col-12">
-											<label class="form-label">Upload video</label>
-											<div class="input-group mb-3">
-												<input type="file" class="form-control" id="inputGroupFile01"
-													name="video_mp4" accept=".mp4">
-												<label class="input-group-text">.mp4</label>
-											</div>
-											<div class="input-group mb-3">
-												<input type="file" class="form-control" id="inputGroupFile02"
-													name="video_webm" accept=".webm">
-												<label class="input-group-text">.WebM</label>
-											</div>
-											<div class="input-group mb-3">
-												<input type="file" class="form-control" id="inputGroupFile03"
-													name="video_ogg" accept=".ogg">
-												<label class="input-group-text">.OGG</label>
-											</div>
-										</div>
 
 										<!-- Preview -->
 										<h5 class="mt-4">Video preview</h5>

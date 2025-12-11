@@ -98,4 +98,18 @@ class Notificatie
 
         return $stmt->execute();
     }
+
+
+    public function deleteAllNotification($userId)
+    {
+        $sql = "DELETE FROM notificaties WHERE user_id = ?";
+        $stmt = $this->conn->prepare($sql);
+
+        if (!$stmt) {
+            return false;
+        }
+
+        $stmt->bind_param("i", $userId);
+        return $stmt->execute();
+    }
 }

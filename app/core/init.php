@@ -20,6 +20,8 @@ require_once __DIR__ . '/loadEnv.php'; // jouw loader
 loadEnv(__DIR__ . '/../../.env'); 
 
 
+
+
 /**
  * ------------------------------------------------------------
  * Databaseverbinding

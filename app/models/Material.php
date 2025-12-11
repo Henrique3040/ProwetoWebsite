@@ -44,10 +44,10 @@ class Material
     {
         $id = generateUUID();
 
-        $sql = "INSERT INTO materiaal_beschikbaarheid (Id, materiaal_id, startdatum, einddatum, starttijd, eindtijd)
-                VALUES (?, ?, ?, ?, ?, ?)";
+        $sql = "INSERT INTO materiaal_beschikbaarheid (Id, materiaal_id, startdatum, einddatum, starttijd, eindtijd, periode)
+                VALUES (?, ?, ?, ?, ?, ?, ?)";
         $stmt = mysqli_prepare($this->conn, $sql);
-        $stmt->bind_param("ssssss", $id, $data['materiaal_id'], $data['startdatum'], $data['einddatum'], $data['starttijd'], $data['eindtijd']);
+        $stmt->bind_param("sssssss", $id, $data['materiaal_id'], $data['startdatum'], $data['einddatum'], $data['starttijd'], $data['eindtijd'], $data['periode']);
         $stmt->execute();
 
         return $id;
@@ -69,11 +69,13 @@ class Material
 
         // 2. Bereken reeds gereserveerd
         $stmt2 = $this->conn->prepare("
-        SELECT SUM(aantal) as reserved 
+        SELECT SUM(aantal) AS reserved
         FROM materiaal_reservaties
         WHERE materiaal_id = ?
-        AND ? BETWEEN startdatum AND einddatum");
-        $stmt2->bind_param("ss", $materialId, $date);
+        AND startdatum <= ?
+        AND einddatum >= ?
+        ");
+        $stmt2->bind_param("sss", $materialId, $date, $date);
         $stmt2->execute();
         $reserved = (int) ($stmt2->get_result()->fetch_assoc()['reserved'] ?? 0);
 
@@ -88,13 +90,16 @@ class Material
             ];
         }
 
-        // 4. Haal beschikbaarheidsperiodes
+        // 4. Haal de juiste beschikbaarheid voor de GEKOZEN DATUM
         $stmt3 = $this->conn->prepare("
-        SELECT startdatum, einddatum, starttijd, eindtijd 
-        FROM materiaal_beschikbaarheid 
+        SELECT periode, starttijd, eindtijd
+        FROM materiaal_beschikbaarheid
         WHERE materiaal_id = ?
-        LIMIT 1");
-        $stmt3->bind_param("s", $materialId);
+        AND startdatum <= ?
+        AND einddatum >= ?
+        LIMIT 1
+    ");
+        $stmt3->bind_param("sss", $materialId, $date, $date);
         $stmt3->execute();
         $avail = $stmt3->get_result()->fetch_assoc();
 
@@ -107,11 +112,11 @@ class Material
 
         $stmt4 = $this->conn->prepare("
         INSERT INTO materiaal_reservaties
-        (Id, materiaal_id, cursus_id, user_id, startdatum, einddatum, starttijd, eindtijd, status, aantal)
-        VALUES (?, ?, ?, ?, ?, ?, ?, ?, 'in_afwachting', ?)");
+        (Id, materiaal_id, cursus_id, user_id, startdatum, einddatum, starttijd, eindtijd, periode, status, aantal)
+        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, 'in_afwachting', ?)");
 
         $stmt4->bind_param(
-            "ssssssssi",
+            "sssssssssi",
             $newId,
             $materialId,
             $cursusId,
@@ -120,9 +125,10 @@ class Material
             $date,
             $avail['starttijd'],
             $avail['eindtijd'],
+            $avail['periode'],
             $aantal
         );
-
+        
         $stmt4->execute();
 
         return [
@@ -130,6 +136,7 @@ class Material
             "reservation_id" => $newId
         ];
     }
+
 
 
 
@@ -144,50 +151,151 @@ class Material
     }
 
 
-    public function getMaterialAvailability($materiaal_id, $date = null)
+
+    public function getAvailabilityDates($materiaal_id)
     {
-        // 1. totale voorraad van materiaal houden
+        $sql = $this->conn->prepare("
+        SELECT startdatum, einddatum, periode
+        FROM materiaal_beschikbaarheid
+        WHERE materiaal_id = ?
+        ORDER BY startdatum ASC
+    ");
+        $sql->bind_param("s", $materiaal_id);
+        $sql->execute();
+
+        return $sql->get_result()->fetch_all(MYSQLI_ASSOC);
+    }
+
+
+    public function getDayAvailability($materiaal_id, $date)
+    {
+        // Totale voorraad
         $q1 = $this->conn->prepare("SELECT Aantal FROM Materialen WHERE Id = ?");
         $q1->bind_param("s", $materiaal_id);
         $q1->execute();
         $total = (int) $q1->get_result()->fetch_assoc()['Aantal'];
 
-        // 2. bestaande beschikbaarheidsregels (zoals jij ze al had)
-        $stmt = $this->conn->prepare("
-        SELECT * 
-        FROM materiaal_beschikbaarheid 
-        WHERE materiaal_id = ?");
-        $stmt->bind_param("s", $materiaal_id);
-        $stmt->execute();
-        $records = $stmt->get_result()->fetch_all(MYSQLI_ASSOC);
+        // Regels voor die datum
+        $q2 = $this->conn->prepare("
+        SELECT starttijd, eindtijd, periode
+        FROM materiaal_beschikbaarheid
+        WHERE materiaal_id = ?
+        AND DATE(?) BETWEEN startdatum AND einddatum
+        ");
+        if (!$q2) {
+            die("SQL ERROR in q2: " . $this->conn->error);
+        }
 
-        // 3. als geen datum is meegegeven → gewoon originele data terug
-        if (!$date) {
-            return [
-                "success" => true,
-                "total_stock" => $total,
-                "records" => $records
+        $q2->bind_param("ss", $materiaal_id, $date);
+        $q2->execute();
+        $items = $q2->get_result()->fetch_all(MYSQLI_ASSOC);
+
+        if (!$items) {
+            return ["success" => true, "segments" => []];
+        }
+
+        $result = [];
+
+        foreach ($items as $i) {
+            $periode = $i['periode'];
+
+            $q3 = $this->conn->prepare("
+            SELECT SUM(aantal) AS reserved
+            FROM materiaal_reservaties
+            WHERE materiaal_id = ?
+            AND startdatum = ?
+            AND periode = ?
+          ");
+            if (!$q3) {
+                die("SQL ERROR in q2: " . $this->conn->error);
+            }
+
+            $q3->bind_param("sss", $materiaal_id, $date, $periode);
+            $q3->execute();
+
+            $reserved = (int) ($q3->get_result()->fetch_assoc()['reserved'] ?? 0);
+
+            $result[$periode] = [
+                "total" => $total,
+                "reserved" => $reserved,
+                "available" => max(0, $total - $reserved),
+                "starttijd" => $i['starttijd'],
+                "eindtijd" => $i['eindtijd']
             ];
         }
 
-        // 4. Bereken hoeveel al gereserveerd op die datum
-        $q2 = $this->conn->prepare("
-        SELECT SUM(aantal) AS reserved 
-        FROM materiaal_reservaties 
+        return [
+            "success" => true,
+            "date" => $date,
+            "segments" => $result
+        ];
+    }
+
+    public function getAvailabilityWithStock($materiaal_id)
+    {
+        // 1. Haal alle beschikbaarheidsregels
+        $dates = $this->getAvailabilityDates($materiaal_id);
+    
+        // 2. Totale voorraad
+        $q1 = $this->conn->prepare("SELECT Aantal FROM Materialen WHERE Id = ?");
+        $q1->bind_param("s", $materiaal_id);
+        $q1->execute();
+        $total = (int) $q1->get_result()->fetch_assoc()['Aantal'];
+    
+        $result = [];
+    
+        foreach ($dates as $d) {
+            $start = $d['startdatum'];
+            $periode = $d['periode'];
+        
+            // Bereken gereserveerd
+            $q2 = $this->conn->prepare("
+                SELECT SUM(aantal) AS reserved
+                FROM materiaal_reservaties
+                WHERE materiaal_id = ?
+                  AND startdatum = ?
+                  AND periode = ?");
+            $q2->bind_param("sss", $materiaal_id, $start, $periode);
+            $q2->execute();
+            $reserved = (int) ($q2->get_result()->fetch_assoc()['reserved'] ?? 0);
+        
+            $available = max(0, $total - $reserved);
+        
+            // 🔥 Alleen toevoegen als er iets beschikbaar is
+            if ($available > 0) {
+                $result[] = [
+                    "date" => $start,
+                    "available" => $available,
+                    "periode" => $periode
+                ];
+            }
+        }
+    
+        return [
+            "success" => true,
+            "records" => $result
+        ];
+    }
+    
+
+
+    public function getAllAvailability($materiaal_id)
+    {
+        $stmt = $this->conn->prepare("
+        SELECT *
+        FROM materiaal_beschikbaarheid
         WHERE materiaal_id = ?
-        AND ? BETWEEN startdatum AND einddatum");
-        $q2->bind_param("ss", $materiaal_id, $date);
-        $q2->execute();
-        $reserved = (int) $q2->get_result()->fetch_assoc()['reserved'];
+        ORDER BY startdatum ASC
+    ");
+        $stmt->bind_param("s", $materiaal_id);
+        $stmt->execute();
 
         return [
             "success" => true,
-            "total_stock" => $total,
-            "reserved" => $reserved,
-            "available" => max(0, $total - $reserved),
-            "records" => $records
+            "records" => $stmt->get_result()->fetch_all(MYSQLI_ASSOC)
         ];
     }
+
 
 
     public function deleteAvailability($id)

@@ -77,33 +77,28 @@ $(document).ready(function () {
     // 2️⃣ Form submit: nieuwe beschikbaarheid
     // ----------------------------------------
     $("#saveAvailabilityBtn").on("click", function () {
-        const startDate = $("#startdatum").val();
-        const endDate = $("#einddatum").val();
-        const startTime = $("#starttijd").val();
-        const endTime = $("#eindtijd").val();
-
-        // Validatie
-        if (!startDate || !endDate) {
-            alert("Start- en einddatum moeten ingevuld zijn.");
+        const selectedDate = $("#selectedDate").val();
+        const periode = $("#periode").val();
+    
+        if (!selectedDate) {
+            alert("Geen datum geselecteerd.");
             return;
         }
-
-        // POST naar backend
+    
         $.post(
             "admin-material-availability.php?id=" + materialId,
             {
                 action: "addAvailability",
                 materiaal_id: materialId,
-                startdatum: startDate,
-                einddatum: endDate,
-                starttijd: startTime,
-                eindtijd: endTime,
+                startdatum: selectedDate,
+                einddatum: selectedDate,
+                periode: periode
             },
             function () {
-                // Modal sluiten en pagina herladen
                 $("#availabilityModal").modal("hide");
                 location.reload();
             }
         );
     });
+    
 });

@@ -19,7 +19,7 @@
 
         if ($_POST['action'] === 'deleteAvailability') {
             $materiaalController->deleteAvailability($_POST['id']);
-            
+
         }
 
         if ($_POST['action'] === 'addAvailability') {
@@ -32,7 +32,14 @@
         die("Geen materiaal geselecteerd.");
 
     $materiaal = $materiaalController->getMaterialById($materiaalId);
-    $beschikbaarheid = $materiaalController->getMaterialAvailability($materiaalId);
+    $beschikbaarheidResponse =$materiaalController->getAllAvailability($materiaalId);
+
+    if (!isset($beschikbaarheidResponse['records']) || !is_array($beschikbaarheidResponse['records'])) {
+        $beschikbaarheid = [];
+    } else {
+        $beschikbaarheid = $beschikbaarheidResponse['records'];
+    }
+
 
     ?>
 
@@ -55,7 +62,7 @@
                             Beschikbaarheid: <?= htmlspecialchars($materiaal['Naam']) ?>
                         </h1>
 
-                        <a href="admin-material-list.php" class="btn btn-secondary btn-sm">← Terug</a>
+                        <a href="admin-materialen.php" class="btn btn-secondary btn-sm">← Terug</a>
                     </div>
                 </div>
 
@@ -81,9 +88,9 @@
                                     <li class="list-group-item d-flex justify-content-between align-items-center">
                                         <span>
                                             <strong><?= $b['startdatum'] ?> - <?= $b['einddatum'] ?></strong>
-                                            <?php if ($b['starttijd']): ?>
-                                                (<?= $b['starttijd'] ?> - <?= $b['eindtijd'] ?>)
-                                            <?php endif; ?>
+                                            <span class="badge bg-primary ms-2">
+                                                <?= ucfirst($b['periode']) ?>
+                                            </span>
                                         </span>
 
                                         <form method="POST" action="admin-material-availability.php?id=<?= $materiaal['Id'] ?>"
@@ -110,7 +117,7 @@
         <div class="modal-dialog">
             <div class="modal-content">
 
-            <form onsubmit="return false;">
+                <form onsubmit="return false;">
 
 
                     <div class="modal-header bg-dark">
@@ -128,17 +135,13 @@
                             Dag: <strong id="dateLabel"></strong>
                         </p>
 
-                        <label class="form-label">Startdatum</label>
-                        <input type="date" name="startdatum" id="startdatum" class="form-control">
-
-                        <label class="form-label mt-3">Einddatum</label>
-                        <input type="date" name="einddatum" id="einddatum" class="form-control">
-
-                        <label class="form-label mt-3">Starttijd (optioneel)</label>
-                        <input type="time" name="starttijd" id="starttijd" class="form-control">
-
-                        <label class="form-label mt-3">Eindtijd (optioneel)</label>
-                        <input type="time" name="eindtijd" id="eindtijd" class="form-control">
+                    
+                        <label class="form-label mt-3">Periode</label>
+                        <select name="periode" id="periode" class="form-control">
+                            <option value="voormiddag">Voormiddag (08:00 - 12:00)</option>
+                            <option value="namiddag">Namiddag (12:00 - 17:00)</option>
+                            <option value="hele_dag" selected>Hele dag (08:00 - 17:00)</option>
+                        </select>
 
                     </div>
 

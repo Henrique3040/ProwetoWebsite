@@ -116,7 +116,7 @@
                                             </span>
                                         <?php endif; ?>
                                     </h6>
-                                    <a class="small" href="/ajax/clear_notifications.php">Clear all</a>
+                                    <a class="small" href="/ajax/clear_notifications.php">Mark as read</a>
                                 </div>
                                 <div class="card-body p-0">
                                     <ul class="list-group list-unstyled list-group-flush">
@@ -159,7 +159,11 @@
                                 </div>
                                 <!-- Button -->
                                 <div class="card-footer bg-transparent border-0 py-3 text-center position-relative">
-                                    <a href="#" class="stretched-link">See all incoming activity</a>
+                                    <form method="post" action="ajax/delete_all_notification.php">
+                                        <input type="hidden" name="user_id" value="<?= $userId ?>">
+                                        <button type="submit">Clear All</button>
+                                    </form>
+                                    
                                 </div>
                             </div>
                         </div>

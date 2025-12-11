@@ -387,7 +387,7 @@ Page content START -->
                                                           </li>';
 												}
 											} else {
-												         echo '<li class="list-inline-item text-muted">Geen categorieën</li>';
+												echo '<li class="list-inline-item text-muted">Geen categorieën</li>';
 											}
 											?>
 										</ul>
@@ -433,6 +433,13 @@ Page content END -->
 								<input type="number" class="form-control" name="aantal" id="aantal" min="1" required>
 								<small id="availableText" class="text-muted"></small>
 							</div>
+							<div id="periodeContainer" class="mt-3" style="display:none;">
+								<label class="form-label">Kies dagdeel</label>
+								<div id="periodeButtons" class="d-flex flex-column gap-2"></div>
+
+								<input type="hidden" name="periode" id="selectedPeriode">
+							</div>
+
 
 
 
@@ -467,7 +474,7 @@ Footer END -->
 	<script src="js/calenderUsers.js"></script>
 
 	<?php include("partials/footer-scripts.php"); ?>
-	
+
 
 </body>
 

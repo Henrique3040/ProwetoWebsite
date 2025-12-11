@@ -45,16 +45,19 @@
             <div class="page-content-wrapper border">
 
                 <div class="row mb-3">
-                    <div class="col-12 d-sm-flex justify-content-between align-items-center">
-                        <h1 class="h3 mb-2 mb-sm-0">Materiaalreservaties
-                            <span class="badge bg-orange bg-opacity-10 text-orange"><?= count($reservations) ?></span>
+                    <div class="col-12 d-flex justify-content-between align-items-center">
+
+                        <h1 class="h3 mb-0">
+                            Materiaalreservaties
+                            <span class="badge bg-warning text-dark ms-2"><?= count($reservations) ?></span>
                         </h1>
+
+                        <a href="ajax/admin-export-reservaties.php" class="btn btn-success d-flex align-items-center">
+                            <i class="bi bi-file-earmark-excel me-2"></i>
+                            Exporteren
+                        </a>
+
                     </div>
-
-                    <a href="admin-export-reservaties.php" class="btn btn-primary">
-                        <i class="bi bi-file-earmark-excel"></i> Exporteren naar Excel
-                    </a>
-
                 </div>
 
                 <div class="card bg-transparent border">

@@ -392,6 +392,15 @@ Steps START -->
 											</div>
 											<!-- Upload image END -->
 
+											<div class="col-12 mt-4">
+												<h5>Upload documenten</h5>
+												<input type="file" name="documents[]" class="form-control" multiple
+													accept=".pdf,.jpg,.jpeg,.png,.doc,.docx,.zip">
+												<small class="text-muted">Je kunt meerdere bestanden
+													selecteren.</small>
+											</div>
+
+
 											<!-- Upload video START -->
 											<div class="col-12">
 												<h5>Upload video</h5>
@@ -401,52 +410,16 @@ Steps START -->
 													<input class="form-control" type="text" name="video_link"
 														placeholder="Enter video url">
 												</div>
-												<div class="position-relative my-4">
-													<hr>
-													<p
-														class="small position-absolute top-50 start-50 translate-middle bg-body px-3 mb-0">
-														Or</p>
-												</div>
-
-												<div class="col-12">
-													<label class="form-label">Upload video</label>
-													<div class="input-group mb-3">
-														<input type="file" class="form-control" id="inputGroupFile01">
-														<label class="input-group-text">.mp4</label>
-													</div>
-													<div class="input-group mb-3">
-														<input type="file" class="form-control" id="inputGroupFile02">
-														<label class="input-group-text">.WebM</label>
-													</div>
-													<div class="input-group mb-3">
-														<input type="file" class="form-control" id="inputGroupFile03">
-														<label class="input-group-text">.OGG</label>
-													</div>
-												</div>
-
-												<div class="col-12 mt-4">
-													<h5>Upload documenten</h5>
-													<input type="file" name="documents[]" class="form-control" multiple
-														accept=".pdf,.jpg,.jpeg,.png,.doc,.docx,.zip">
-													<small class="text-muted">Je kunt meerdere bestanden
-														selecteren.</small>
-												</div>
 
 
 												<!-- Preview -->
 												<h5 class="mt-4">Video preview</h5>
 												<div class="position-relative">
-													<!-- Image -->
-													<img src="assets/images/about/04.jpg" class="rounded-4" alt="">
-													<div class="position-absolute top-50 start-50 translate-middle">
-														<!-- Video link -->
-														<a href="https://www.youtube.com/embed/tXHviS-4ygo"
-															class="btn btn-lg text-danger btn-round btn-white-shadow mb-0"
-															data-glightbox="" data-gallery="video-tour">
-															<i class="fas fa-play"></i>
-														</a>
-													</div>
+													<iframe id="videoPreview" class="rounded-4" width="100%"
+														height="315" src="" style="background:#000;"
+														allowfullscreen></iframe>
 												</div>
+
 											</div>
 											<!-- Upload video END -->
 

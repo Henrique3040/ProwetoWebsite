@@ -67,4 +67,8 @@ class NotificatieController
     {
         return $this->model->createNotification($userId, $message);
     }
+
+    public function deleteAllNotification($userId){
+        return $this->model->deleteAllNotification($userId);
+    }
 }
