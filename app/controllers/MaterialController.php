@@ -172,9 +172,9 @@ class MaterialController
         return $this->model->getAllAvailability($materiaal_id);
     }
 
-    public function reserve($userId, $materialId, $cursusId, $date, $aantal)
+    public function reserve($userId, $materialId, $cursusId, $date, $periode, $aantal)
     {
-        $result = $this->model->reserve($userId, $materialId, $cursusId, $date, $aantal);
+        $result = $this->model->reserve($userId, $materialId, $cursusId, $date, $periode, $aantal);
 
         if (!$result['success']) {
             return $result;

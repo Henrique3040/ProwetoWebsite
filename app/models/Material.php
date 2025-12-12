@@ -53,7 +53,7 @@ class Material
         return $id;
     }
 
-    public function reserve($user_id, $materialId, $cursusId, $date, $aantal)
+    public function reserve($user_id, $materialId, $cursusId, $date, $periode, $aantal)
     {
         // 1. Haal totaal voorraad
         $stmt = $this->conn->prepare("SELECT Aantal FROM Materialen WHERE Id = ?");
@@ -72,10 +72,11 @@ class Material
         SELECT SUM(aantal) AS reserved
         FROM materiaal_reservaties
         WHERE materiaal_id = ?
-        AND startdatum <= ?
-        AND einddatum >= ?
+        AND startdatum = ?
+        AND periode = ?
+
         ");
-        $stmt2->bind_param("sss", $materialId, $date, $date);
+        $stmt2->bind_param("sss", $materialId, $date, $periode);
         $stmt2->execute();
         $reserved = (int) ($stmt2->get_result()->fetch_assoc()['reserved'] ?? 0);
 
@@ -92,14 +93,14 @@ class Material
 
         // 4. Haal de juiste beschikbaarheid voor de GEKOZEN DATUM
         $stmt3 = $this->conn->prepare("
-        SELECT periode, starttijd, eindtijd
+        SELECT starttijd, eindtijd
         FROM materiaal_beschikbaarheid
         WHERE materiaal_id = ?
         AND startdatum <= ?
         AND einddatum >= ?
-        LIMIT 1
-    ");
-        $stmt3->bind_param("sss", $materialId, $date, $date);
+        AND periode = ?
+        LIMIT 1");
+        $stmt3->bind_param("ssss", $materialId, $date, $date, $periode);
         $stmt3->execute();
         $avail = $stmt3->get_result()->fetch_assoc();
 
@@ -125,7 +126,7 @@ class Material
             $date,
             $avail['starttijd'],
             $avail['eindtijd'],
-            $avail['periode'],
+            $periode,
             $aantal
         );
         

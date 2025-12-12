@@ -44,6 +44,7 @@ require_once "../../app/core/init.php";
   $_POST['material_id'],
   $_POST['course_id'],
   $_POST['datum'],
+  $_POST['periode'],
   $_POST['aantal'],
 );
 
