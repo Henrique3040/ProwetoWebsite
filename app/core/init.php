@@ -16,6 +16,11 @@
 // Start een PHP-sessie (voor gebruikersauthenticatie, status, etc.)
 session_start();
 
+require_once __DIR__ . '/loadEnv.php'; // jouw loader
+loadEnv(__DIR__ . '/../../.env'); 
+
+
+
 
 /**
  * ------------------------------------------------------------
@@ -31,6 +36,7 @@ $db = Database::getInstance();
 $conn = $db->getConnection();
 
 
+
 /**
  * ------------------------------------------------------------
  * Controllers
@@ -44,6 +50,10 @@ require_once __DIR__ . '/../controllers/SubWebsiteController.php';
 require_once __DIR__ . '/../controllers/FaqController.php';
 require_once __DIR__ . '/../controllers/LeerjaarController.php';
 require_once __DIR__ . '/../controllers/UserController.php';
+require_once __DIR__ . '/../controllers/MaterialController.php';
+require_once __DIR__ . '/../controllers/NotificatieController.php';
+require_once __DIR__ . '/../helpers/auth.php';
+
 
 /**
  * ------------------------------------------------------------
@@ -58,6 +68,7 @@ $subWebsiteController = new SubWebsiteController($conn);
 $faqController = new FaqController($conn);
 $leerjaarController = new LeerjaarController($conn);
 $userController = new UserController($conn);
+$materiaalController = new MaterialController($conn);
+$notificatieController = new NotificatieController($conn);
 
 ?>
-

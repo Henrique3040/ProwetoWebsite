@@ -13,7 +13,7 @@ class User
      */
     private $conn;
 
-        /**
+    /**
      * Constructor
      *
      * @param mysqli $db Databaseverbinding
@@ -30,16 +30,36 @@ class User
      * @param string $password Wachtwoord
      * @return bool True bij succes, false bij falen
      */
-    public function createUser($username, $password)
+    public function createUser($email, $username, $password)
     {
         $id = generateUUID();
         $hashedPassword = password_hash($password, PASSWORD_DEFAULT);
 
-        $sql = "INSERT INTO users (id, username, password) VALUES (?, ?, ?)";
+        $sql = "INSERT INTO users (id, username, email, password) VALUES (?, ?, ?, ?)";
         $stmt = mysqli_prepare($this->conn, $sql);
-        mysqli_stmt_bind_param($stmt, "sss", $id, $username, $hashedPassword);
+        mysqli_stmt_bind_param($stmt, "ssss", $id, $username, $email, $hashedPassword);
 
         return mysqli_stmt_execute($stmt);
+    }
+
+    public function getAllAdmins (){
+        $sql = "SELECT id, username, email FROM users WHERE admin = 1";
+        $stmt = mysqli_prepare($this->conn, $sql);
+        mysqli_stmt_execute($stmt);
+        $result = mysqli_stmt_get_result($stmt);
+    
+        return mysqli_fetch_all($result, MYSQLI_ASSOC);
+    }
+
+    public function getUserById($userId)
+    {
+        $sql = "SELECT * FROM users WHERE Id = ?";
+        $stmt = mysqli_prepare($this->conn, $sql);
+        mysqli_stmt_bind_param($stmt, "s", $userId);
+        mysqli_stmt_execute($stmt);
+        $result = mysqli_stmt_get_result($stmt);
+        
+        return mysqli_fetch_assoc($result);
     }
 
     /**
@@ -54,8 +74,8 @@ class User
         $stmt = mysqli_prepare($this->conn, $sql);
         mysqli_stmt_bind_param($stmt, "s", $username);
         mysqli_stmt_execute($stmt);
-
         $result = mysqli_stmt_get_result($stmt);
+        
         return mysqli_fetch_assoc($result);
     }
 
@@ -76,6 +96,23 @@ class User
         }
 
         return false;
+    }
+
+    public function getEmailNotificationSetting($userId) {
+        $sql = "SELECT email_notifications FROM users WHERE id=?";
+        $stmt = mysqli_prepare($this->conn, $sql);
+        mysqli_stmt_bind_param($stmt, "s", $userId);
+        mysqli_stmt_execute($stmt);
+        $result = mysqli_stmt_get_result($stmt);
+        $row = mysqli_fetch_assoc($result);
+        return $row['email_notifications'] ?? 1;
+    }
+
+    public function updateEmailNotificationSetting($userId, $value) {
+        $sql = "UPDATE users SET email_notifications=? WHERE id=?";
+        $stmt = mysqli_prepare($this->conn, $sql);
+        mysqli_stmt_bind_param($stmt, "is", $value, $userId);
+        return mysqli_stmt_execute($stmt);
     }
 }
 ?>

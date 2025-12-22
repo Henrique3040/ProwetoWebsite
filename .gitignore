@@ -1,0 +1,9 @@
+# Ignore environment variables
+/vendor/
+.env
+
+# PHPMailer
+app/libraries/PHPMailer/
+
+# Uploads 
+public/uploads/

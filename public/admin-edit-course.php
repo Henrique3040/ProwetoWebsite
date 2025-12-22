@@ -16,8 +16,8 @@
 
 	<?php
 	require_once __DIR__ . '/../app/core/init.php';
-	require_once __DIR__ . '/../app/helpers/auth.php'; 
-    requireAdmin();
+	require_once __DIR__ . '/../app/helpers/auth.php';
+	requireAdmin();
 
 	if (!isset($_GET['id'])) {
 		header("Location: admin-course-list.php");
@@ -35,6 +35,10 @@
 	$course = $courseController->getCourseDetail($courseId);
 	$categories = $categoryController->getAllCategories();
 	$leerjaren = $leerjaarController->getAllLeerjaren();
+	$materialen = $materiaalController->getAllMaterials();
+	$selectedMaterialIds = array_column($course['Materialen'], 'Id');
+
+
 
 	// Beveiliging: redirect als cursus niet gevonden is
 	if (!$course) {
@@ -55,7 +59,7 @@
 		<!-- Page content START -->
 		<div class="page-content">
 
-			
+
 
 			<!-- Page main content START -->
 			<div class="page-content-wrapper border">
@@ -168,6 +172,46 @@
 													<?php endforeach; ?>
 												</select>
 											</div>
+
+											<!-- Course Materials -->
+											<hr class="my-4">
+											<h5>Materialen</h5>
+
+											<div id="materialList">
+												<?php foreach ($course['Materialen'] as $mat): ?>
+													<div
+														class="d-flex justify-content-between align-items-center border p-2 rounded mb-2">
+														<span><?= htmlspecialchars($mat['Naam']) ?></span>
+														<button type="button"
+															class="btn btn-sm btn-danger-soft delete-material"
+															data-id="<?= $mat['Id'] ?>">
+															<i class="fas fa-trash"></i>
+														</button>
+													</div>
+												<?php endforeach; ?>
+											</div>
+
+											<!-- input om nieuwe materiaal toe te voegen -->
+											<div class="col-md-12">
+												<label class="form-label">Select materials</label>
+
+												<select class="form-select js-choice" name="material_ids[]" multiple>
+													<?php foreach ($materialen as $mat): ?>
+														<option value="<?= $mat['Id'] ?>" <?= in_array($mat['Id'], $selectedMaterialIds) ? 'selected' : '' ?>>
+															<?= htmlspecialchars($mat['Naam']) ?>
+														</option>
+													<?php endforeach; ?>
+												</select>
+
+												<small class="text-muted">Je kunt meerdere materialen
+													selecteren.</small>
+											</div>
+
+											<!-- Hidden inputs -->
+											<input type="hidden" name="DeletedMaterialIDs" id="DeletedMaterialIDs"
+												value="[]">
+
+
 
 											<!-- Switches -->
 											<div class="col-md-4 d-flex align-items-center mt-4">
@@ -301,6 +345,47 @@
 									</div>
 									<!-- Upload image END -->
 
+									<hr class="my-4">
+									<h5>Documenten</h5>
+
+									<div class="mb-3">
+										<label class="form-label">Upload nieuwe documenten (PDF, DOCX, PPTX,
+											ZIP)</label>
+										<input type="file" name="nieuwe_documenten[]" class="form-control" multiple
+											accept=".pdf,.docx,.pptx,.zip">
+										<p class="small text-muted mt-1">Je kunt meerdere documenten tegelijk
+											selecteren.</p>
+									</div>
+
+									<!-- Huidige documenten tonen -->
+									<?php
+									$documents = $course['DocumentenLijst'] ?? []; // komt uit getCourseDetail()
+									?>
+									<?php if (!empty($documents)): ?>
+										<h6 class="mt-4">Bestaande documenten</h6>
+										<ul class="list-group">
+											<?php foreach ($documents as $doc): ?>
+												<li class="list-group-item d-flex justify-content-between align-items-center">
+													<a href="<?= htmlspecialchars($doc['BestandURL']) ?>" target="_blank">
+														<?= htmlspecialchars(basename($doc['BestandURL'])) ?>
+													</a>
+													<div>
+														<button type="button" class="btn btn-sm btn-danger-soft delete-doc"
+															data-id="<?= htmlspecialchars($doc['id']) ?>">
+															<i class="fas fa-trash"></i>
+														</button>
+													</div>
+												</li>
+											<?php endforeach; ?>
+										</ul>
+									<?php else: ?>
+										<p class="text-muted mt-2">Nog geen documenten toegevoegd.</p>
+									<?php endif; ?>
+
+									<!-- Verborgen input voor verwijderde documenten -->
+									<input type="hidden" name="deletedDocuments" id="deletedDocuments" value="[]">
+
+
 									<!-- Upload video START -->
 									<div class="col-12">
 										<h5>Upload video</h5>
@@ -311,31 +396,6 @@
 												value="<?= htmlspecialchars($course['Link'] ?? '') ?>"
 												placeholder="Enter video url">
 
-										</div>
-										<div class="position-relative my-4">
-											<hr>
-											<p
-												class="small position-absolute top-50 start-50 translate-middle bg-body px-3 mb-0">
-												Or</p>
-										</div>
-
-										<div class="col-12">
-											<label class="form-label">Upload video</label>
-											<div class="input-group mb-3">
-												<input type="file" class="form-control" id="inputGroupFile01"
-													name="video_mp4" accept=".mp4">
-												<label class="input-group-text">.mp4</label>
-											</div>
-											<div class="input-group mb-3">
-												<input type="file" class="form-control" id="inputGroupFile02"
-													name="video_webm" accept=".webm">
-												<label class="input-group-text">.WebM</label>
-											</div>
-											<div class="input-group mb-3">
-												<input type="file" class="form-control" id="inputGroupFile03"
-													name="video_ogg" accept=".ogg">
-												<label class="input-group-text">.OGG</label>
-											</div>
 										</div>
 
 										<!-- Preview -->

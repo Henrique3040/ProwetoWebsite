@@ -164,6 +164,7 @@ Footer END -->
 
 	<!-- Vendors -->
 	<script src="assets/vendor/tiny-slider/min/tiny-slider.js"></script>
+	
 
 	<?php include("partials/footer-scripts.php"); ?>
 

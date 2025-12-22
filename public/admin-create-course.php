@@ -15,11 +15,12 @@
 
 	<?php
 	require_once __DIR__ . '/../app/core/init.php';
-	require_once __DIR__ . '/../app/helpers/auth.php'; 
-    requireAdmin();
+	require_once __DIR__ . '/../app/helpers/auth.php';
+	requireAdmin();
 	$categorieen = $categoryController->getAllCategories();
 	$courseController->store();
 	$leerjaren = $leerjaarController->getAllLeerjaren();
+	$materialen = $materiaalController->getAllMaterials();
 	?>
 
 	<?php include("partials/head-css.php"); ?>
@@ -27,12 +28,12 @@
 
 <body>
 
-	
+
 
 	<!-- **************** MAIN CONTENT START **************** -->
 	<main>
 
-	<?php include("partials/sidebar.php"); ?>
+		<?php include("partials/sidebar.php"); ?>
 		<!-- =======================
 Page Banner START -->
 		<section class="py-0 bg-blue h-100px align-items-center d-flex h-200px rounded-0"
@@ -43,8 +44,6 @@ Page Banner START -->
 					<div class="col-12 text-center">
 						<!-- Title -->
 						<h1 class="text-white">Submit a new Course</h1>
-						<p class="text-white mb-0">Read our <a href="#" class="text-white"><u>"Before you create a
-									course"</u></a> article before submitting!</p>
 					</div>
 				</div>
 			</div>
@@ -60,8 +59,7 @@ Steps START -->
 					<div class="col-md-8 mx-auto text-center">
 						<!-- Content -->
 						<p class="text-center">Use this interface to add a new Course to the portal. Once you are done
-							adding the item it will be reviewed for quality. If approved, your course will appear for
-							sale and you will be informed by email that your course has been accepted.</p>
+							adding the you can reviewed for quality in edit course modus. If approved, you can change the status to accepted.</p>
 					</div>
 				</div>
 
@@ -113,7 +111,8 @@ Steps START -->
 						<div class="card-body">
 							<!-- Step content START -->
 							<div class="bs-stepper-content">
-								<form id="courseForm" action="admin-create-course.php" method="POST" enctype="multipart/form-data">
+								<form id="courseForm" action="admin-create-course.php" method="POST"
+									enctype="multipart/form-data">
 
 
 									<!-- Step 1 content START -->
@@ -167,6 +166,22 @@ Steps START -->
 													<?php endforeach; ?>
 												</select>
 											</div>
+
+
+											<!-- Materialen multi-select -->
+											<div class="col-md-12">
+												<label class="form-label">Select materials</label>
+												<select class="form-select js-choice" name="material_ids[]" multiple>
+													<?php foreach ($materialen as $mat): ?>
+														<option value="<?= $mat['Id'] ?>">
+															<?= htmlspecialchars($mat['Naam']) ?>
+														</option>
+													<?php endforeach; ?>
+												</select>
+												<small class="text-muted">Je kunt meerdere materialen
+													selecteren.</small>
+											</div>
+
 
 											<!-- Switches -->
 											<div class="col-md-4 d-flex align-items-center mt-4">
@@ -374,6 +389,15 @@ Steps START -->
 											</div>
 											<!-- Upload image END -->
 
+											<div class="col-12 mt-4">
+												<h5>Upload documenten</h5>
+												<input type="file" name="documents[]" class="form-control" multiple
+													accept=".pdf,.jpg,.jpeg,.png,.doc,.docx,.zip">
+												<small class="text-muted">Je kunt meerdere bestanden
+													selecteren.</small>
+											</div>
+
+
 											<!-- Upload video START -->
 											<div class="col-12">
 												<h5>Upload video</h5>
@@ -383,43 +407,16 @@ Steps START -->
 													<input class="form-control" type="text" name="video_link"
 														placeholder="Enter video url">
 												</div>
-												<div class="position-relative my-4">
-													<hr>
-													<p
-														class="small position-absolute top-50 start-50 translate-middle bg-body px-3 mb-0">
-														Or</p>
-												</div>
 
-												<div class="col-12">
-													<label class="form-label">Upload video</label>
-													<div class="input-group mb-3">
-														<input type="file" class="form-control" id="inputGroupFile01">
-														<label class="input-group-text">.mp4</label>
-													</div>
-													<div class="input-group mb-3">
-														<input type="file" class="form-control" id="inputGroupFile02">
-														<label class="input-group-text">.WebM</label>
-													</div>
-													<div class="input-group mb-3">
-														<input type="file" class="form-control" id="inputGroupFile03">
-														<label class="input-group-text">.OGG</label>
-													</div>
-												</div>
 
 												<!-- Preview -->
 												<h5 class="mt-4">Video preview</h5>
 												<div class="position-relative">
-													<!-- Image -->
-													<img src="assets/images/about/04.jpg" class="rounded-4" alt="">
-													<div class="position-absolute top-50 start-50 translate-middle">
-														<!-- Video link -->
-														<a href="https://www.youtube.com/embed/tXHviS-4ygo"
-															class="btn btn-lg text-danger btn-round btn-white-shadow mb-0"
-															data-glightbox="" data-gallery="video-tour">
-															<i class="fas fa-play"></i>
-														</a>
-													</div>
+													<iframe id="videoPreview" class="rounded-4" width="100%"
+														height="315" src="" style="background:#000;"
+														allowfullscreen></iframe>
 												</div>
+
 											</div>
 											<!-- Upload video END -->
 

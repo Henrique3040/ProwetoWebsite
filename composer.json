@@ -1,0 +1,6 @@
+{
+    "name": "henrique/proweto",
+    "require": {
+        "phpoffice/phpspreadsheet": "1.24"
+    }
+}

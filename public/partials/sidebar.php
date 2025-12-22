@@ -31,6 +31,8 @@
 						<li class="nav-item"> <a class="nav-link" href="admin-course-list.php">All Courses</a></li>
 						<li class="nav-item"> <a class="nav-link" href="admin-course-category.php">Course Category</a></li>
 						<li class="nav-item"> <a class="nav-link" href="admin-subwebsites.php">SubWebsites</a></li>
+						<li class="nav-item"> <a class="nav-link" href="admin-materialen.php">Materialen</a></li>
+						<li class="nav-item"> <a class="nav-link" href="admin-material-reservaties.php">Material Reservations</a></li>
 						<li class="nav-item"> <a class="nav-link" href="admin-create-course.php">Add New Course</a></li>
 					</ul>
 				</li>
@@ -41,7 +43,7 @@
 						<a class="h5 mb-0 text-body" href="index.php" data-bs-toggle="tooltip" data-bs-placement="top" title="Home">
 							<i class="bi bi-globe"></i>
 						</a>
-						<a class="h5 mb-0 text-body" href="logout.php" data-bs-toggle="tooltip" data-bs-placement="top" title="Sign out">
+						<a class="h5 mb-0 text-body" href="ajax/logout.php" data-bs-toggle="tooltip" data-bs-placement="top" title="Sign out">
 							<i class="bi bi-power"></i>
 						</a>
 				</div>

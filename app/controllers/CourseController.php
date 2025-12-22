@@ -11,6 +11,8 @@
  */
 
 require_once __DIR__ . '/../models/Course.php';
+require_once __DIR__ . '/../models/Document.php';
+
 
 class CourseController
 {
@@ -22,13 +24,15 @@ class CourseController
     /**
      * Constructor
      *
-     * Initialiseert de controller en laadt het Course-model met de databaseverbinding.
+     * Initialiseert de controller en laadt het Course-model en Document-model met de databaseverbinding.
      *
      * @param mysqli $db De actieve databaseverbinding.
      */
     public function __construct($db)
     {
         $this->model = new Course($db);
+        $this->documentModel = new Document($db);
+
     }
 
     /**
@@ -57,7 +61,7 @@ class CourseController
         return $this->model->getCourseDetail($courseId);
     }
 
-     /**
+    /**
      * Voegt een beoordeling (rating) toe aan een cursus.
      *
      * @param int $courseId Het ID van de cursus.
@@ -65,10 +69,14 @@ class CourseController
      * @return bool True als de beoordeling succesvol is toegevoegd.
      */
 
-    public function rateCourse($courseId, $rating)
-    {
-        return $this->model->addRating($courseId, $rating);
-    }
+     public function rateCourse($courseId, $userId, $rating)
+     {
+         return $this->model->addOrUpdateRating($courseId, $userId, $rating);
+     }
+     
+     public function getUserRating($courseId, $userId){
+        return $this->model->getUserRating($courseId, $userId);
+     }
 
     /**
      * Zoekt naar cursussen op basis van een zoekterm.
@@ -96,7 +104,8 @@ class CourseController
      *
      * @return int Het aantal cursussen.
      */
-    public function getAllCount(){
+    public function getAllCount()
+    {
         return $this->model->getAllCount();
     }
 
@@ -162,7 +171,6 @@ class CourseController
     public function store()
     {
 
-
         if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             $titel = $_POST['titel'];
             $korteBeschrijving = $_POST['korte_beschrijving'];
@@ -174,6 +182,8 @@ class CourseController
             $materiaal = isset($_POST['materiaal']) ? 1 : 0;
             $documenten = isset($_POST['documenten']) ? 1 : 0;
             $active = isset($_POST['active']) ? 1 : 0;
+            $selectedMaterials = $_POST['material_ids'] ?? [];
+
 
 
             // Upload foto
@@ -202,10 +212,13 @@ class CourseController
                 'Materiaal' => $materiaal,
                 'Documenten' => $documenten,
                 'LeerJaarID' => $leerjaarId,
-                'faqs' => $faqs
+                'faqs' => $faqs,
+                'material_ids' => $selectedMaterials
             ]);
 
+
             if ($cursusId) {
+                $this->uploadDocuments($cursusId);
                 header('Location: admin-create-course.php?controller=course&action=success');
                 exit;
             } else {
@@ -215,7 +228,7 @@ class CourseController
     }
 
 
-     /**
+    /**
      * Verwijdert een cursus uit de database.
      *
      * @param int $courseId Het ID van de te verwijderen cursus.
@@ -265,6 +278,11 @@ class CourseController
             $materiaal = isset($_POST['materiaal']) ? 1 : 0;
             $documenten = isset($_POST['documenten']) ? 1 : 0;
             $active = isset($_POST['active']) ? 1 : 0;
+            $deletedMaterialIDs = isset($_POST['DeletedMaterialIDs']) ? json_decode($_POST['DeletedMaterialIDs'], true) : [];
+            $selectedMaterialIds = $_POST['material_ids'] ?? [];
+
+
+
 
             // Upload nieuwe foto (optioneel)
             $fotoURL = null;
@@ -284,6 +302,36 @@ class CourseController
                 $fotoURL = $targetFile;
             }
 
+
+            // Nieuwe documenten uploaden
+            $uploadedDocs = [];
+            if (isset($_FILES['nieuwe_documenten']) && !empty($_FILES['nieuwe_documenten']['name'][0])) {
+                $uploadDir = 'uploads/documents/';
+                if (!is_dir($uploadDir))
+                    mkdir($uploadDir, 0755, true);
+
+                foreach ($_FILES['nieuwe_documenten']['tmp_name'] as $key => $tmpName) {
+                    if ($_FILES['nieuwe_documenten']['error'][$key] === UPLOAD_ERR_OK) {
+
+                        $origName = $_FILES['nieuwe_documenten']['name'][$key];
+                        $fileType = pathinfo($origName, PATHINFO_EXTENSION);
+
+                        $filename = time() . '_' . basename($origName);
+                        $targetFile = $uploadDir . $filename;
+                        move_uploaded_file($tmpName, $targetFile);
+
+                        // Bewaar info voor model
+                        $uploadedDocs[] = [
+                            "name" => $origName,
+                            "path" => $targetFile,
+                            "type" => $fileType
+                        ];
+                    }
+                }
+            }
+
+
+
             // FAQ’s (optioneel)
             $faqs = [];
             if (isset($_POST['faqs']) && !empty($_POST['faqs'])) {
@@ -294,6 +342,11 @@ class CourseController
             $deletedFaqIDs = [];
             if (isset($_POST['deletedFaqs']) && !empty($_POST['deletedFaqs'])) {
                 $deletedFaqIDs = json_decode($_POST['deletedFaqs'], true);
+            }
+
+            $deleteDocIDs = [];
+            if (isset($_POST['deletedDocuments']) && !empty($_POST['deletedDocuments'])) {
+                $deleteDocIDs = json_decode($_POST['deletedDocuments'], true);
             }
 
             // Update via model
@@ -309,7 +362,12 @@ class CourseController
                 'Documenten' => $documenten,
                 'LeerJaarID' => $leerjaarId,
                 'Faqs' => $faqs,
-                'DeletedFaqIDs' => $deletedFaqIDs // belangrijk!
+                'DeletedFaqIDs' => $deletedFaqIDs, // belangrijk!
+                'UploadedDocuments' => $uploadedDocs,
+                'DeletedDocumentIDs' => $deleteDocIDs, // belangrijk!
+                'SelectedMaterialIds' => $selectedMaterialIds,
+                'DeletedMaterialIDs' => $deletedMaterialIDs,
+
             ]);
 
             if ($updated) {
@@ -320,6 +378,30 @@ class CourseController
             }
         }
     }
+
+    public function uploadDocuments($courseId)
+    {
+        if (isset($_FILES['documents'])) {
+            $uploadDir = 'uploads/documents/';
+            if (!is_dir($uploadDir))
+                mkdir($uploadDir, 0755, true);
+
+            foreach ($_FILES['documents']['name'] as $key => $name) {
+                if ($_FILES['documents']['error'][$key] === UPLOAD_ERR_OK && !empty($name)) {
+                    $filename = time() . '_' . basename($name);
+                    $targetFile = $uploadDir . $filename;
+                    move_uploaded_file($_FILES['documents']['tmp_name'][$key], $targetFile);
+
+                    $fileType = pathinfo($name, PATHINFO_EXTENSION);
+                    $added = $this->documentModel->addDocument($courseId, $name, $targetFile, $fileType);
+                    if (!$added)
+                        error_log("Document toevoegen mislukt: $name");
+                }
+            }
+
+        }
+    }
+
 
 }
 ?>

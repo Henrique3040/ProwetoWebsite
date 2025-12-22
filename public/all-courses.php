@@ -246,6 +246,7 @@ Footer END -->
 
 	<!-- Vendors -->
 	<script src="assets/vendor/choices.js/public/assets/scripts/choices.min.js"></script>
+	
 
 
 	<?php include("partials/footer-scripts.php"); ?>

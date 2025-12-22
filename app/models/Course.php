@@ -5,7 +5,6 @@
  * Modelklasse voor het beheren van cursussen.
  * Bevat methodes voor CRUD, ratings, views, filters, categorieën en FAQ's.
  */
-
 include_once __DIR__ . '/../helpers/generateUUID.php';
 class Course
 {
@@ -14,7 +13,7 @@ class Course
      */
     private $conn;
 
-     /**
+    /**
      * Constructor
      *
      * @param mysqli $db De databaseverbinding.
@@ -73,7 +72,7 @@ class Course
     }
 
 
-     /**
+    /**
      * Haalt detailinformatie van een cursus op, inclusief FAQ's.
      *
      * @param string $courseId ID van de cursus.
@@ -127,8 +126,49 @@ class Course
 
         $course['Faqs'] = $faqs;
 
+        // ✅ Haal documenten op
+        $sqlDocs = "SELECT id, Naam, BestandURL, Bestandstype, UploadedAt 
+        FROM CursusDocumenten 
+        WHERE cursus_id = ?";
+        $stmtDocs = mysqli_prepare($this->conn, $sqlDocs);
+        mysqli_stmt_bind_param($stmtDocs, "s", $courseId);
+        mysqli_stmt_execute($stmtDocs);
+        $resultDocs = mysqli_stmt_get_result($stmtDocs);
+        $documents = mysqli_fetch_all($resultDocs, MYSQLI_ASSOC);
+
+        $course['DocumentenLijst'] = $documents;
+
+        // ✅ haal cursus materialen op
+        $sqlMat = "
+                   SELECT m.Id, m.Naam, m.FotoURL 
+                   FROM Materialen m
+                   JOIN CursusMaterialen cm ON m.Id = cm.materiaal_id
+                   WHERE cm.cursus_id = ?";
+
+        $stmtMat = mysqli_prepare($this->conn, $sqlMat);
+        mysqli_stmt_bind_param($stmtMat, "s", $courseId);
+        mysqli_stmt_execute($stmtMat);
+        $course['Materialen'] = mysqli_fetch_all(mysqli_stmt_get_result($stmtMat), MYSQLI_ASSOC);
+
+
         return $course;
     }
+
+
+    public function getUserRating($courseId, $userId)
+    {
+        $sql = "SELECT rating FROM CursusRating WHERE cursus_id = ? AND user_id = ?";
+        $stmt = mysqli_prepare($this->conn, $sql);
+        mysqli_stmt_bind_param($stmt, "ss", $courseId, $userId);
+        mysqli_stmt_execute($stmt);
+        $res = mysqli_stmt_get_result($stmt);
+
+        if ($row = mysqli_fetch_assoc($res)) {
+            return (int) $row['rating'];
+        }
+        return 0;
+    }
+
 
     /**
      * Voeg een rating toe aan een cursus en werk het gemiddelde bij.
@@ -137,32 +177,60 @@ class Course
      * @param int $rating
      * @return bool
      */
-    public function addRating($courseId, $rating)
+    public function addOrUpdateRating($courseId, $userId, $rating)
     {
         $id = generateUUID();
 
-        // 1) Nieuwe rating opslaan
-        $sql = "INSERT INTO CursusRating (id, cursus_id, rating) VALUES (?, ?, ?)";
+        $sql = "INSERT INTO CursusRating (id, user_id, cursus_id, rating)
+            VALUES (?, ?, ?, ?)
+            ON DUPLICATE KEY UPDATE
+                rating = VALUES(rating),
+                updated_at = NOW()";
+
         $stmt = mysqli_prepare($this->conn, $sql);
-        mysqli_stmt_bind_param($stmt, "ssi", $id, $courseId, $rating);
+
+        if (!$stmt) {
+            error_log("SQL PREPARE ERROR: " . mysqli_error($this->conn));
+            return false;
+        }
+
+        mysqli_stmt_bind_param($stmt, "sssi", $id, $userId, $courseId, $rating);
         mysqli_stmt_execute($stmt);
 
-        // 2) Nieuw gemiddelde berekenen
-        $sql2 = "SELECT AVG(rating) AS avgRating FROM CursusRating WHERE cursus_id = ?";
-        $stmt2 = mysqli_prepare($this->conn, $sql2);
-        mysqli_stmt_bind_param($stmt2, "s", $courseId);
-        mysqli_stmt_execute($stmt2);
-        $result = mysqli_stmt_get_result($stmt2);
-        $avg = mysqli_fetch_assoc($result)['avgRating'];
+        if (mysqli_stmt_errno($stmt)) {
+            error_log("SQL EXEC ERROR: " . mysqli_stmt_error($stmt));
+            return false;
+        }
 
-        // 3) Gemiddelde opslaan in Cursusdetails tabel
-        $sql3 = "UPDATE Cursusdetails SET Rating = ? WHERE cursus_id = ?";
-        $stmt3 = mysqli_prepare($this->conn, $sql3);
-        mysqli_stmt_bind_param($stmt3, "ds", $avg, $courseId);
-        mysqli_stmt_execute($stmt3);
+        // 2️⃣ Bereken nieuw gemiddelde
+        $sqlAvg = "
+            SELECT ROUND(AVG(rating), 1) AS avgRating
+            FROM CursusRating
+            WHERE cursus_id = ?
+        ";
+
+        $stmtAvg = mysqli_prepare($this->conn, $sqlAvg);
+        mysqli_stmt_bind_param($stmtAvg, "s", $courseId);
+        mysqli_stmt_execute($stmtAvg);
+
+        $avg = mysqli_fetch_assoc(mysqli_stmt_get_result($stmtAvg))['avgRating'];
+
+        // 3️⃣ Update Cursusdetails
+        $sqlUpdate = "
+    UPDATE Cursusdetails
+    SET Rating = ?
+    WHERE cursus_id = ?
+";
+
+        $stmtUpdate = mysqli_prepare($this->conn, $sqlUpdate);
+        mysqli_stmt_bind_param($stmtUpdate, "ds", $avg, $courseId);
+        mysqli_stmt_execute($stmtUpdate);
+
+        return true;
 
         return true;
     }
+
 
 
     /**
@@ -224,7 +292,8 @@ class Course
      *
      * @return int
      */
-    public function getAllCount(){
+    public function getAllCount()
+    {
         $sql = "SELECT COUNT(DISTINCT c.Id) AS total
         FROM Cursus c
         ";
@@ -347,7 +416,7 @@ class Course
         LEFT JOIN CursusCategorie cc ON c.id = cc.cursus_id
         LEFT JOIN Cursusdetails d ON c.id = d.cursus_id
         $whereSql
-    ";
+     ";
 
         $countStmt = mysqli_prepare($this->conn, $countSql);
         if (!empty($params)) {
@@ -371,7 +440,7 @@ class Course
         GROUP BY c.Id
         $orderBy
         LIMIT ? OFFSET ?
-    ";
+     ";
 
         $stmt = mysqli_prepare($this->conn, $sql);
 
@@ -509,7 +578,7 @@ class Course
     }
 
 
-     /**
+    /**
      * Haal alle actieve cursussen op.
      *
      * @return mysqli_result
@@ -542,7 +611,7 @@ class Course
     }
 
 
-     /**
+    /**
      * Haal inactieve cursussen op.
      *
      * @return mysqli_result
@@ -609,6 +678,19 @@ class Course
                 $stmtFaq = mysqli_prepare($this->conn, $sqlFaq);
                 mysqli_stmt_bind_param($stmtFaq, "ssss", $faqId, $Id, $vraag, $antwoord);
                 mysqli_stmt_execute($stmtFaq);
+            }
+        }
+
+        // Material koppelen
+        if (!empty($data['material_ids'])) {
+            foreach ($data['material_ids'] as $matId) {
+                $linkId = generateUUID();
+
+                $sqlMat = "INSERT INTO CursusMaterialen (Id, cursus_id, materiaal_id) VALUES (?, ?, ?)";
+                $stmtMat = mysqli_prepare($this->conn, $sqlMat);
+
+                mysqli_stmt_bind_param($stmtMat, "sss", $linkId, $Id, $matId);
+                mysqli_stmt_execute($stmtMat);
             }
         }
 
@@ -761,10 +843,13 @@ class Course
             mysqli_stmt_execute($stmt2);
 
             // 3️⃣ Categorie opnieuw koppelen
-            mysqli_query(
+            $stmtDelCat = mysqli_prepare(
                 $this->conn,
                 "DELETE FROM CursusCategorie WHERE cursus_id = ?"
             );
+            mysqli_stmt_bind_param($stmtDelCat, "s", $courseId);
+            mysqli_stmt_execute($stmtDelCat);
+
 
             if (!empty($data['CategorieID'])) {
                 $stmtCat = mysqli_prepare(
@@ -773,6 +858,82 @@ class Course
                 );
                 mysqli_stmt_bind_param($stmtCat, "ss", $courseId, $data['CategorieID']);
                 mysqli_stmt_execute($stmtCat);
+            }
+
+
+            // 6️⃣ Documenten verwerken
+            // Verwijder geselecteerde documenten
+            if (!empty($data['DeletedDocumentIDs'])) {
+                foreach ($data['DeletedDocumentIDs'] as $docId) {
+                    $stmtPath = mysqli_prepare($this->conn, "SELECT BestandURL FROM CursusDocumenten WHERE Id = ?");
+                    mysqli_stmt_bind_param($stmtPath, "s", $docId);
+                    mysqli_stmt_execute($stmtPath);
+                    $resPath = mysqli_stmt_get_result($stmtPath);
+                    $doc = mysqli_fetch_assoc($resPath);
+                    if ($doc && file_exists($doc['BestandURL'])) {
+                        unlink($doc['BestandURL']);
+                    }
+
+                    $stmtDel = mysqli_prepare($this->conn, "DELETE FROM CursusDocumenten WHERE Id = ?");
+                    mysqli_stmt_bind_param($stmtDel, "s", $docId);
+                    mysqli_stmt_execute($stmtDel);
+                }
+            }
+
+            // Nieuwe documenten toevoegen
+            if (!empty($data['UploadedDocuments'])) {
+                foreach ($data['UploadedDocuments'] as $doc) {
+
+                    $docId = generateUUID();
+                    $bestandUrl = $doc['path'];
+                    $bestandNaam = $doc['name'];
+                    $bestandType = $doc['type'];
+
+                    $stmtAdd = mysqli_prepare(
+                        $this->conn,
+                        "INSERT INTO CursusDocumenten (Id, cursus_id, Naam, BestandURL, Bestandstype) 
+                         VALUES (?, ?, ?, ?, ?)"
+                    );
+
+                    if (!$stmtAdd) {
+                        throw new Exception("Prepare failed: " . mysqli_error($this->conn));
+                    }
+
+                    mysqli_stmt_bind_param(
+                        $stmtAdd,
+                        "sssss",
+                        $docId,
+                        $courseId,
+                        $bestandNaam,   // juiste kolom!
+                        $bestandUrl,
+                        $bestandType    // juiste kolom!
+                    );
+
+                    mysqli_stmt_execute($stmtAdd);
+                }
+            }
+
+
+            //materiaal koppeling verwijderen
+            if (!empty($data['DeletedMaterialIDs'])) {
+                foreach ($data['DeletedMaterialIDs'] as $matId) {
+                    $stmtDel = mysqli_prepare(
+                        $this->conn,
+                        "DELETE FROM CursusMaterialen WHERE cursus_id=? AND materiaal_id=?"
+                    );
+                    mysqli_stmt_bind_param($stmtDel, "ss", $courseId, $matId);
+                    mysqli_stmt_execute($stmtDel);
+                }
+            }
+
+            foreach ($data['SelectedMaterialIds'] as $matId) {
+                $linkId = generateUUID();
+                $stmtAdd = mysqli_prepare(
+                    $this->conn,
+                    "INSERT INTO CursusMaterialen (Id, cursus_id, materiaal_id) VALUES (?, ?, ?)"
+                );
+                mysqli_stmt_bind_param($stmtAdd, "sss", $linkId, $courseId, $matId);
+                mysqli_stmt_execute($stmtAdd);
             }
 
             // 4️⃣ Update FAQ’s

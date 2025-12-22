@@ -18,11 +18,15 @@
 		$password = $_POST['password'] ?? '';
 
 		if ($userController->login($username, $password)) {
-			header("Location: admin-dashboard.php");
+
+			if ($_SESSION['user']['admin'] == 1) {
+				header("Location: /admin-dashboard.php");
+			} else {
+				header("Location: /index.php");
+			}
 			exit;
-		} else {
-			$error = "Ongeldige gebruikersnaam of wachtwoord.";
 		}
+		
 	}
 	?>
 
@@ -64,11 +68,11 @@
 								<form method="POST">
 									<!-- Email -->
 									<div class="mb-4">
-										<label class="form-label">Email address *</label>
+										<label class="form-label">User Name *</label>
 										<div class="input-group input-group-lg">
 											<span
 												class="input-group-text bg-light rounded-start border-0 text-secondary px-3">
-												<i class="bi bi-envelope-fill"></i>
+												<i class="fa-solid fa-user"></i>
 											</span>
 											<input type="text" class="form-control border-0 bg-light rounded-end ps-1"
 												placeholder="E-mail" name="username" required>
@@ -115,6 +119,10 @@
 								<?php endif; ?>
 
 								<!-- Form END -->
+								 <!-- Sign up link -->
+								<div class="mt-4 text-center">
+									<span>Don't have an account? <a href="sign-up.php">Signup here</a></span>
+								</div>
 
 							</div>
 						</div> <!-- Row END -->

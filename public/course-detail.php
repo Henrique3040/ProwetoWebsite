@@ -13,11 +13,23 @@
 
 	// Haal course ID op uit de URL
 	$courseId = $_GET['id'] ?? null;
+	$userRating = 0;
+
+	if (isset($_SESSION['user'])) {
+		$userRating = $courseController->getUserRating(
+			$courseId,
+			$_SESSION['user']['id']
+		);
+	}
 	$course = $courseController->getCourseDetail($courseId);
+
 
 	$categories = $categoryController->getCategoriesByCourse($course['id']);
 
 	$faqs = $faqController->index($course['id']);
+
+
+
 	?>
 
 	<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
@@ -124,55 +136,173 @@ Page content START -->
 							</div>
 							<!-- About course END -->
 
-							<!-- Curriculum START -->
+							<!-- Document start -->
+							<?php if (!empty($course['DocumentenLijst'])): ?>
+								<div class="col-12">
+									<div class="card border">
+										<!-- Header -->
+										<div class="card-header border-bottom">
+											<h3 class="mb-0">📂 Cursusdocumenten</h3>
+										</div>
 
-							<!-- Curriculum END -->
-
-							<!-- FAQs START -->
-
-							<!-- FAQ Tab Content -->
-
-							<div id="course-pills-5" role="tabpanel" aria-labelledby="course-pills-tab-5">
-								<!-- Title -->
-								<h5 class="mb-3">Frequently Asked Questions</h5>
-
-								<!-- Accordion START -->
-								<div class="accordion accordion-flush" id="accordionExample">
-									<?php if (!empty($faqs)): ?>
-										<?php foreach ($faqs as $index => $faq): ?>
-											<div class="accordion-item">
-												<h2 class="accordion-header" id="heading<?= $index ?>">
-													<button class="accordion-button <?= $index > 0 ? 'collapsed' : '' ?>"
-														type="button" data-bs-toggle="collapse"
-														data-bs-target="#collapse<?= $index ?>"
-														aria-expanded="<?= $index === 0 ? 'true' : 'false' ?>"
-														aria-controls="collapse<?= $index ?>">
-
-														<span class="text-secondary fw-bold me-3">
-															<?= str_pad($index + 1, 2, '0', STR_PAD_LEFT) ?>
-														</span>
-														<span class="h6 mb-0">
-															<?= htmlspecialchars($faq['Vraag']) ?>
-														</span>
-													</button>
-												</h2>
-
-												<div id="collapse<?= $index ?>"
-													class="accordion-collapse collapse <?= $index === 0 ? 'show' : '' ?>"
-													aria-labelledby="heading<?= $index ?>" data-bs-parent="#accordionExample">
-
-													<div class="accordion-body pt-0">
-														<?= nl2br(htmlspecialchars($faq['Antwoord'])) ?>
-													</div>
-												</div>
-											</div>
-										<?php endforeach; ?>
-									<?php else: ?>
-										<p class="text-muted">Er zijn nog geen veelgestelde vragen voor deze cursus.</p>
-									<?php endif; ?>
+										<!-- Body -->
+										<div class="card-body">
+											<ul class="list-group list-group-flush">
+												<?php foreach ($course['DocumentenLijst'] as $doc): ?>
+													<li
+														class="list-group-item d-flex justify-content-between align-items-center">
+														<div class="d-flex align-items-center">
+															<i class="bi bi-file-earmark-text text-primary me-2 fs-5"></i>
+															<span><?= htmlspecialchars($doc['Naam']) ?></span>
+														</div>
+														<a href="<?= htmlspecialchars($doc['BestandURL']) ?>"
+															class="btn btn-sm btn-outline-primary" download>
+															<i class="bi bi-download me-1"></i> Download
+														</a>
+													</li>
+												<?php endforeach; ?>
+											</ul>
+										</div>
+									</div>
 								</div>
-								<!-- Accordion END -->
+							<?php else: ?>
+								<div class="col-12">
+									<div class="alert alert-light border text-muted">
+										<i class="bi bi-info-circle me-1"></i> Er zijn nog geen documenten toegevoegd voor
+										deze cursus.
+									</div>
+								</div>
+							<?php endif; ?>
+							<!-- Document end -->
+
+
+							<!-- materialen start -->
+							<?php if (!empty($course['Materialen'])): ?>
+								<div class="col-12">
+									<div class="card border">
+										<div
+											class="card-header border-bottom d-flex align-items-center justify-content-between">
+											<h3 class="mb-0">📚 Cursusmaterialen</h3>
+											<small class="text-muted"><?= count($course['Materialen']) ?>
+												beschikbaar</small>
+										</div>
+
+										<div class="card-body">
+											<!-- Grid van materialen -->
+											<div class="row g-3">
+												<?php foreach ($course['Materialen'] as $mat): ?>
+													<?php
+													// veilige velden
+													$matNaam = htmlspecialchars($mat['Naam']);
+													$matFoto = !empty($mat['FotoURL']) && file_exists($mat['FotoURL']) ? $mat['FotoURL'] : 'assets/images/placeholder-material.png';
+													$matId = htmlspecialchars($mat['Id']);
+													?>
+													<div class="col-12 col-sm-6 col-md-4">
+														<div class="card h-100 shadow-sm">
+															<div class="ratio ratio-4x3">
+																<img src="<?= htmlspecialchars($matFoto) ?>"
+																	alt="<?= $matNaam ?>" class="card-img-top object-fit-cover">
+															</div>
+															<div class="card-body d-flex flex-column">
+																<h6 class="card-title mb-2"><?= $matNaam ?></h6>
+
+																<?php if (!empty($mat['Beschrijving'])): ?>
+																	<p class="card-text small text-muted mb-2">
+																		<?= htmlspecialchars($mat['Beschrijving']) ?>
+																	</p>
+																<?php endif; ?>
+
+																<div
+																	class="mt-auto d-flex justify-content-between align-items-center">
+																	<a href="#" class="btn btn-outline-secondary btn-sm"
+																		target="_blank" rel="noopener">
+																		<i class="bi bi-info-circle me-1"></i> Info
+																	</a>
+
+																	<!-- Trigger-knop voor modal -->
+																	<button type="button"
+																		class="btn btn-primary btn-sm open-reserve-modal-btn"
+																		data-bs-toggle="modal" data-bs-target="#reserveModal"
+																		data-material-id="<?= $matId ?>"
+																		data-material-name="<?= $matNaam ?>"
+																		data-course-id="<?= $course['id'] ?>"
+																		data-logged-in="<?= AuthController::isLoggedIn() ? '1' : '0' ?>">
+																		<i class="bi bi-calendar-plus me-1"></i> Reserveer
+																	</button>
+																</div>
+															</div>
+														</div>
+													</div>
+												<?php endforeach; ?>
+											</div>
+										</div>
+									</div>
+								</div>
+							<?php else: ?>
+								<div class="col-12">
+									<div class="alert alert-light border text-muted">
+										<i class="bi bi-info-circle me-1"></i> Er zijn nog geen materialen toegevoegd voor
+										deze cursus.
+									</div>
+								</div>
+							<?php endif; ?>
+							<!-- materialen end -->
+
+							<div class="col-12" id="course-pills-5" role="tabpanel"
+								aria-labelledby="course-pills-tab-5">
+								<div class="card border">
+									<!-- Card header -->
+									<div class="card-header border-bottom">
+										<h3 class="mb-0">Frequently Asked Questions</h3>
+									</div>
+
+									<!-- Card body -->
+									<div class="card-body">
+
+										<div class="accordion accordion-flush" id="accordionExample">
+											<?php if (!empty($faqs)): ?>
+												<?php foreach ($faqs as $index => $faq): ?>
+													<div class="accordion-item">
+														<h2 class="accordion-header" id="heading<?= $index ?>">
+															<button
+																class="accordion-button <?= $index > 0 ? 'collapsed' : '' ?>"
+																type="button" data-bs-toggle="collapse"
+																data-bs-target="#collapse<?= $index ?>"
+																aria-expanded="<?= $index === 0 ? 'true' : 'false' ?>"
+																aria-controls="collapse<?= $index ?>">
+
+																<span class="text-secondary fw-bold me-3">
+																	<?= str_pad($index + 1, 2, '0', STR_PAD_LEFT) ?>
+																</span>
+																<span class="h6 mb-0">
+																	<?= htmlspecialchars($faq['Vraag']) ?>
+																</span>
+															</button>
+														</h2>
+
+														<div id="collapse<?= $index ?>"
+															class="accordion-collapse collapse <?= $index === 0 ? 'show' : '' ?>"
+															aria-labelledby="heading<?= $index ?>"
+															data-bs-parent="#accordionExample">
+
+															<div class="accordion-body pt-0">
+																<?= nl2br(htmlspecialchars($faq['Antwoord'])) ?>
+															</div>
+														</div>
+													</div>
+												<?php endforeach; ?>
+											<?php else: ?>
+												<p class="text-muted mb-0">
+													<i class="bi bi-info-circle me-1"></i>
+													Er zijn nog geen veelgestelde vragen voor deze cursus.
+												</p>
+											<?php endif; ?>
+										</div>
+
+									</div>
+								</div>
 							</div>
+
 							<!-- Content END -->
 
 
@@ -224,18 +354,19 @@ Page content START -->
 											<li class="list-group-item px-0 d-flex justify-content-between">
 												<span class="h6 fw-light mb-0"><i
 														class="fas fa-fw fa-book-open text-primary"></i>Materialen</span>
-												<span>Ja</span>
+												<span><?= !empty($course['Materiaal']) ? 'Ja' : 'Nee' ?></span>
+
 											</li>
 
 											<li class="list-group-item px-0 d-flex justify-content-between">
 												<span class="h6 fw-light mb-0"><i
 														class="fas fa-fw fa-globe text-primary"></i>Language</span>
-												<span>English</span>
+												<span><?= $course['Taal'] ?></span>
 											</li>
 											<li class="list-group-item px-0 d-flex justify-content-between">
 												<span class="h6 fw-light mb-0"><i
 														class="fas fa-fw fa-user-clock text-primary"></i>Document</span>
-												<span>Nee</span>
+												<span><?= !empty($course['Documenten']) ? 'Ja' : 'Nee' ?></span>
 											</li>
 
 										</ul>
@@ -246,22 +377,16 @@ Page content START -->
 										<!-- Rating and follow -->
 										<div
 											class="d-sm-flex justify-content-sm-between align-items-center mt-0 mt-sm-2">
-											
+
 											<!-- Rating star -->
-											<?php if (!isset($_COOKIE["rated_" . $course['id']])): ?>
-												<div id="rating" data-course="<?= $course['id'] ?>" class="star-rating">
-													<i class="bi bi-star" data-value="1"></i>
-													<i class="bi bi-star" data-value="2"></i>
-													<i class="bi bi-star" data-value="3"></i>
-													<i class="bi bi-star" data-value="4"></i>
-													<i class="bi bi-star" data-value="5"></i>
-													<p>/5</p>
-												</div>
+											<div id="rating" data-course="<?= $course['id'] ?>"
+												data-current="<?= $userRating ?? 0 ?>" class="star-rating">
 
-											<?php else: ?>
-												<p class="text-success">Bedankt voor je rating!</p>
-											<?php endif; ?>
-
+												<?php for ($i = 1; $i <= 5; $i++): ?>
+													<i class="bi <?= $i <= $userRating ? 'bi-star-fill text-warning' : 'bi-star' ?>"
+														data-value="<?= $i ?>"></i>
+												<?php endfor; ?>
+											</div>
 
 										</div>
 									</div>
@@ -277,8 +402,8 @@ Page content START -->
 											if ($categories) {
 												foreach ($categories as $cat) {
 													echo '<li class="list-inline-item">
-                            <a class="btn btn-outline-light btn-sm" href="#">' . htmlspecialchars($cat['Naam']) . '</a>
-                          </li>';
+                                                            <a class="btn btn-outline-light btn-sm" href="#">' . htmlspecialchars($cat['Naam']) . '</a>
+                                                          </li>';
 												}
 											} else {
 												echo '<li class="list-inline-item text-muted">Geen categorieën</li>';
@@ -300,6 +425,49 @@ Page content START -->
 		<!-- =======================
 Page content END -->
 
+
+		<!-- Reserveer Modal -->
+		<div class="modal fade" id="reserveModal" tabindex="-1" aria-hidden="true">
+			<div class="modal-dialog modal-dialog-centered modal-lg">
+				<div class="modal-content">
+
+					<div class="modal-header">
+						<h5 class="modal-title">Materiaal reserveren</h5>
+						<button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+					</div>
+
+					<div class="modal-body">
+
+						<p><strong>Materiaal:</strong> <span id="materialName"></span></p>
+
+						<div id="myReservationsBox" class="alert alert-info d-none">
+							<h6 class="mb-2">Jouw bestaande reservaties</h6>
+							<ul id="myReservationsList" class="mb-0"></ul>
+						</div>
+
+						<hr>
+
+						<!-- Hier komen datums + periodes -->
+						<div id="calendarContainer">
+							<p class="text-muted">Beschikbare datums worden geladen...</p>
+						</div>
+
+						<hr>
+
+						<!-- Reserveer knop -->
+						<button id="confirmReservation" class="btn btn-success w-100 mt-3">
+							Reservering bevestigen
+						</button>
+
+					</div>
+
+				</div>
+			</div>
+		</div>
+
+
+
+
 	</main>
 	<!-- **************** MAIN CONTENT END **************** -->
 
@@ -316,8 +484,10 @@ Footer END -->
 	<script src="assets/vendor/sticky-js/sticky.min.js"></script>
 	<script src="assets/vendor/plyr/plyr.min.js"></script>
 	<script src="js/rating.js"></script>
+	<script src="js/calenderUsers.js"></script>
 
 	<?php include("partials/footer-scripts.php"); ?>
+
 
 </body>
 

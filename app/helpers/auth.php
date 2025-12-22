@@ -16,10 +16,15 @@
  *
  * @return void
  */
+  require_once __DIR__ . '/../controllers/AuthController.php';
 
-function requireAdmin() {
-    if (!isset($_SESSION['admin_logged_in']) || $_SESSION['admin_logged_in'] !== true) {
-        header("Location: /error-404.php");
-        exit;
-    }
-}
+  function requireLogin()
+  {
+    AuthController::requireLogin();
+  }
+
+  function requireAdmin()
+  {
+    AuthController::requireAdmin();
+  }
+

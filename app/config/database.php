@@ -26,23 +26,6 @@ class Database
     * @var string
     */
 
-   private $host = "localhost";
-   /**
-    * Database gebruikersnaam
-    * @var string
-    */
-   private $username = "root";
-   /**
-    * Database wachtwoord
-    * @var string
-    */
-   private $password = "";
-   /**
-    * Database naam
-    * @var string
-    */
-   private $database = "proweto";
-
 
    /**
     * Constructor
@@ -55,10 +38,11 @@ class Database
    private function __construct()
    {
       $this->connection = new mysqli(
-         $this->host,
-         $this->username,
-         $this->password,
-         $this->database
+         $_ENV['DB_HOST'],
+         $_ENV['DB_USER'],
+         $_ENV['DB_PASS'],
+         $_ENV['DB_NAME']
+
       );
 
       if ($this->connection->connect_error) {
