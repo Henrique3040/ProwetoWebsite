@@ -90,7 +90,7 @@
                                             <td><?= htmlspecialchars($r['username']) ?></td>
                                             <td><?= htmlspecialchars($r['materiaal_naam']) ?></td>
                                             <td><?= htmlspecialchars($r['cursus_titel']) ?></td>
-                                            <td><?= $r['startdatum'] ?> → <?= $r['einddatum'] ?></td>
+                                            <td><?= $r['startdatum'] ?></td>
 
                                             <td>
                                                 <span class="badge

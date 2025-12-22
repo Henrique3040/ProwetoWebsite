@@ -68,11 +68,11 @@
 								<form method="POST">
 									<!-- Email -->
 									<div class="mb-4">
-										<label class="form-label">Email address *</label>
+										<label class="form-label">User Name *</label>
 										<div class="input-group input-group-lg">
 											<span
 												class="input-group-text bg-light rounded-start border-0 text-secondary px-3">
-												<i class="bi bi-envelope-fill"></i>
+												<i class="fa-solid fa-user"></i>
 											</span>
 											<input type="text" class="form-control border-0 bg-light rounded-end ps-1"
 												placeholder="E-mail" name="username" required>

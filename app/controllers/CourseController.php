@@ -69,10 +69,14 @@ class CourseController
      * @return bool True als de beoordeling succesvol is toegevoegd.
      */
 
-    public function rateCourse($courseId, $rating)
-    {
-        return $this->model->addRating($courseId, $rating);
-    }
+     public function rateCourse($courseId, $userId, $rating)
+     {
+         return $this->model->addOrUpdateRating($courseId, $userId, $rating);
+     }
+     
+     public function getUserRating($courseId, $userId){
+        return $this->model->getUserRating($courseId, $userId);
+     }
 
     /**
      * Zoekt naar cursussen op basis van een zoekterm.

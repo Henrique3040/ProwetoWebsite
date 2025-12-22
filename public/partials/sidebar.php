@@ -43,7 +43,7 @@
 						<a class="h5 mb-0 text-body" href="index.php" data-bs-toggle="tooltip" data-bs-placement="top" title="Home">
 							<i class="bi bi-globe"></i>
 						</a>
-						<a class="h5 mb-0 text-body" href="logout.php" data-bs-toggle="tooltip" data-bs-placement="top" title="Sign out">
+						<a class="h5 mb-0 text-body" href="ajax/logout.php" data-bs-toggle="tooltip" data-bs-placement="top" title="Sign out">
 							<i class="bi bi-power"></i>
 						</a>
 				</div>

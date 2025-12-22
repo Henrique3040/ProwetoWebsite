@@ -43,9 +43,9 @@ class UserController
      * @param string $password Het wachtwoord van de nieuwe gebruiker (wordt gehasht in het model).
      * @return bool True als registratie is gelukt, anders false.
      */
-    public function register($username, $password)
+    public function register($email, $username, $password)
     {
-        return $this->model->createUser($username, $password);
+        return $this->model->createUser($email,$username, $password);
     }
 
     /**
@@ -113,7 +113,7 @@ class UserController
     {
         session_unset(); // Verwijder alle sessievariabelen
         session_destroy(); // Vernietig de sessie
-        header("Location: sign-in.php");
+        header("Location: /sign-in.php");
         exit;
     }
 

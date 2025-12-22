@@ -131,7 +131,10 @@ class MaterialController
                 $starttijd = "12:00";
                 $eindtijd = "17:00";
                 break;
-
+            case "avond":
+                $starttijd = "17:00";
+                $eindtijd = "20:00";
+            break;
             default:
             case "hele_dag":
                 $starttijd = "08:00";
@@ -179,69 +182,132 @@ class MaterialController
         if (!$result['success']) {
             return $result;
         }
-
-        // -------------------------------------------
-        // 1. Ophalen volledige reservatie + user info
-        // -------------------------------------------
-        $reservation = $this->model->getReservationById($result['reservation_id']);
-        $user = $this->UserModel->getUserById($userId);
-
-
-        // -------------------------------------------
-        // 2. Mail naar gebruiker (bevestiging)
-        // -------------------------------------------
-        if (!empty($user['email']) && intval($user['email_notifications']) === 1) {
-            $subject = "Bevestiging van je reservatie";
-            $body = "
-            <p>Beste {$user['username']},</p>
-            <p>Je reservatie is succesvol ontvangen.</p>
-            <p><strong>Materiaal:</strong> {$reservation['materiaal_id']}<br>
-               <strong>Aantal:</strong> {$reservation['aantal']}<br>
-               <strong>Datum:</strong> {$reservation['startdatum']}</p>
-            <p>Status: <strong>In afwachting</strong></p>
-         ";
-
-            Mailer::sendMail($user['email'], $subject, $body);
-        }
-
-        sleep(10); // 1 seconde wachten zodat Mailtrap niet blokkeert
-
-        // -------------------------------------------
-        // 3. Mail naar ALLE admins
-        // -------------------------------------------
-        $admins = $this->UserModel->getAllAdmins();
-        foreach ($admins as $admin) {
-            if (!empty($admin['email']) && intval($user['email_notifications']) === 1) {
-                $subject = "Nieuwe reservatie geplaatst";
-                $body = "
-                <p>Hallo admin,</p>
-                <p>Er is een nieuwe reservatie geplaatst:</p>
-                <p>
-                    <strong>Gebruiker:</strong> {$user['username']}<br>
-                    <strong>Materiaal:</strong> {$reservation['materiaal_id']}<br>
-                    <strong>Aantal:</strong> {$reservation['aantal']}<br>
-                    <strong>Datum:</strong> {$reservation['startdatum']}
-                </p>
-             ";
-
-                Mailer::sendMail($admin['email'], $subject, $body);
-            }
-        }
-
         return $result;
     }
 
+    /**
+     * Verwerkt en bewaart meerdere materiaalreservaties voor één gebruiker.
+     * Stopt en retourneert een fout zodra één reservatie faalt.
+     */
+    public function reserveMultiple($userId, $materialId, $courseId, array $reservations)
+    {
+        $saved = [];
+
+        foreach ($reservations as $r) {
+            $res = $this->model->reserve(
+                $userId,
+                $materialId,
+                $courseId,
+                $r['date'],
+                $r['periode'],
+                (int) $r['aantal']
+            );
+
+            if (!$res['success']) {
+                return $res;
+            }
+
+            $saved[] = [
+                'date' => $r['date'],
+                'periode' => $r['periode'],
+                'aantal' => $r['aantal']
+            ];
+        }
+
+        //Deze is de email logica, staat in coment om niet al calls te gebruiken.
+        /*
+        // -------------------------
+        // DATA OPHALEN
+        // -------------------------
+        $user = $this->UserModel->getUserById($userId);
+
+        
+
+        // -------------------------
+        // 1 MAIL NAAR GEBRUIKER
+        // -------------------------
+        if (!empty($user['email']) && intval($user['email_notifications']) === 1) {
+
+            $rows = '';
+            foreach ($saved as $s) {
+                $rows .= "
+                  <tr>
+                    <td>{$s['date']}</td>
+                    <td>{$s['periode']}</td>
+                    <td>{$s['aantal']}</td>
+                  </tr>";
+            }
+
+            $body = "
+            <p>Beste {$user['username']},</p>
+            <p>Je reservatie is succesvol ontvangen met de volgende details:</p>
+    
+            <table border='1' cellpadding='6' cellspacing='0'>
+              <tr>
+                <th>Datum</th>
+                <th>Periode</th>
+                <th>Aantal</th>
+              </tr>
+              {$rows}
+            </table>
+    
+            <p>Status: <strong>In afwachting</strong></p>
+            ";
+
+            Mailer::sendMail(
+                $user['email'],
+                "Bevestiging van je reservatie",
+                $body
+            );
+        }
+        
+
+        sleep(10); // 1 seconde wachten zodat Mailtrap niet blokkeert
+
+        // -------------------------
+        // 1 MAIL NAAR ADMINS
+        // -------------------------
+        $admins = $this->UserModel->getAllAdmins();
+
+        foreach ($admins as $admin) {
+            if (!empty($admin['email'])) {
+
+                Mailer::sendMail(
+                    $admin['email'],
+                    "Nieuwe reservatie geplaatst",
+                    $body // zelfde body is prima
+                );
+            }
+        }*/
+
+        return [
+            "success" => true
+        ];
+    }
+
+
+
+    /**
+    * Haalt het gekoppelde cursus-ID op voor een gegeven materiaal.
+    */
     public function getCourseIdFromMaterial($materialId)
     {
         return $this->model->getCourseIdFromMaterial($materialId);
     }
 
+
+    /**
+    * Verwijdert een beschikbaarheidsrecord (adminfunctie).
+    */
     public function deleteAvailability($id)
     {
         $this->model->deleteAvailability($id);
     }
 
 
+    /**
+    * Geeft een overzicht van alle reservaties (admin).
+    */
     public function getAllReservations()
     {
         return $this->model->getAllReservations();
@@ -252,6 +318,9 @@ class MaterialController
         return $this->model->deleteReservation($id);
     }
 
+    /**
+    * Wijzigt de status van een reservatie en verstuurt notificaties indien toegestaan.
+    */
     public function updateReservationStatus($id, $status)
     {
         // 1. status bijwerken in de database

@@ -12,6 +12,7 @@
 	 
 	 if(isset($_POST['signup'])) {
 		$username = $_POST['username'];
+		$email = $_POST['email'];
 		$password = $_POST['password'];
 		$confirm_password = $_POST['confirm_password'];
 		$terms = isset($_POST['terms']) ? true : false;
@@ -22,7 +23,7 @@
 		} elseif($password !== $confirm_password) {
 			echo "<script>alert('Passwords do not match!');</script>";
 		} else {
-			$result = $userController->register($username, $password);
+			$result = $userController->register($email, $username, $password);
 	
 			if($result) {
 				echo "<script>alert('Registration successful!'); window.location='sign-in.php';</script>";
@@ -78,10 +79,20 @@
 								<!-- Form START -->
 								<form method="POST">
 									<!-- Email -->
+
+									<div class="mb-4">
+										<label for="exampleEmail" class="form-label">Email *</label>
+										<div class="input-group input-group-lg">
+										     <span class="input-group-text bg-light rounded-start border-0 text-secondary px-3"><i class="bi bi-envelope-fill"></i></span>
+										     <input type="email" class="form-control border-0 bg-light rounded-end ps-1" placeholder="Email" name="email" id="exampleEmail">
+										</div>
+									</div>
+
+									<!-- Username -->
 									<div class="mb-4">
 										<label for="exampleInputUserName" class="form-label">User Name *</label>
 										<div class="input-group input-group-lg">
-											<span class="input-group-text bg-light rounded-start border-0 text-secondary px-3"><i class="bi bi-envelope-fill"></i></span>
+											<span class="input-group-text bg-light rounded-start border-0 text-secondary px-3"><i class="fa-solid fa-user"></i></i></span>
 											<input type="text" class="form-control border-0 bg-light rounded-end ps-1" placeholder="User Name" name="username" id="exampleInputUserName">
 										</div>
 									</div>
@@ -116,23 +127,6 @@
 									</div>
 								</form>
 								<!-- Form END -->
-
-								<!-- Social buttons -->
-								<div class="row">
-									<!-- Divider with text -->
-									<div class="position-relative my-4">
-										<hr>
-										<p class="small position-absolute top-50 start-50 translate-middle bg-body px-5">Or</p>
-									</div>
-									<!-- Social btn -->
-									<div class="col-xxl-6 d-grid">
-										<a href="#" class="btn bg-google mb-2 mb-xxl-0"><i class="fab fa-fw fa-google text-white me-2"></i>Signup with Google</a>
-									</div>
-									<!-- Social btn -->
-									<div class="col-xxl-6 d-grid">
-										<a href="#" class="btn bg-facebook mb-0"><i class="fab fa-fw fa-facebook-f me-2"></i>Signup with Facebook</a>
-									</div>
-								</div>
 
 								<!-- Sign up link -->
 								<div class="mt-4 text-center">

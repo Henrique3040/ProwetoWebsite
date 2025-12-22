@@ -5,7 +5,6 @@
  * Modelklasse voor het beheren van cursussen.
  * Bevat methodes voor CRUD, ratings, views, filters, categorieën en FAQ's.
  */
-
 include_once __DIR__ . '/../helpers/generateUUID.php';
 class Course
 {
@@ -155,6 +154,22 @@ class Course
         return $course;
     }
 
+
+    public function getUserRating($courseId, $userId)
+    {
+        $sql = "SELECT rating FROM CursusRating WHERE cursus_id = ? AND user_id = ?";
+        $stmt = mysqli_prepare($this->conn, $sql);
+        mysqli_stmt_bind_param($stmt, "ss", $courseId, $userId);
+        mysqli_stmt_execute($stmt);
+        $res = mysqli_stmt_get_result($stmt);
+
+        if ($row = mysqli_fetch_assoc($res)) {
+            return (int) $row['rating'];
+        }
+        return 0;
+    }
+
+
     /**
      * Voeg een rating toe aan een cursus en werk het gemiddelde bij.
      *
@@ -162,32 +177,60 @@ class Course
      * @param int $rating
      * @return bool
      */
-    public function addRating($courseId, $rating)
+    public function addOrUpdateRating($courseId, $userId, $rating)
     {
         $id = generateUUID();
 
-        // 1) Nieuwe rating opslaan
-        $sql = "INSERT INTO CursusRating (id, cursus_id, rating) VALUES (?, ?, ?)";
+        $sql = "INSERT INTO CursusRating (id, user_id, cursus_id, rating)
+            VALUES (?, ?, ?, ?)
+            ON DUPLICATE KEY UPDATE
+                rating = VALUES(rating),
+                updated_at = NOW()";
+
         $stmt = mysqli_prepare($this->conn, $sql);
-        mysqli_stmt_bind_param($stmt, "ssi", $id, $courseId, $rating);
+
+        if (!$stmt) {
+            error_log("SQL PREPARE ERROR: " . mysqli_error($this->conn));
+            return false;
+        }
+
+        mysqli_stmt_bind_param($stmt, "sssi", $id, $userId, $courseId, $rating);
         mysqli_stmt_execute($stmt);
 
-        // 2) Nieuw gemiddelde berekenen
-        $sql2 = "SELECT AVG(rating) AS avgRating FROM CursusRating WHERE cursus_id = ?";
-        $stmt2 = mysqli_prepare($this->conn, $sql2);
-        mysqli_stmt_bind_param($stmt2, "s", $courseId);
-        mysqli_stmt_execute($stmt2);
-        $result = mysqli_stmt_get_result($stmt2);
-        $avg = mysqli_fetch_assoc($result)['avgRating'];
+        if (mysqli_stmt_errno($stmt)) {
+            error_log("SQL EXEC ERROR: " . mysqli_stmt_error($stmt));
+            return false;
+        }
 
-        // 3) Gemiddelde opslaan in Cursusdetails tabel
-        $sql3 = "UPDATE Cursusdetails SET Rating = ? WHERE cursus_id = ?";
-        $stmt3 = mysqli_prepare($this->conn, $sql3);
-        mysqli_stmt_bind_param($stmt3, "ds", $avg, $courseId);
-        mysqli_stmt_execute($stmt3);
+        // 2️⃣ Bereken nieuw gemiddelde
+        $sqlAvg = "
+            SELECT ROUND(AVG(rating), 1) AS avgRating
+            FROM CursusRating
+            WHERE cursus_id = ?
+        ";
+
+        $stmtAvg = mysqli_prepare($this->conn, $sqlAvg);
+        mysqli_stmt_bind_param($stmtAvg, "s", $courseId);
+        mysqli_stmt_execute($stmtAvg);
+
+        $avg = mysqli_fetch_assoc(mysqli_stmt_get_result($stmtAvg))['avgRating'];
+
+        // 3️⃣ Update Cursusdetails
+        $sqlUpdate = "
+    UPDATE Cursusdetails
+    SET Rating = ?
+    WHERE cursus_id = ?
+";
+
+        $stmtUpdate = mysqli_prepare($this->conn, $sqlUpdate);
+        mysqli_stmt_bind_param($stmtUpdate, "ds", $avg, $courseId);
+        mysqli_stmt_execute($stmtUpdate);
+
+        return true;
 
         return true;
     }
+
 
 
     /**
@@ -840,22 +883,22 @@ class Course
             // Nieuwe documenten toevoegen
             if (!empty($data['UploadedDocuments'])) {
                 foreach ($data['UploadedDocuments'] as $doc) {
-            
+
                     $docId = generateUUID();
                     $bestandUrl = $doc['path'];
                     $bestandNaam = $doc['name'];
                     $bestandType = $doc['type'];
-            
+
                     $stmtAdd = mysqli_prepare(
                         $this->conn,
                         "INSERT INTO CursusDocumenten (Id, cursus_id, Naam, BestandURL, Bestandstype) 
                          VALUES (?, ?, ?, ?, ?)"
                     );
-            
+
                     if (!$stmtAdd) {
                         throw new Exception("Prepare failed: " . mysqli_error($this->conn));
                     }
-            
+
                     mysqli_stmt_bind_param(
                         $stmtAdd,
                         "sssss",
@@ -865,11 +908,11 @@ class Course
                         $bestandUrl,
                         $bestandType    // juiste kolom!
                     );
-            
+
                     mysqli_stmt_execute($stmtAdd);
                 }
             }
-            
+
 
             //materiaal koppeling verwijderen
             if (!empty($data['DeletedMaterialIDs'])) {
@@ -892,7 +935,7 @@ class Course
                 mysqli_stmt_bind_param($stmtAdd, "sss", $linkId, $courseId, $matId);
                 mysqli_stmt_execute($stmtAdd);
             }
-            
+
             // 4️⃣ Update FAQ’s
             if (!empty($data['Faqs'])) {
                 foreach ($data['Faqs'] as $faq) {

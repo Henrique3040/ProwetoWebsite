@@ -10,26 +10,43 @@
  *  - Ster-elementen <i> binnen #rating, elk met data-value attribuut (1-5)
  */
 
-document.querySelectorAll('#rating i').forEach(star => {
+$(document).ready(function () {
 
-    star.addEventListener('click', function () {
-        // 1️⃣ Waarde van aangeklikte ster ophalen
-        let value = this.dataset.value;
+    $('#rating i').on('click', function () {
 
-        // 2️⃣ Cursus-ID ophalen uit parent container
-        let course = document.querySelector('#rating').dataset.course;
+        // 1️⃣ Waarde van aangeklikte ster
+        let value = $(this).data('value');
 
-        // 3️⃣ Verstuur rating naar backend via POST
-        fetch("rate.php", {
-            method: "POST",
-            headers: { "Content-Type": "application/x-www-form-urlencoded" },
-            body: `course_id=${course}&rating=${value}`
-        })
-        .then(res => res.json())
-        .then(() => {
-            // 4️⃣ Pagina herladen om nieuwe gemiddelde rating te tonen
-            location.reload();
+        // 2️⃣ Cursus-ID uit parent container
+        let course = $('#rating').data('course');
+
+        // 3️⃣ Verstuur rating naar backend
+        $.ajax({
+            url: 'ajax/rate.php',
+            method: 'POST',
+            dataType: 'json',
+            data: {
+                course_id: course,
+                rating: value
+            },
+            success: function (data) {
+                if (data.success) {
+
+                    // Reset alle sterren
+                    $('#rating i')
+                        .removeClass('bi-star-fill text-warning')
+                        .addClass('bi-star');
+
+                    // Vul sterren t/m aangeklikte waarde
+                    $('#rating i').each(function () {
+                        if ($(this).data('value') <= value) {
+                            $(this).addClass('bi-star-fill text-warning');
+                        }
+                    });
+                }
+            }
         });
+
     });
 
 });

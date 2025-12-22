@@ -140,7 +140,8 @@
                         <select name="periode" id="periode" class="form-control">
                             <option value="voormiddag">Voormiddag (08:00 - 12:00)</option>
                             <option value="namiddag">Namiddag (12:00 - 17:00)</option>
-                            <option value="hele_dag" selected>Hele dag (08:00 - 17:00)</option>
+                            <option value="avond" selected>Avond (17:00 - 20:00)</option>
+                            <option value="hele_dag" selected>Hele dag (08:00 - 20:00)</option>
                         </select>
 
                     </div>

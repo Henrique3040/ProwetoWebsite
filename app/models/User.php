@@ -13,7 +13,7 @@ class User
      */
     private $conn;
 
-        /**
+    /**
      * Constructor
      *
      * @param mysqli $db Databaseverbinding
@@ -30,14 +30,14 @@ class User
      * @param string $password Wachtwoord
      * @return bool True bij succes, false bij falen
      */
-    public function createUser($username, $password)
+    public function createUser($email, $username, $password)
     {
         $id = generateUUID();
         $hashedPassword = password_hash($password, PASSWORD_DEFAULT);
 
-        $sql = "INSERT INTO users (id, username, password) VALUES (?, ?, ?)";
+        $sql = "INSERT INTO users (id, username, email, password) VALUES (?, ?, ?, ?)";
         $stmt = mysqli_prepare($this->conn, $sql);
-        mysqli_stmt_bind_param($stmt, "sss", $id, $username, $hashedPassword);
+        mysqli_stmt_bind_param($stmt, "ssss", $id, $username, $email, $hashedPassword);
 
         return mysqli_stmt_execute($stmt);
     }

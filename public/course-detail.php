@@ -13,7 +13,16 @@
 
 	// Haal course ID op uit de URL
 	$courseId = $_GET['id'] ?? null;
+	$userRating = 0;
+
+	if (isset($_SESSION['user'])) {
+		$userRating = $courseController->getUserRating(
+			$courseId,
+			$_SESSION['user']['id']
+		);
+	}
 	$course = $courseController->getCourseDetail($courseId);
+
 
 	$categories = $categoryController->getCategoriesByCourse($course['id']);
 
@@ -213,8 +222,10 @@ Page content START -->
 																	<!-- Trigger-knop voor modal -->
 																	<button type="button"
 																		class="btn btn-primary btn-sm open-reserve-modal-btn"
+																		data-bs-toggle="modal" data-bs-target="#reserveModal"
 																		data-material-id="<?= $matId ?>"
 																		data-material-name="<?= $matNaam ?>"
+																		data-course-id="<?= $course['id'] ?>"
 																		data-logged-in="<?= AuthController::isLoggedIn() ? '1' : '0' ?>">
 																		<i class="bi bi-calendar-plus me-1"></i> Reserveer
 																	</button>
@@ -237,47 +248,61 @@ Page content START -->
 							<?php endif; ?>
 							<!-- materialen end -->
 
-							<div id="course-pills-5" role="tabpanel" aria-labelledby="course-pills-tab-5">
-								<!-- Title -->
-								<h5 class="mb-3">Frequently Asked Questions</h5>
+							<div class="col-12" id="course-pills-5" role="tabpanel"
+								aria-labelledby="course-pills-tab-5">
+								<div class="card border">
+									<!-- Card header -->
+									<div class="card-header border-bottom">
+										<h3 class="mb-0">Frequently Asked Questions</h3>
+									</div>
 
-								<!-- Accordion START -->
-								<div class="accordion accordion-flush" id="accordionExample">
-									<?php if (!empty($faqs)): ?>
-										<?php foreach ($faqs as $index => $faq): ?>
-											<div class="accordion-item">
-												<h2 class="accordion-header" id="heading<?= $index ?>">
-													<button class="accordion-button <?= $index > 0 ? 'collapsed' : '' ?>"
-														type="button" data-bs-toggle="collapse"
-														data-bs-target="#collapse<?= $index ?>"
-														aria-expanded="<?= $index === 0 ? 'true' : 'false' ?>"
-														aria-controls="collapse<?= $index ?>">
+									<!-- Card body -->
+									<div class="card-body">
 
-														<span class="text-secondary fw-bold me-3">
-															<?= str_pad($index + 1, 2, '0', STR_PAD_LEFT) ?>
-														</span>
-														<span class="h6 mb-0">
-															<?= htmlspecialchars($faq['Vraag']) ?>
-														</span>
-													</button>
-												</h2>
+										<div class="accordion accordion-flush" id="accordionExample">
+											<?php if (!empty($faqs)): ?>
+												<?php foreach ($faqs as $index => $faq): ?>
+													<div class="accordion-item">
+														<h2 class="accordion-header" id="heading<?= $index ?>">
+															<button
+																class="accordion-button <?= $index > 0 ? 'collapsed' : '' ?>"
+																type="button" data-bs-toggle="collapse"
+																data-bs-target="#collapse<?= $index ?>"
+																aria-expanded="<?= $index === 0 ? 'true' : 'false' ?>"
+																aria-controls="collapse<?= $index ?>">
 
-												<div id="collapse<?= $index ?>"
-													class="accordion-collapse collapse <?= $index === 0 ? 'show' : '' ?>"
-													aria-labelledby="heading<?= $index ?>" data-bs-parent="#accordionExample">
+																<span class="text-secondary fw-bold me-3">
+																	<?= str_pad($index + 1, 2, '0', STR_PAD_LEFT) ?>
+																</span>
+																<span class="h6 mb-0">
+																	<?= htmlspecialchars($faq['Vraag']) ?>
+																</span>
+															</button>
+														</h2>
 
-													<div class="accordion-body pt-0">
-														<?= nl2br(htmlspecialchars($faq['Antwoord'])) ?>
+														<div id="collapse<?= $index ?>"
+															class="accordion-collapse collapse <?= $index === 0 ? 'show' : '' ?>"
+															aria-labelledby="heading<?= $index ?>"
+															data-bs-parent="#accordionExample">
+
+															<div class="accordion-body pt-0">
+																<?= nl2br(htmlspecialchars($faq['Antwoord'])) ?>
+															</div>
+														</div>
 													</div>
-												</div>
-											</div>
-										<?php endforeach; ?>
-									<?php else: ?>
-										<p class="text-muted">Er zijn nog geen veelgestelde vragen voor deze cursus.</p>
-									<?php endif; ?>
+												<?php endforeach; ?>
+											<?php else: ?>
+												<p class="text-muted mb-0">
+													<i class="bi bi-info-circle me-1"></i>
+													Er zijn nog geen veelgestelde vragen voor deze cursus.
+												</p>
+											<?php endif; ?>
+										</div>
+
+									</div>
 								</div>
-								<!-- Accordion END -->
 							</div>
+
 							<!-- Content END -->
 
 
@@ -354,20 +379,14 @@ Page content START -->
 											class="d-sm-flex justify-content-sm-between align-items-center mt-0 mt-sm-2">
 
 											<!-- Rating star -->
-											<?php if (!isset($_COOKIE["rated_" . $course['id']])): ?>
-												<div id="rating" data-course="<?= $course['id'] ?>" class="star-rating">
-													<i class="bi bi-star" data-value="1"></i>
-													<i class="bi bi-star" data-value="2"></i>
-													<i class="bi bi-star" data-value="3"></i>
-													<i class="bi bi-star" data-value="4"></i>
-													<i class="bi bi-star" data-value="5"></i>
-													<p>/5</p>
-												</div>
+											<div id="rating" data-course="<?= $course['id'] ?>"
+												data-current="<?= $userRating ?? 0 ?>" class="star-rating">
 
-											<?php else: ?>
-												<p class="text-success">Bedankt voor je rating!</p>
-											<?php endif; ?>
-
+												<?php for ($i = 1; $i <= 5; $i++): ?>
+													<i class="bi <?= $i <= $userRating ? 'bi-star-fill text-warning' : 'bi-star' ?>"
+														data-value="<?= $i ?>"></i>
+												<?php endfor; ?>
+											</div>
 
 										</div>
 									</div>
@@ -409,7 +428,7 @@ Page content END -->
 
 		<!-- Reserveer Modal -->
 		<div class="modal fade" id="reserveModal" tabindex="-1" aria-hidden="true">
-			<div class="modal-dialog modal-dialog-centered">
+			<div class="modal-dialog modal-dialog-centered modal-lg">
 				<div class="modal-content">
 
 					<div class="modal-header">
@@ -418,40 +437,34 @@ Page content END -->
 					</div>
 
 					<div class="modal-body">
+
 						<p><strong>Materiaal:</strong> <span id="materialName"></span></p>
 
-						<div id="calendarContainer">
-							<p class="text-muted">Kalender wordt geladen...</p>
+						<div id="myReservationsBox" class="alert alert-info d-none">
+							<h6 class="mb-2">Jouw bestaande reservaties</h6>
+							<ul id="myReservationsList" class="mb-0"></ul>
 						</div>
 
-						<form id="reserveForm" method="POST" action="ajax/reserve_material.php" style="display:none;">
-							<input type="hidden" name="material_id" id="materialId">
-							<input type="hidden" name="datum" id="selectedDate">
-							<input type="hidden" name="course_id" value="<?= $course['id'] ?>">
-							<div class="mt-3">
-								<label for="aantal" class="form-label">Aantal stuks</label>
-								<input type="number" class="form-control" name="aantal" id="aantal" min="1" required>
-								<small id="availableText" class="text-muted"></small>
-							</div>
-							<div id="periodeContainer" class="mt-3" style="display:none;">
-								<label class="form-label">Kies dagdeel</label>
-								<div id="periodeButtons" class="d-flex flex-column gap-2"></div>
+						<hr>
 
-								<input type="hidden" name="periode" id="selectedPeriode">
-							</div>
+						<!-- Hier komen datums + periodes -->
+						<div id="calendarContainer">
+							<p class="text-muted">Beschikbare datums worden geladen...</p>
+						</div>
 
+						<hr>
 
+						<!-- Reserveer knop -->
+						<button id="confirmReservation" class="btn btn-success w-100 mt-3">
+							Reservering bevestigen
+						</button>
 
-
-							<button type="submit" class="btn btn-success w-100 mt-3">
-								Reservering bevestigen
-							</button>
-						</form>
 					</div>
 
 				</div>
 			</div>
 		</div>
+
 
 
 

@@ -52,9 +52,11 @@ $reservations = $materiaalController->getUserReservations($userId);
                                 <th>Materiaal</th>
                                 <th>Cursus</th>
                                 <th>Periode</th>
+                                <th>Dag deel</th>
                                 <th>Status</th>
-                                <th>Aangemaakt</th>
+                                <th>Besteled</th>
                                 <th>Acties</th>
+                                
                             </tr>
                         </thead>
                         <tbody>
@@ -65,7 +67,8 @@ $reservations = $materiaalController->getUserReservations($userId);
                             <tr>
                                 <td><?= htmlspecialchars($r['materiaal_naam'] ?? '—') ?></td>
                                 <td><?= htmlspecialchars($r['cursus_titel'] ?? '—') ?></td>
-                                <td><?= htmlspecialchars($r['startdatum']) ?> → <?= htmlspecialchars($r['einddatum']) ?></td>
+                                <td><?= htmlspecialchars($r['startdatum']) ?></td>
+                                <td><?= htmlspecialchars($r['periode'])?></td>
                                 <td>
                                     <span class="badge <?= $r['status'] === 'in_afwachting' ? 'bg-warning' : ($r['status'] === 'goedgekeurd' ? 'bg-success' : ($r['status'] === 'geweigerd' ? 'bg-danger' : 'bg-secondary')) ?>">
                                         <?= htmlspecialchars(ucfirst($r['status'])) ?>

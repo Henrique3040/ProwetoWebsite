@@ -180,7 +180,7 @@
 				<?php if ($loggedIn): ?>
 					<ul class="navbar-nav mx-auto">
 						<li>
-							<a class="bg-danger-soft-hover" href="logout.php">
+							<a class="bg-danger-soft-hover" href="ajax/logout.php">
 								<i class="bi bi-power fa-fw me-2"></i>Log out
 							</a>
 						</li>

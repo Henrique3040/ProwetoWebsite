@@ -440,7 +440,7 @@ class Material
     public function getReservationsByUser(string $userId): array
     {
         $sql = "
-           SELECT r.Id, r.materiaal_id, r.startdatum, r.einddatum, r.starttijd, r.eindtijd, r.status, r.aangemaakt_op,
+           SELECT r.Id, r.materiaal_id, r.startdatum, r.einddatum, r.starttijd, r.eindtijd, r.periode, r.status, r.aangemaakt_op,
                   m.Naam AS materiaal_naam,
                   c.Titel AS cursus_titel
            FROM materiaal_reservaties r

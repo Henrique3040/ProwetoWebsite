@@ -44,8 +44,6 @@ Page Banner START -->
 					<div class="col-12 text-center">
 						<!-- Title -->
 						<h1 class="text-white">Submit a new Course</h1>
-						<p class="text-white mb-0">Read our <a href="#" class="text-white"><u>"Before you create a
-									course"</u></a> article before submitting!</p>
 					</div>
 				</div>
 			</div>
@@ -61,8 +59,7 @@ Steps START -->
 					<div class="col-md-8 mx-auto text-center">
 						<!-- Content -->
 						<p class="text-center">Use this interface to add a new Course to the portal. Once you are done
-							adding the item it will be reviewed for quality. If approved, your course will appear for
-							sale and you will be informed by email that your course has been accepted.</p>
+							adding the you can reviewed for quality in edit course modus. If approved, you can change the status to accepted.</p>
 					</div>
 				</div>
 

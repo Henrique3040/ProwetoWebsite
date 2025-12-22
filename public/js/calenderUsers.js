@@ -1,138 +1,387 @@
-$(document).ready(function () {
-  /**
-   * 1️⃣ Open reserveer-modal
-   *
-   * Trigger: klik op .open-reserve-modal-btn
-   * Data-attributen van knop:
-   * - material-id
-   * - material-name
-   * - logged-in (1 = ingelogd, 0 = niet ingelogd)
-   */
-  $(".open-reserve-modal-btn").on("click", function () {
-    const matId = $(this).data("material-id");
-    const matName = $(this).data("material-name");
-    const loggedIn = $(this).data("logged-in");
+// -------------------------------
+// RESERVATIE DATA STRUCTUUR
+// -------------------------------
+// Bevat de volledige reservering die naar de server wordt gestuurd
+let reservationData = {
+  materialId: null, // ID van het materiaal
+  courseId: null,   // ID van de cursus
+  items: []         // Geselecteerde datums + periodes
+};
 
-    // Modal velden resetten
-    $("#materialName").text(matName);
-    $("#materialId").val(matId);
-    $("#selectedDate").val("");
-    $("#reserveForm").hide();
-    $("#aantal").val(1).prop("disabled", false);
-    $("#availableText").text("");
+// Bestaande reserveringen van de huidige gebruiker
+// Structuur: { '2025-01-10': [ { periode, start, end }, ... ] }
+let userReservations = {};
 
-    let modal = new bootstrap.Modal(document.getElementById("reserveModal"));
-    modal.show();
+// -------------------------------
+// MODAL OPEN EVENT
+// -------------------------------
+let activeMaterialId = null;
 
-    /**
-     * Niet ingelogd → toon waarschuwing en login-knop
-     */
-    if (loggedIn != 1) {
-      $("#calendarContainer").html(`
-          <div class="alert alert-warning text-center">
-            Je moet ingelogd zijn om te reserveren.<br><br>
-            <a href="/sign-in.php" class="btn btn-primary w-100">Inloggen</a>
-          </div>
-        `);
-      return;
-    }
+$("#reserveModal").on("show.bs.modal", function (event) {
 
-    // ---------------------------------------
-    // 2️⃣ Laad beschikbaarheid via AJAX
-    // ---------------------------------------
-    $.getJSON("ajax/get_material_availability.php", {
-      material_id: matId,
-    }).done(function (data) {
-      if (!data.records || data.records.length === 0) {
+  let button = $(event.relatedTarget);
+  let isLoggedIn = button.data("logged-in") === 1;
+
+  // NIET ingelogd → toon login-bericht
+  if (!isLoggedIn) {
+    $("#materialName").text("");
+    $("#calendarContainer").html(`
+      <div class="alert alert-warning">
+        <h6 class="mb-2">
+          <i class="bi bi-lock-fill me-1"></i>
+          Inloggen vereist
+        </h6>
+        <p class="mb-3">
+          Je moet ingelogd zijn om materiaal te kunnen reserveren.
+        </p>
+        <a href="/sign-in.php" class="btn btn-primary w-100">
+          <i class="bi bi-box-arrow-in-right me-1"></i>
+          Inloggen
+        </a>
+      </div>
+    `);
+
+    $("#confirmReservation").addClass("d-none");
+    $("#myReservationsBox").addClass("d-none");
+    return;
+  }
+
+  // ✅ WEL ingelogd → normale flow
+  $("#confirmReservation").removeClass("d-none");
+
+  activeMaterialId = button.data("material-id");
+
+  reservationData.materialId = button.data("material-id");
+  reservationData.courseId = button.data("course-id");
+  reservationData.items = [];
+
+  $("#materialName").text(button.data("material-name"));
+
+  loadAvailableDates(reservationData.materialId, reservationData.courseId);
+
+  loadUserReservations(reservationData.materialId).then(() => {
+    renderUserReservations();
+  });
+});
+
+
+// --------------------------------------
+// 1) BESCHIKBARE DATUMS LADEN
+// --------------------------------------
+function loadAvailableDates(materialId, courseId) {
+  $("#calendarContainer").html('<p class="text-muted">Datums laden...</p>');
+
+  $.ajax({
+    url: "ajax/get_material_availability.php",
+    method: "GET",
+    dataType: "json", // 🔥 BELANGRIJK
+    data: { material_id: materialId, course_id: courseId },
+  
+    success: function (response) {
+
+      if (!response.success || !Array.isArray(response.records)) {
+        console.error("Onverwachte response:", response);
         $("#calendarContainer").html(
-          "<p class='text-danger'>Geen beschikbaarheid voor dit materiaal.</p>"
+          '<p class="text-danger">Fout bij laden van datums.</p>'
         );
         return;
       }
+    
+      // unieke datums uit records halen
+      const availabilityPerDate = {};
 
-      // ⭐ Unieke datums verzamelen
-      let uniqueDates = {};
-
-      data.records.forEach((record) => {
-        if (record.date) {
-          uniqueDates[record.date] = true;
+      response.records.forEach(r => {
+        if (!availabilityPerDate[r.date]) {
+          availabilityPerDate[r.date] = 0;
         }
+        availabilityPerDate[r.date] += parseInt(r.available, 10);
       });
+    
+      let html = '<div class="list-group">';
+    
+      Object.entries(availabilityPerDate).forEach(([date, totalAvailable]) => {
+        const safeDate = date.replace(/[^0-9]/g, '');
+      
+        html += `
+          <label class="list-group-item d-flex justify-content-between align-items-center">
+            <span>
+              <input type="checkbox"
+                     class="form-check-input me-2 select-date"
+                     data-date="${date}">
+              ${date}
+            </span>
+      
+            <span class="badge bg-secondary"
+                  id="date-total-${safeDate}"
+                  data-original="${totalAvailable}">
+              ${totalAvailable} beschikbaar
+            </span>
+          </label>
+      
+          <div id="periods_${safeDate}" class="ms-4 mt-2 mb-3"></div>
+        `;
+      });
+      
+    
+      html += "</div>";
+      $("#calendarContainer").html(html);
+    },
+    
+  
+    error: function (xhr) {
+      console.error(xhr.responseText);
+      $("#calendarContainer").html(
+        '<p class="text-danger">Serverfout bij laden.</p>'
+      );
+    }
+  });
+  
+}
 
-      let dates = Object.keys(uniqueDates);
+let userReservationsRequest = null;
+function loadUserReservations(materialId) {
+  
+  if (userReservationsRequest) {
+    userReservationsRequest.abort();
+  }
 
-      if (dates.length === 0) {
-        $("#calendarContainer").html(
-          "<p class='text-danger'>Geen beschikbare dagen gevonden.</p>"
-        );
+  userReservationsRequest = $.ajax({
+    url: "ajax/get_user_material_reservations.php",
+    method: "GET",
+    dataType: "json",
+    data: { material_id: materialId },
+    success: function (res) {
+      if (materialId !== activeMaterialId) return;
+      userReservations = res.data || {};
+    }
+  });
+
+  return userReservationsRequest;
+
+}
+
+function renderUserReservations() {
+  const box = $("#myReservationsBox");
+  const list = $("#myReservationsList");
+
+  list.empty();
+
+  if (!userReservations || Object.keys(userReservations).length === 0) {
+    box.addClass("d-none");
+    return;
+  }
+
+  Object.entries(userReservations).forEach(([date, reservations]) => {
+    reservations.forEach(r => {
+      list.append(`
+        <li>
+          <strong>${date} |</strong>
+          <strong>
+            ${r.periode}: ${r.start} – ${r.end}
+          </strong>
+        </li>
+      `);
+    });
+  });
+
+  box.removeClass("d-none");
+}
+
+// --------------------------------------
+// 2) DATUM GESELECTEERD → PERIODES LADEN
+// --------------------------------------
+$(document).on("change", ".select-date", function () {
+  let date = $(this).data("date");
+  let checked = $(this).is(":checked");
+
+  if (checked) {
+    loadPeriodsForDate(date);
+  } else {
+    const safeDate = date.replace(/[^0-9]/g, '');
+    $(`#periods_${date}`).html("");
+
+    // verwijder uit JSON
+    reservationData.items = reservationData.items.filter(
+      item => item.date !== date
+    );    
+    // updateDebugJson();
+  }
+});
+
+// --------------------------------------
+// 3) PERIODES VOOR DATUM LADEN
+// --------------------------------------
+function loadPeriodsForDate(date) {
+  const safeDate = date.replace(/[^0-9]/g, '');
+
+  $.ajax({
+    url: "ajax/get_material_availability.php",
+    method: "GET",
+    dataType: "json",
+    data: {
+      material_id: reservationData.materialId,
+      date: date
+    },
+
+    success: function (response) {
+
+      if (!response.success || !response.segments) {
+        console.error("Onverwachte response:", response);
         return;
       }
 
-      // ⭐ Datum-lijst tonen (1 knop per datum)
-      let html = "<h6>Beschikbare dagen:</h6><div class='list-group'>";
+      let html = '<div class="card card-body bg-light">';
 
-      dates.forEach((date) => {
+      Object.entries(response.segments).forEach(([periode, info]) => {
+        if (info.available <= 0) return;
+
         html += `
-        <button class="list-group-item list-group-item-action available-date"
-                data-date="${date}">
-            ${date}
-        </button>`;
+          <div class="mb-2">
+            <label>
+              <input type="checkbox"
+                     class="select-period"
+                     data-date="${date}"
+                     data-period="${periode}"
+                     data-available="${info.available}">
+              ${periode} — <small>${info.available} beschikbaar</small>
+            </label>
+
+            <input type="number"
+                   class="form-control form-control-sm mt-1 period-amount d-none"
+                   min="1" max="${info.available}"
+                   data-date="${date}"
+                   data-period="${periode}">
+          </div>
+        `;
       });
 
       html += "</div>";
-      $("#calendarContainer").html(html);
 
-      // ---------------------------------------
-      // 3️⃣ Datum selecteren door gebruiker
-      // ---------------------------------------
-      $(".available-date").on("click", function () {
-        const date = $(this).data("date");
-        $("#selectedDate").val(date);
-
-        $.getJSON("ajax/get_material_availability.php", {
-          material_id: matId,
-          date: date,
-        }).done(function (info) {
-          const segments = info.segments;
-          let html = "";
-
-          Object.keys(segments).forEach((periode) => {
-            const seg = segments[periode];
-            const disabled = seg.available === 0 ? "disabled" : "";
-            html += `
-                    <button type="button" class="btn btn-outline-primary w-100 select-periode-btn" data-periode="${periode}" data-available="${
-              seg.available
-            }" ${disabled}>
-                      ${periode.replace("_", " ")} (${
-              seg.available
-            } beschikbaar)
-                    </button>
-                  `;
-          });
-
-          $("#periodeButtons").html(html);
-          $("#periodeContainer").show();
-
-          $(".select-periode-btn").on("click", function () {
-            $(".select-periode-btn").removeClass("active");
-            $(this).addClass("active");
-            $("#selectedPeriode").val($(this).data("periode"));
-
-            const available = $(this).data("available");
-            $("#aantal")
-              .attr("max", available)
-              .val(available > 0 ? 1 : 0)
-              .prop("disabled", available === 0);
-
-            $("#availableText").html(
-              `Beschikbaar in dit dagdeel: <strong>${available}</strong>`
-            );
-          });
-        });
-      });
-
-      // Formulier tonen
-      $("#reserveForm").show();
-    });
+      $(`#periods_${safeDate}`).html(html);
+    }
   });
+}
+
+
+// ----------------------------------------------------
+// 4) PERIODE GESELECTEERD → AANTAL TOEVOEGEN
+// ----------------------------------------------------
+$(document).on("change", ".select-period", function () {
+  let date = $(this).data("date");
+  let period = $(this).data("period");
+  let available = $(this).data("available");
+
+  let amountField = $(
+    `input.period-amount[data-date="${date}"][data-period="${period}"]`
+  );
+
+  if ($(this).is(":checked")) {
+    amountField.removeClass("d-none");
+    amountField.val(1);
+
+    addOrUpdateItem(date, period, 1);
+  } else {
+    amountField.addClass("d-none");
+
+    removePeriod(date, period);
+  }
+
+  // updateDebugJson();
 });
+
+// --------------------------------------------
+// 5) AANTAL AANGEPAST
+// --------------------------------------------
+$(document).on("input", ".period-amount", function () {
+  let date = $(this).data("date");
+  let period = $(this).data("period");
+  let amount = parseInt($(this).val(), 10);
+
+  addOrUpdateItem(date, period, amount);
+ // updateDebugJson();
+});
+
+// --------------------------
+// JSON MODIFY HELPERS
+// --------------------------
+function addOrUpdateItem(date, period, amount) {
+  let item = reservationData.items.find((i) => i.date === date);
+
+  if (!item) {
+    item = { date: date, periodes: {} };
+    reservationData.items.push(item);
+  }
+
+  item.periodes[period] = { amount };
+}
+
+function removePeriod(date, period) {
+  let item = reservationData.items.find((i) => i.date === date);
+  if (!item) return;
+
+  delete item.periodes[period];
+
+  if (Object.keys(item.periodes).length === 0) {
+    reservationData.items = reservationData.items.filter(
+      (i) => i.date !== date
+    );
+  }
+}
+
+// --------------------------------------------
+// DEBUG JSON
+// --------------------------------------------
+function updateDebugJson() {
+  $("#debugJson").text(JSON.stringify(reservationData, null, 2));
+}
+
+// --------------------------------------------
+// RESERVERING VERSTUREN
+// --------------------------------------------
+$("#confirmReservation").on("click", function () {
+  if (reservationData.items.length === 0) {
+    alert("Selecteer minimaal één datum en periode.");
+    return;
+  }
+
+  $.ajax({
+    url: 'ajax/reserve_material_multi.php',
+    method: 'POST',
+    data: { json: JSON.stringify(reservationData) },
+    dataType: 'json',
+    success: function(response) {
+      if (response.success) {
+        alert(response.message || 'Reservering voltooid!');
+        location.reload();
+      } else {
+        alert(response.message || 'Er trad een fout op.');
+        console.error(response.results);
+        // hier kun je fouten per periode tonen in de UI
+      }
+    },
+    error: function(xhr) {
+      let msg = 'Onbekende fout, status: ' + xhr.status;
+      alert(msg);
+    }
+  });
+  
+  
+});
+
+function updateDateTotal(date) {
+  const safeDate = date.replace(/[^0-9]/g, '');
+  const badge = $(`#date-total-${safeDate}`);
+
+  const originalTotal = parseInt(badge.data("original"), 10);
+  let used = 0;
+
+  const item = reservationData.items.find(i => i.date === date);
+  if (item) {
+    Object.values(item.periodes).forEach(p => {
+      used += p.amount;
+    });
+  }
+
+  const remaining = originalTotal - used;
+  badge.text(`${remaining} beschikbaar`);
+}
