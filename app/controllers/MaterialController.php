@@ -74,7 +74,7 @@ class MaterialController
 
         $this->model->update($id, $naam, $aantal, $fotoPath);
 
-        header("Location: admin-materialen?succes=1.php?");
+        header("Location: admin-materialen.php");
         exit;
     }
 
@@ -215,7 +215,7 @@ class MaterialController
         }
 
         //Deze is de email logica, staat in coment om niet al calls te gebruiken.
-        /*
+        
         // -------------------------
         // DATA OPHALEN
         // -------------------------
@@ -278,7 +278,7 @@ class MaterialController
                     $body // zelfde body is prima
                 );
             }
-        }*/
+        }
 
         return [
             "success" => true
